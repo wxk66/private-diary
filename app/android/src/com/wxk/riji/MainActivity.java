@@ -327,7 +327,7 @@ public class MainActivity extends Activity {
                    + key + "'," + (param == null ? "null" : "'" + param.replace("'", "") + "'") + ")");
             return;
         }
-        Toast.makeText(this, "Private Journal", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Private Diary", Toast.LENGTH_SHORT).show();
     }
 
     private static int parseColor(String css) {

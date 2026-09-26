@@ -20,7 +20,7 @@
     el.dispatchEvent(new KeyboardEvent('keydown', { key:k, bubbles:true, cancelable:true }));
   }
   function sleep(ms){ return new Promise(function(r){ setTimeout(r, ms); }); }
-  function store(){ return JSON.parse(localStorage.getItem('private-journal.v1')); }
+  function store(){ return JSON.parse(localStorage.getItem('private-diary.v1')); }
   function pad(n){ return String(n).padStart(2,'0'); }
   function recs(){ return store().records[TK] || []; }
   function onChip(){ var c = $('.chip.on'); return c ? c.getAttribute('data-kind') : null; }
@@ -511,7 +511,7 @@
     selLang.dispatchEvent(new Event('change'));
     eq('切换后 LANG 为 en', D.lang, 'en');
     eq('语言已持久化', store().settings.lang, 'en');
-    eq('品牌名变英文', $('.brand span:last-child').textContent.trim(), 'Private Journal');
+    eq('品牌名变英文', $('.brand span:last-child').textContent.trim(), 'Private Diary');
     eq('导航变英文', $$('.tab span')[1].textContent.trim(), 'Stats');
     eq('html lang 属性已更新', document.documentElement.getAttribute('lang'), 'en');
     eq('类型按钮变英文', $('#kindChips .chip[data-kind="ej"]').textContent.trim(), 'Ejaculation');

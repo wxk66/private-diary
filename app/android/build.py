@@ -11,7 +11,7 @@
 
     python android/build.py
 
-产物： app/android/dist/private-journal-v<版本>.apk
+产物： app/android/dist/private-diary-v<版本>.apk
 签名： app/android/keystore/riji.jks（首次自动生成，密码见 KS_PASS）
 """
 import io
@@ -213,7 +213,7 @@ def main():
              '-dname', 'CN=Riji, OU=Personal, O=wxk, L=Mingguang, ST=Anhui, C=CN'],
             env=env)
 
-    out_apk = os.path.join(DIST, 'private-journal-v%s.apk' % VERSION)
+    out_apk = os.path.join(DIST, 'private-diary-v%s.apk' % VERSION)
     if os.path.exists(out_apk):
         os.remove(out_apk)
     run([tool('apksigner'), 'sign',

@@ -46,7 +46,7 @@ app/android/
 python app/android/build.py
 ```
 
-产物：`app/android/dist/private-journal-v1.2.0.apk`（文件名里的版本号取自 `build.py` 顶部的 `VERSION`）
+产物：`app/android/dist/private-diary-v1.2.0.apk`（文件名里的版本号取自 `build.py` 顶部的 `VERSION`）
 
 依赖（本机已装好）：
 
@@ -98,14 +98,14 @@ versionCode 必须递增**，否则会报「应用未安装」。
 
 ## 安装到手机
 
-1. 把 `dist/private-journal-v1.2.0.apk` 传到手机（数据线 / 微信文件传输助手都行）
+1. 把 `dist/private-diary-v1.2.0.apk` 传到手机（数据线 / 微信文件传输助手都行）
 2. 手机上点击安装，首次会提示「允许安装未知来源应用」，同意即可
 3. 桌面出现「私密日志」图标，点开即用，无需联网
 
 命令行安装（手机开 USB 调试并连上电脑）：
 
 ```powershell
-adb install -r "app\android\dist\private-journal-v1.2.0.apk"
+adb install -r "app\android\dist\private-diary-v1.2.0.apk"
 ```
 
 ## 与浏览器 PWA 的关系

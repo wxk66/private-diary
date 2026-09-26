@@ -144,15 +144,15 @@
 
 ### 方式二：安装 APK
 
-从 [Releases](../../releases) 下载 `private-journal-v1.2.0.apk`（约 80 KB），
-或直接用仓库里的 `app/android/dist/private-journal-v1.2.0.apk`。
+从 [Releases](../../releases) 下载 `private-diary-v1.2.0.apk`（约 80 KB），
+或直接用仓库里的 `app/android/dist/private-diary-v1.2.0.apk`。
 
 1. 把 APK 传到手机（数据线 / 微信文件传输助手都行）
 2. 手机上点击安装，首次会提示「允许安装未知来源应用」，同意即可
 3. 桌面出现「私密日志」图标，点开即用，无需联网
 
 ```bash
-adb install -r "app/android/dist/private-journal-v1.2.0.apk"
+adb install -r "app/android/dist/private-diary-v1.2.0.apk"
 ```
 
 > APK 是一个最小 WebView 外壳，业务逻辑全在网页里。
@@ -206,7 +206,7 @@ python -m http.server 8777 --bind 127.0.0.1
 
 设置页 →「导出备份（JSON）」：
 
-- 浏览器版：直接下载 `private-journal-YYYY-MM-DD.json`
+- 浏览器版：直接下载 `private-diary-YYYY-MM-DD.json`
 - APK 版：弹出系统的「保存到…」界面，你自己选位置（走 SAF，不需要存储权限）
 
 「从备份恢复」会**覆盖**当前全部记录（有二次确认），导入时会保留你当前的隐私锁设置。
@@ -233,7 +233,7 @@ python -m http.server 8777 --bind 127.0.0.1
 
 ### 数据格式
 
-数据存在浏览器/WebView 的 **localStorage** 里，键名 `private-journal.v1`：
+数据存在浏览器/WebView 的 **localStorage** 里，键名 `private-diary.v1`：
 
 ```jsonc
 {
@@ -276,7 +276,7 @@ python -m http.server 8777 --bind 127.0.0.1
 
 ## 隐私与数据
 
-- 所有数据存在浏览器/WebView 的 **localStorage** 里，键名 `private-journal.v1`
+- 所有数据存在浏览器/WebView 的 **localStorage** 里，键名 `private-diary.v1`
 - 应用**没有任何网络请求**，APK 也不申请联网权限，代码里没有 `fetch` / `XMLHttpRequest`
 - 没有账号、没有遥测、没有崩溃上报
 - 隐私锁的密码只保存 PBKDF2 派生结果和随机盐，不保存明文
@@ -287,7 +287,7 @@ python -m http.server 8777 --bind 127.0.0.1
 ## 项目结构
 
 ```
-private-journal/
+private-diary/
 ├─ README.md / README-en.md      中英文文档
 ├─ LICENSE                       MIT
 ├─ app/

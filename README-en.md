@@ -1,6 +1,6 @@
 [中文](README.md) | English
 
-# Private Journal
+# Private Diary
 
 > A fully offline, calendar-style private tracker. Your data never leaves your device — no network, no account, no upload.
 
@@ -9,7 +9,7 @@
 [![No Network](https://img.shields.io/badge/network-none-critical.svg)](#privacy--data)
 [![Languages](https://img.shields.io/badge/i18n-English%20%7C%20中文-5452e2.svg)](#configuration)
 
-Private Journal records the frequency and type of each day in a calendar, and puts long-term trends,
+Private Diary records the frequency and type of each day in a calendar, and puts long-term trends,
 trigger distribution, frequency reminders and self-set goals on a stats page.
 It ships in two forms: a **PWA you install from your phone browser**, and an
 **installable Android APK** (with real daily reminder notifications).
@@ -147,21 +147,21 @@ The switch takes effect immediately — no reinstall, no reload.
    - It must be served over HTTP (service workers can't register on `file://`, so offline mode won't work)
    - Locally: run `python -m http.server 8777 --bind 127.0.0.1` from the `app/` directory
 2. Browser menu → "**Add to Home Screen**"
-3. A "Private Journal" icon appears — tap to launch
+3. A "Private Diary" icon appears — tap to launch
 
 It runs as a standalone full-screen window with no address bar, and **works offline**.
 
 ### Option 2: Install the APK
 
-Download `private-journal-v1.2.0.apk` (~80 KB) from [Releases](../../releases),
-or use `app/android/dist/private-journal-v1.2.0.apk` from the repo.
+Download `private-diary-v1.2.0.apk` (~80 KB) from [Releases](../../releases),
+or use `app/android/dist/private-diary-v1.2.0.apk` from the repo.
 
 1. Transfer the APK to your phone (USB cable, or any file-transfer app)
 2. Tap to install; Android will ask you to allow installs from unknown sources
-3. A "Private Journal" icon appears — tap to launch, no network needed
+3. A "Private Diary" icon appears — tap to launch, no network needed
 
 ```bash
-adb install -r "app/android/dist/private-journal-v1.2.0.apk"
+adb install -r "app/android/dist/private-diary-v1.2.0.apk"
 ```
 
 > The APK is a minimal WebView shell; all business logic lives in the web page.
@@ -215,7 +215,7 @@ Stats → Goals: 8 this week vs a limit of 3 — over, 0 weeks on target
 
 Settings → "Export backup (JSON)":
 
-- Web: downloads `private-journal-YYYY-MM-DD.json`
+- Web: downloads `private-diary-YYYY-MM-DD.json`
 - APK: opens the system "Save to…" dialog so you pick the location (via SAF, no storage permission)
 
 "Restore from backup" **overwrites** all current entries (with confirmation) and preserves
@@ -244,7 +244,7 @@ Everything is configured in the in-app Settings page — no config files, no cod
 
 ### Data format
 
-Data lives in the browser/WebView **localStorage** under the key `private-journal.v1`:
+Data lives in the browser/WebView **localStorage** under the key `private-diary.v1`:
 
 ```jsonc
 {
@@ -288,7 +288,7 @@ to the new key automatically.
 
 ## Privacy & data
 
-- Everything is stored in the browser/WebView **localStorage** under the key `private-journal.v1`
+- Everything is stored in the browser/WebView **localStorage** under the key `private-diary.v1`
 - The app makes **no network requests at all**; the APK requests no network permission, and
   there is no `fetch` / `XMLHttpRequest` anywhere in the code
 - No account, no telemetry, no crash reporting
@@ -300,7 +300,7 @@ to the new key automatically.
 ## Project structure
 
 ```
-private-journal/
+private-diary/
 ├─ README.md / README-en.md      docs (Chinese / English)
 ├─ LICENSE                       MIT
 ├─ app/

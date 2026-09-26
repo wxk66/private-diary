@@ -115,7 +115,7 @@ function seedScript(records, theme, lang) {
   const text = JSON.stringify(seed);
   // 要再包一层 stringify，才能生成 JS 字符串字面量；只 dump 一次会变成对象字面量，
   // localStorage 里存进去的就是 "[object Object]" 这 15 个字符
-  return '<script>try{localStorage.setItem(\'private-journal.v1\',' + JSON.stringify(text) + ');}catch(e){}</script>\n';
+  return '<script>try{localStorage.setItem(\'private-diary.v1\',' + JSON.stringify(text) + ');}catch(e){}</script>\n';
 }
 
 function build() {

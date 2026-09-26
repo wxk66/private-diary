@@ -952,10 +952,10 @@ html[lang="en"] .gdist-row .nm{width:86px}
 'use strict';
 
 /* ================= 存储 ================= */
-/* 项目从「日迹 / do-you-fly？」改名而来，localStorage 的键也跟着换了。
+/* 项目先后叫过「日迹 / do-you-fly？」和「Private Journal」，localStorage 的键跟着换过。
    旧键仍然会读一次并自动搬到新键 —— 改个名字不该让用户丢数据。 */
-var STORE_KEY = 'private-journal.v1';
-var LEGACY_STORE_KEYS = ['dyf.tracker.v1'];
+var STORE_KEY = 'private-diary.v1';
+var LEGACY_STORE_KEYS = ['dyf.tracker.v1', 'private-journal.v1'];
 var DEFAULTS = {
   version: 2,
   records: {},
@@ -1241,8 +1241,8 @@ zh: {
   'confirm.pinOff': '关闭隐私锁？'
 },
 en: {
-  'app.name': 'Private Journal',
-  'app.title': 'Private Journal · Calendar log',
+  'app.name': 'Private Diary',
+  'app.title': 'Private Diary · Calendar log',
   'app.desc': 'A local, calendar-style tracker. Your data never leaves your device — no network, no account.',
   'unit.times': 'times',
   'unit.timesShort': '',
@@ -2963,7 +2963,7 @@ function bind(){
   document.getElementById('btnExport').onclick = function(){
     var data = { app:t('app.name'), exportedAt:new Date().toISOString(), payload:S };
     var json = JSON.stringify(data, null, 2);
-    var name = 'private-journal-' + todayKey() + '.json';
+    var name = 'private-diary-' + todayKey() + '.json';
     if(window.RijiNative && window.RijiNative.exportBackup){
       try{ window.RijiNative.exportBackup(name, json); return; }catch(e){ /* 落到下面的浏览器分支 */ }
     }

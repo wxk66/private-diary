@@ -100,7 +100,7 @@ def main():
                        ('goalCard', '目标达成'), ('trendWrap', '月度趋势'),
                        ('exportBackup', '原生导出桥'), ('setDailyReminder', '原生提醒桥'),
                        ('p2:', 'PBKDF2 密码'),
-                       ('Private Journal', '英文界面'), ('setLang', '语言切换'),
+                       ('Private Diary', '英文界面'), ('setLang', '语言切换'),
                        ('LEGACY_STORE_KEYS', '旧存储键迁移')]:
         checks.append(('网页含' + label, key in html))
 
