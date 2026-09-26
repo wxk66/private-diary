@@ -1,0 +1,3089 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f3f4f8">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="私密日志">
+<meta name="description" content="本地日历式记录工具，数据只保存在你的设备上，不联网、无账号。">
+<title>私密日志 · 日历记录</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+<style>
+/* ============ 主题变量 ============ */
+:root{
+  --bg:#f3f4f8; --card:#ffffff; --card-2:#f6f7fb;
+  --line:#e5e7f0; --line-2:#eef0f6;
+  --text:#191b23; --text-2:#575e6d; --text-3:#99a0af;
+  --accent:#5452e2; --accent-2:#4340cf; --accent-soft:#ededfd; --accent-on:#ffffff;
+  --danger:#e5484d; --danger-soft:#fdeeee;
+  --i1:#eceefc; --i2:#d9daf8; --i3:#b9bbf3; --i4:#9294e9;
+  --h0:#eceef4; --h1:#dad9f7; --h2:#bdbef2; --h3:#9698ea; --h4:#6d70e2;
+  --k-ej:#5452e2; --k-fl:#0d9e90; --k-other:#8b94a5;
+  --k-ej-bg:#ededfd; --k-fl-bg:#e0f5f2; --k-other-bg:#eef1f5;
+  --warn-fg:#b45309; --warn-bg:#fdf4e3; --warn-line:#f0ddb2;
+  --press:rgba(20,22,45,.06);
+  --shadow:0 1px 2px rgba(23,26,54,.045), 0 8px 24px rgba(23,26,54,.055);
+  --shadow-lg:0 16px 48px rgba(23,26,54,.22);
+  --shadow-bar:0 10px 32px rgba(23,26,54,.14);
+  --grad:linear-gradient(150deg,#6a69f0,#4947d4);
+  --glow:rgba(84,82,226,.055);
+  --radius:18px; --radius-sm:12px;
+  --safe-b:env(safe-area-inset-bottom,0px);
+  --safe-t:env(safe-area-inset-top,0px);
+}
+[data-theme="dark"]{
+  --bg:#0e0f14; --card:#161822; --card-2:#1c1f2b;
+  --line:#262a38; --line-2:#20232e;
+  --text:#f0f2f8; --text-2:#a6adbd; --text-3:#6f7789;
+  --accent:#8a8af8; --accent-2:#a4a4fb; --accent-soft:#262848; --accent-on:#11131d;
+  --danger:#ff6b71; --danger-soft:#2c1b1e;
+  --i1:#20223a; --i2:#2e3160; --i3:#484b8c; --i4:#666ac2;
+  --h0:#20232e; --h1:#2c2f55; --h2:#3f4384; --h3:#585da8; --h4:#7e83dd;
+  --k-ej:#8a8af8; --k-fl:#34d4bc; --k-other:#7d8798;
+  --k-ej-bg:#262848; --k-fl-bg:#14312c; --k-other-bg:#232633;
+  --warn-fg:#f2b544; --warn-bg:#2d2513; --warn-line:#4a3d1c;
+  --press:rgba(255,255,255,.08);
+  --shadow:0 1px 2px rgba(0,0,0,.42), 0 8px 24px rgba(0,0,0,.30);
+  --shadow-lg:0 16px 48px rgba(0,0,0,.62);
+  --shadow-bar:0 10px 32px rgba(0,0,0,.5);
+  --grad:linear-gradient(150deg,#8282f6,#5c5ce0);
+  --glow:rgba(122,122,246,.07);
+}
+
+/* ============ 基础 ============ */
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{
+  margin:0;background:var(--bg);color:var(--text);
+  background-image:radial-gradient(130% 55% at 50% -8%,var(--glow),transparent 62%);
+  background-repeat:no-repeat;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",Roboto,"Helvetica Neue",sans-serif;
+  font-size:15px;line-height:1.55;
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+  overscroll-behavior-y:none;
+  transition:background-color .3s ease,color .3s ease;
+}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;padding:0}
+input,select,textarea{font:inherit;color:inherit}
+::-webkit-scrollbar{width:0;height:0}
+::selection{background:var(--accent-soft);color:var(--accent-2)}
+button:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+
+/* ============ 布局 ============ */
+.app{max-width:520px;margin:0 auto;min-height:100%;display:flex;flex-direction:column}
+.topbar{
+  position:sticky;top:0;z-index:20;
+  padding:calc(var(--safe-t) + 15px) 18px 13px;
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--bg);
+  background:color-mix(in srgb,var(--bg) 84%,transparent);
+  backdrop-filter:saturate(180%) blur(16px);
+  -webkit-backdrop-filter:saturate(180%) blur(16px);
+}
+.brand{display:flex;align-items:center;gap:9px;font-size:17.5px;font-weight:700;letter-spacing:.5px}
+.brand .mark{
+  width:23px;height:23px;border-radius:8px;
+  background:var(--grad);
+  box-shadow:0 3px 9px rgba(84,82,226,.35);
+  display:flex;align-items:center;justify-content:center;flex:0 0 auto;
+}
+[data-theme="dark"] .brand .mark{box-shadow:0 3px 9px rgba(0,0,0,.5)}
+.brand .mark::after{content:"";width:7px;height:7px;border-radius:50%;background:#fff;opacity:.95}
+.icon-btn{
+  width:37px;height:37px;border-radius:12px;display:flex;align-items:center;justify-content:center;
+  color:var(--text-2);transition:.18s;
+}
+@media(hover:hover){.icon-btn:hover{background:var(--card-2);color:var(--text)}}
+.icon-btn:active{background:var(--card-2);transform:scale(.92)}
+.icon-btn svg{width:19px;height:19px}
+main{flex:1;padding:2px 14px calc(112px + var(--safe-b))}
+.view{animation:fade .24s ease both}
+@keyframes fade{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+
+/* ============ 卡片 ============ */
+.card{
+  background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);
+  border:1px solid var(--line-2);margin-bottom:12px;overflow:hidden;
+  transition:background-color .3s ease,border-color .3s ease;
+}
+.card-pad{padding:14px}
+
+/* ============ 月历 ============ */
+.month-head{display:flex;align-items:center;justify-content:space-between;padding:15px 14px 9px}
+.month-title{font-size:18px;font-weight:700;letter-spacing:.3px;display:flex;align-items:center;gap:9px}
+.month-title .sub{
+  font-size:11px;font-weight:600;color:var(--accent);
+  background:var(--accent-soft);padding:2.5px 9px;border-radius:99px;letter-spacing:.2px;
+}
+.month-title .sub:empty{display:none}
+.nav-btn{
+  width:35px;height:35px;border-radius:11px;display:flex;align-items:center;justify-content:center;
+  color:var(--text-2);transition:.16s;
+}
+@media(hover:hover){.nav-btn:hover{background:var(--card-2);color:var(--text)}}
+.nav-btn:active{background:var(--card-2);transform:scale(.9)}
+.nav-btn svg{width:17px;height:17px}
+.nav-btn[disabled]{opacity:.28}
+
+.weekdays{display:grid;grid-template-columns:repeat(7,1fr);padding:0 9px 5px;gap:2px}
+.weekdays span{text-align:center;font-size:11px;color:var(--text-3);font-weight:600;padding:4px 0;letter-spacing:.5px}
+.weekdays span.wk{color:var(--accent);opacity:.8}
+
+.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3.5px;padding:2px 9px 13px}
+.cell{
+  position:relative;aspect-ratio:1/1;border-radius:12px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  transition:background-color .14s ease,transform .14s ease,box-shadow .14s ease;
+  background:transparent;
+}
+@media(hover:hover){.cell:hover{background:var(--card-2)}}
+.cell .dnum{font-size:14.5px;font-weight:550;line-height:1;font-variant-numeric:tabular-nums}
+.cell.dim{background:transparent}
+.cell.dim .dnum{color:var(--text-3);opacity:.5}
+.cell.lv1{background:var(--i1)}
+.cell.lv2{background:var(--i2)}
+.cell.lv3{background:var(--i3)}
+.cell.lv4{background:var(--i4)}
+.cell.lv4 .dnum,.cell.lv3 .dnum{font-weight:650}
+[data-theme="dark"] .cell.lv4 .dnum,[data-theme="dark"] .cell.lv3 .dnum{color:#fff}
+.cell.today .dnum{color:var(--accent);font-weight:750}
+.cell.today::before{
+  content:"";position:absolute;inset:0;border-radius:12px;border:1.5px solid var(--accent);opacity:.6;
+}
+.cell.sel{box-shadow:0 0 0 2px var(--accent);background:var(--accent-soft)}
+.cell.sel .dnum{color:var(--accent);font-weight:700}
+.cell:active{transform:scale(.92)}
+.dots{display:flex;align-items:center;gap:2.5px;height:5px}
+.dots i{width:4.5px;height:4.5px;border-radius:50%;background:var(--accent);display:block}
+/* 深色底上给圆点加一圈描边，保证各类型颜色都能看清 */
+.cell.lv3 .dots i,.cell.lv4 .dots i{box-shadow:0 0 0 1.2px rgba(255,255,255,.85)}
+[data-theme="dark"] .cell.lv3 .dots i,[data-theme="dark"] .cell.lv4 .dots i{box-shadow:0 0 0 1.2px rgba(14,15,20,.75)}
+.dots b{font-size:9px;font-weight:700;color:var(--accent);line-height:1}
+[data-theme="dark"] .cell.lv4 .dots b{color:#fff}
+
+/* ============ 主按钮 ============ */
+.btn-add{
+  width:100%;height:54px;border-radius:16px;margin:2px 0 12px;
+  background:var(--grad);color:#fff;
+  font-size:16px;font-weight:650;letter-spacing:.6px;
+  display:flex;align-items:center;justify-content:center;gap:7px;
+  box-shadow:0 8px 22px rgba(84,82,226,.32), inset 0 1px 0 rgba(255,255,255,.18);
+  transition:transform .16s ease,box-shadow .16s ease;
+}
+[data-theme="dark"] .btn-add{box-shadow:0 8px 22px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.14)}
+.btn-add:active{transform:scale(.975);box-shadow:0 3px 10px rgba(84,82,226,.3)}
+.btn-add svg{width:20px;height:20px}
+.btn-add small{font-size:11.5px;font-weight:500;opacity:.85;margin-left:2px}
+
+/* ============ 日详情 ============ */
+.day-head{display:flex;align-items:center;justify-content:space-between;padding:15px 15px 11px}
+.day-head .dt{font-size:15.5px;font-weight:700}
+.day-head .dt em{font-style:normal;color:var(--text-3);font-weight:500;font-size:12.5px;margin-left:8px}
+.badge{
+  font-size:12px;font-weight:650;padding:4px 11px;border-radius:99px;
+  background:var(--accent-soft);color:var(--accent);font-variant-numeric:tabular-nums;
+}
+.rec-list{list-style:none;margin:0;padding:0 9px}
+.rec-item{
+  display:flex;align-items:center;gap:11px;padding:12px 9px;border-radius:13px;transition:.15s;
+}
+.rec-item+.rec-item{border-top:1px solid var(--line-2)}
+@media(hover:hover){.rec-item:hover{background:var(--card-2)}}
+.rec-item:active{background:var(--card-2)}
+.rec-item .t{
+  font-size:14.5px;font-weight:650;font-variant-numeric:tabular-nums;
+  min-width:52px;color:var(--text);
+}
+.rec-item .info{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.rec-item .row1{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.rec-item .vol{font-size:12px;font-weight:650;color:var(--text-2);font-variant-numeric:tabular-nums}
+.rec-item .n{font-size:12px;color:var(--text-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rec-item .tg{font-size:11.5px;font-weight:600;color:var(--accent);opacity:.9;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+[data-theme="dark"] .rec-item .tg{color:var(--accent-2)}
+.rec-item .chev{color:var(--text-3);opacity:.55;flex:0 0 auto}
+.rec-item .chev svg{width:15px;height:15px;display:block}
+.empty{padding:26px 14px;text-align:center;color:var(--text-3);font-size:13px}
+.empty .em{font-size:24px;display:block;margin-bottom:7px;opacity:.45}
+.day-foot{padding:4px 15px 15px}
+.btn-ghost{
+  width:100%;height:44px;border-radius:13px;border:1.5px dashed var(--line);
+  color:var(--text-2);font-size:14px;font-weight:550;transition:.16s;
+}
+@media(hover:hover){.btn-ghost:hover{border-color:var(--accent);color:var(--accent)}}
+.btn-ghost:active{background:var(--card-2);border-color:var(--accent);color:var(--accent)}
+
+/* ============ 迷你统计 ============ */
+.mini{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+.mini .m{
+  background:var(--card);border:1px solid var(--line-2);border-radius:14px;
+  padding:12px 8px 11px;text-align:center;box-shadow:var(--shadow);
+  transition:background-color .3s ease,border-color .3s ease;
+}
+.mini .m .v{font-size:20px;font-weight:750;letter-spacing:-.3px;font-variant-numeric:tabular-nums}
+.mini .m .v i{font-style:normal;font-size:11px;font-weight:500;color:var(--text-3);margin-left:2px}
+.mini .m .k{font-size:11px;color:var(--text-3);margin-top:3px;font-weight:500}
+
+/* ============ 统计页 ============ */
+.sec-title{
+  font-size:12px;font-weight:650;color:var(--text-3);letter-spacing:1px;
+  margin:20px 5px 9px;text-transform:uppercase;
+}
+.big-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.big{
+  background:var(--card);border:1px solid var(--line-2);border-radius:16px;
+  padding:15px;box-shadow:var(--shadow);
+  transition:background-color .3s ease,border-color .3s ease;
+}
+.big .v{font-size:27px;font-weight:780;letter-spacing:-.8px;line-height:1.1;font-variant-numeric:tabular-nums}
+.big .v i{font-style:normal;font-size:12px;font-weight:500;color:var(--text-3);margin-left:3px}
+.big .k{font-size:12px;color:var(--text-3);margin-top:5px;font-weight:500}
+.big .d{font-size:11.5px;margin-top:7px;font-weight:600}
+.up{color:#e5484d}.down{color:#12946b}
+[data-theme="dark"] .up{color:#ff7b81}[data-theme="dark"] .down{color:#3ddc97}
+
+.chart{padding:17px 13px 11px}
+.bars{display:flex;align-items:flex-end;gap:3px;height:112px}
+.bars .b{flex:1;display:flex;flex-direction:column;justify-content:flex-end;height:100%;position:relative}
+.bars .b span{
+  display:block;width:100%;border-radius:4px 4px 2px 2px;background:var(--i3);
+  min-height:0;transition:height .35s cubic-bezier(.3,1.2,.5,1);
+}
+.bars .b.on span{background:var(--grad)}
+.bars .b.today span{background:var(--grad);box-shadow:0 0 0 1.5px var(--accent) inset}
+.axis{display:flex;justify-content:space-between;margin-top:8px;font-size:10.5px;color:var(--text-3);font-weight:500}
+.legend{display:flex;align-items:center;gap:6px;justify-content:flex-end;font-size:11px;color:var(--text-3);margin-top:8px}
+.legend i{width:10px;height:10px;border-radius:3.5px;display:block}
+
+.heat-wrap{overflow-x:auto;padding:15px 13px 13px;scrollbar-width:none}
+.heat{display:flex;gap:3px}
+.heat .col{display:flex;flex-direction:column;gap:3px}
+.heat .hc{width:11px;height:11px;border-radius:3.5px;background:var(--h0)}
+.heat .hc.l1{background:var(--h1)}.heat .hc.l2{background:var(--h2)}
+.heat .hc.l3{background:var(--h3)}.heat .hc.l4{background:var(--h4)}
+.heat .hc.future{opacity:.25}
+
+.rows{
+  background:var(--card);border:1px solid var(--line-2);border-radius:16px;
+  overflow:hidden;box-shadow:var(--shadow);
+  transition:background-color .3s ease,border-color .3s ease;
+}
+.row{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;font-size:14px}
+.row+.row{border-top:1px solid var(--line-2)}
+.row .rk{color:var(--text-2)}
+.row .rv{font-weight:650;font-variant-numeric:tabular-nums}
+/* 详细数据里的分组小标题，用来把 11 行拆成三段，别堆成一坨 */
+.rows-sub{
+  background:var(--card-2);padding:8px 16px;font-size:11px;font-weight:650;
+  color:var(--text-3);letter-spacing:.8px;border-top:1px solid var(--line-2);
+}
+.rows-sub:first-child{border-top:0}
+
+/* ============ 设置页 ============ */
+.set-row{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;gap:12px;font-size:14px}
+.set-row+.set-row{border-top:1px solid var(--line-2)}
+.set-row .sl{display:flex;flex-direction:column;gap:2px}
+.set-row .sl .s{font-size:11.5px;color:var(--text-3)}
+select.sel{
+  appearance:none;background:var(--card-2);border:1px solid var(--line);border-radius:11px;
+  padding:8px 30px 8px 12px;font-size:13.5px;font-weight:550;color:var(--text);
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2399a0af' stroke-width='2' stroke-linecap='round'><path d='M6 9l6 6 6-6'/></svg>");
+  background-repeat:no-repeat;background-position:right 9px center;background-size:14px;
+}
+.sw{width:48px;height:28px;border-radius:99px;background:var(--line);position:relative;transition:.24s;flex:0 0 auto;border:0;padding:0}
+.sw::after{
+  content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;
+  background:#fff;transition:.24s cubic-bezier(.3,1.2,.5,1);box-shadow:0 1px 4px rgba(0,0,0,.28);
+}
+.sw.on{background:var(--accent)}
+.sw.on::after{transform:translateX(20px)}
+.sw:active::after{width:26px}
+.sw.on:active::after{transform:translateX(16px)}
+.sw[disabled]{opacity:.4;pointer-events:none}
+input.tinput{
+  appearance:none;-webkit-appearance:none;
+  background:var(--card-2);border:1px solid var(--line);border-radius:11px;
+  padding:8px 12px;font-size:13.5px;font-weight:550;color:var(--text);outline:none;
+  transition:.16s;
+}
+input.tinput:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+input.tinput[disabled]{opacity:.45;pointer-events:none}
+.act-btn{
+  display:flex;align-items:center;justify-content:center;gap:7px;width:100%;height:47px;
+  border-radius:14px;background:var(--card);border:1px solid var(--line);
+  font-size:14.5px;font-weight:600;transition:.16s;box-shadow:var(--shadow);
+}
+@media(hover:hover){.act-btn:hover{border-color:var(--accent);color:var(--accent)}}
+.act-btn:active{transform:scale(.98);background:var(--card-2)}
+.act-btn.danger{color:var(--danger);background:var(--danger-soft);border-color:transparent}
+@media(hover:hover){.act-btn.danger:hover{color:var(--danger);border-color:transparent;filter:brightness(.97)}}
+.act-btn svg{width:17px;height:17px}
+.note{font-size:12.5px;color:var(--text-3);line-height:1.75;padding:15px 16px}
+.note b{color:var(--text-2);font-weight:650}
+
+/* ============ 底部导航（悬浮胶囊） ============ */
+.tabbar{
+  position:fixed;left:0;right:0;bottom:0;z-index:30;
+  display:flex;justify-content:center;
+  padding:0 16px calc(12px + var(--safe-b));
+  pointer-events:none;
+}
+.tabbar .inner{
+  pointer-events:auto;display:flex;width:100%;max-width:400px;
+  padding:5px;gap:4px;
+  background:var(--card);
+  background:color-mix(in srgb,var(--card) 86%,transparent);
+  border:1px solid var(--line-2);border-radius:24px;
+  box-shadow:var(--shadow-bar);
+  backdrop-filter:saturate(180%) blur(18px);
+  -webkit-backdrop-filter:saturate(180%) blur(18px);
+}
+.tab{
+  flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;
+  padding:7px 0 6px;border-radius:18px;
+  color:var(--text-3);font-size:10.5px;font-weight:600;transition:.18s;
+}
+.tab svg{width:21px;height:21px;transition:.18s}
+.tab.active{color:var(--accent);background:var(--accent-soft)}
+.tab.active svg{transform:translateY(-1px)}
+.tab:active{transform:scale(.95)}
+
+/* ============ 弹层 ============ */
+.sheet{position:fixed;inset:0;z-index:60;display:flex;align-items:flex-end;justify-content:center}
+.sheet .mask{position:absolute;inset:0;background:rgba(10,12,20,.48);backdrop-filter:blur(3px);animation:fade .2s ease both}
+.sheet .panel{
+  position:relative;width:100%;max-width:520px;background:var(--card);
+  border-radius:26px 26px 0 0;padding:12px 18px calc(22px + var(--safe-b));
+  box-shadow:var(--shadow-lg);animation:up .3s cubic-bezier(.2,.9,.3,1) both;
+  max-height:90vh;overflow-y:auto;-webkit-overflow-scrolling:touch;
+}
+.sheet .panel::before{
+  content:"";display:block;width:38px;height:4.5px;border-radius:99px;
+  background:var(--line);margin:2px auto 15px;
+}
+@keyframes up{from{transform:translateY(100%)}to{transform:none}}
+.sheet h3{margin:0 2px 17px;font-size:17px;font-weight:700}
+.field{margin-bottom:15px}
+.field label{display:block;font-size:12px;color:var(--text-3);margin-bottom:7px;font-weight:550}
+.field input,.field textarea{
+  width:100%;background:var(--card-2);border:1.5px solid var(--line);border-radius:13px;
+  padding:12px 14px;font-size:15px;outline:none;transition:.16s;
+}
+.field input:focus,.field textarea:focus{
+  border-color:var(--accent);background:var(--card);
+  box-shadow:0 0 0 3.5px var(--accent-soft);
+}
+.field textarea{resize:none;min-height:66px;line-height:1.6}
+
+/* ---- 类型选择 ---- */
+/* auto-fit 而不是固定 4 列：英文类型名（Ejaculation）比中文长得多，
+   固定列宽会挤成一团，auto-fit 让它该换行时换行 */
+.chips{display:grid;grid-template-columns:repeat(auto-fit,minmax(86px,1fr));gap:8px}
+.chip{
+  height:45px;border-radius:13px;border:1.5px solid var(--line);background:var(--card-2);
+  font-size:14px;font-weight:600;color:var(--text-2);
+  display:flex;align-items:center;justify-content:center;gap:6px;transition:.16s;
+  white-space:nowrap;overflow:hidden;padding:0 6px;
+}
+.chip i{width:7px;height:7px;border-radius:50%;background:currentColor;display:block;flex:0 0 auto}
+.chip:active{transform:scale(.95)}
+.chip.on{color:#fff;border-color:transparent;box-shadow:0 5px 14px rgba(23,26,54,.2)}
+.chip.on[data-kind="ej"]{background:var(--k-ej)}
+.chip.on[data-kind="fl"]{background:var(--k-fl)}
+.chip.on[data-kind="other"]{background:var(--k-other)}
+.chip.on i{background:#fff}
+[data-theme="dark"] .chip.on{color:#11131d;box-shadow:0 5px 14px rgba(0,0,0,.45)}
+
+/* ---- 精液量 ---- */
+.vol-field{overflow:hidden;transition:max-height .26s ease,opacity .2s ease,margin .26s ease}
+.vol-field.hide{max-height:0;opacity:0;margin-bottom:0}
+.vol-field.show{max-height:120px;opacity:1}
+.vol-input{display:flex;align-items:center;gap:0;position:relative}
+.vol-input input{
+  width:100%;background:var(--card-2);border:1.5px solid var(--line);border-radius:13px;
+  padding:12px 56px 12px 14px;font-size:17px;font-weight:650;outline:none;
+  font-variant-numeric:tabular-nums;transition:.16s;
+}
+.vol-input input:focus{border-color:var(--k-ej);background:var(--card);box-shadow:0 0 0 3.5px var(--k-ej-bg)}
+.vol-input .unit{
+  position:absolute;right:15px;font-size:13px;color:var(--text-3);font-weight:600;pointer-events:none;
+}
+.vol-hint{font-size:11.5px;color:var(--text-3);margin-top:7px;display:flex;justify-content:space-between;gap:8px}
+.vol-hint b{color:var(--text-2);font-weight:650;cursor:pointer}
+.vol-hint b:active{color:var(--accent)}
+
+/* ---- 类型标记 ---- */
+.kbadge{
+  display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:650;
+  padding:3px 9px;border-radius:99px;white-space:nowrap;
+}
+.kbadge::before{content:"";width:5px;height:5px;border-radius:50%;background:currentColor}
+.kbadge[data-kind="ej"]{color:var(--k-ej);background:var(--k-ej-bg)}
+.kbadge[data-kind="fl"]{color:var(--k-fl);background:var(--k-fl-bg)}
+.kbadge[data-kind="other"]{color:var(--k-other);background:var(--k-other-bg)}
+.kbadge[data-kind=""]{color:var(--text-3);background:var(--card-2)}
+
+/* ---- 类型分布 ---- */
+.tdist{padding:15px 16px}
+.tdist-row{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.tdist-row:last-child{margin-bottom:0}
+.tdist-row .nm{font-size:13px;font-weight:600;width:42px;flex:0 0 auto}
+.tdist-row .track{flex:1;height:9px;border-radius:99px;background:var(--card-2);overflow:hidden}
+.tdist-row .track span{display:block;height:100%;border-radius:99px;background:var(--k-other);transition:width .4s cubic-bezier(.3,1.2,.5,1)}
+.tdist-row[data-kind="ej"] .track span{background:var(--k-ej)}
+.tdist-row[data-kind="fl"] .track span{background:var(--k-fl)}
+.tdist-row[data-kind="other"] .track span{background:var(--k-other)}
+.tdist-row .ct{font-size:12.5px;font-weight:650;color:var(--text-2);width:46px;text-align:right;flex:0 0 auto;font-variant-numeric:tabular-nums}
+.tdist-row .ct em{font-style:normal;color:var(--text-3);font-weight:500;font-size:11px}
+
+/* ---- 频率提醒 ---- */
+.remind{
+  border-radius:16px;padding:13px 15px;margin-bottom:10px;
+  border:1px solid transparent;animation:fade .25s ease both;
+  transition:background-color .3s ease,border-color .3s ease;
+}
+.remind.warn{background:var(--warn-bg);border-color:var(--warn-line);box-shadow:0 2px 10px rgba(180,83,9,.06)}
+.remind.note{background:var(--card);border-color:var(--line-2);box-shadow:var(--shadow)}
+.rm-head{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.rm-tag{
+  font-size:10.5px;font-weight:700;padding:2.5px 7px;border-radius:6px;
+  letter-spacing:.4px;flex:0 0 auto;
+}
+.remind.warn .rm-tag{background:var(--warn-fg);color:#fff}
+[data-theme="dark"] .remind.warn .rm-tag{color:#191b23}
+.remind.note .rm-tag{background:var(--text-3);color:var(--card)}
+.rm-title{font-size:13.5px;font-weight:700;flex:1;line-height:1.35}
+.remind.warn .rm-title{color:var(--warn-fg)}
+.rm-x{
+  width:26px;height:26px;border-radius:9px;color:var(--text-3);
+  font-size:18px;line-height:1;display:flex;align-items:center;justify-content:center;
+  flex:0 0 auto;transition:.15s;
+}
+.rm-x:active{background:var(--press)}
+.rm-body{font-size:12.5px;color:var(--text-2);line-height:1.65}
+.rm-more{
+  display:inline-block;font-size:11.5px;font-weight:650;margin-top:6px;
+  color:var(--accent);transition:.15s;
+}
+.remind.warn .rm-more{color:var(--warn-fg);opacity:.85}
+.rm-tip{
+  display:none;font-size:11.5px;color:var(--text-3);line-height:1.7;
+  margin-top:9px;padding-top:9px;border-top:1px dashed var(--line);
+}
+.remind.open .rm-tip{display:block}
+.remind.warn .rm-tip{border-top-color:var(--warn-line)}
+
+/* ---- 数值步进器 ---- */
+.stepper{
+  display:flex;align-items:center;gap:2px;flex:0 0 auto;
+  background:var(--card-2);border:1px solid var(--line);border-radius:12px;padding:3px;
+}
+.stepper button{
+  width:33px;height:31px;border-radius:9px;font-size:18px;font-weight:600;
+  color:var(--text-2);display:flex;align-items:center;justify-content:center;transition:.15s;
+}
+.stepper button:active{background:var(--accent-soft);color:var(--accent);transform:scale(.9)}
+.stepper button[disabled]{opacity:.3;pointer-events:none}
+.stepper b{
+  min-width:36px;text-align:center;font-size:15.5px;font-weight:700;
+  font-variant-numeric:tabular-nums;
+}
+.sheet-actions{display:flex;gap:10px;margin-top:19px}
+.sheet-actions button{flex:1;height:48px;border-radius:14px;font-size:15px;font-weight:650;transition:.16s}
+.sheet-actions button:active{transform:scale(.97)}
+.b-primary{background:var(--grad);color:#fff;box-shadow:0 6px 16px rgba(84,82,226,.28)}
+[data-theme="dark"] .b-primary{box-shadow:0 6px 16px rgba(0,0,0,.5)}
+.b-danger{background:var(--danger-soft);color:var(--danger)}
+.b-plain{background:var(--card-2);color:var(--text-2);border:1px solid var(--line)}
+
+/* ---- 诱因 / 情绪标签（多选） ---- */
+.tagwrap{display:flex;flex-wrap:wrap;gap:7px}
+.tag{
+  height:34px;padding:0 12px;border-radius:99px;border:1.5px solid var(--line);
+  background:var(--card-2);color:var(--text-2);font-size:13px;font-weight:550;
+  display:inline-flex;align-items:center;transition:.16s;
+}
+.tag:active{transform:scale(.94)}
+.tag.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-2);font-weight:650}
+[data-theme="dark"] .tag.on{color:var(--accent-2)}
+.tag-mini{font-size:11px;color:var(--text-3);margin-top:9px;line-height:1.6}
+
+/* ---- 目标达成 ---- */
+.goal{padding:16px}
+.goal-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:15px}
+.goal-top .t{font-size:13.5px;font-weight:700}
+.goal-top .s{font-size:11.5px;color:var(--text-3);margin-top:3px;line-height:1.5}
+.goal-pill{font-size:11.5px;font-weight:700;padding:4px 10px;border-radius:99px;flex:0 0 auto;white-space:nowrap}
+.goal-pill.ok{background:#e3f7ef;color:#0b7a58}
+.goal-pill.over{background:var(--warn-bg);color:var(--warn-fg)}
+[data-theme="dark"] .goal-pill.ok{background:#13302a;color:#3ddc97}
+.goal-row{margin-bottom:14px}
+.goal-row:last-of-type{margin-bottom:0}
+.goal-row .lab{display:flex;justify-content:space-between;align-items:baseline;font-size:12px;color:var(--text-2);margin-bottom:6px}
+.goal-row .lab b{font-weight:700;font-variant-numeric:tabular-nums;color:var(--text)}
+.goal-row .lab em{font-style:normal;color:var(--text-3);font-size:11px}
+.goal-bar{height:9px;border-radius:99px;background:var(--card-2);overflow:hidden}
+.goal-bar span{display:block;height:100%;border-radius:99px;background:var(--grad);transition:width .45s cubic-bezier(.3,1.2,.5,1)}
+.goal-bar.over span{background:linear-gradient(90deg,#f0a03c,#e5484d)}
+.goal-streak{
+  display:flex;align-items:center;gap:9px;margin-top:15px;padding-top:14px;
+  border-top:1px dashed var(--line);font-size:12.5px;color:var(--text-2);line-height:1.5;
+}
+.goal-streak b{font-size:19px;font-weight:780;color:var(--accent);font-variant-numeric:tabular-nums;flex:0 0 auto}
+[data-theme="dark"] .goal-streak b{color:var(--accent-2)}
+
+/* ---- 月度趋势折线 ---- */
+.trend{padding:16px 13px 11px}
+.trend svg{display:block;width:100%;height:134px;overflow:visible}
+.trend .gl{stroke:var(--line-2);stroke-width:1}
+.trend .ar{fill:var(--accent);opacity:.09}
+.trend .ln{fill:none;stroke:var(--accent);stroke-width:2.2;stroke-linejoin:round;stroke-linecap:round}
+.trend .pt{fill:var(--card);stroke:var(--accent);stroke-width:2}
+.trend .pt.now{fill:var(--accent);stroke:var(--card);stroke-width:2.5}
+.trend .vl{font-size:10px;font-weight:700;fill:var(--accent);text-anchor:middle}
+.trend .xl{font-size:9.5px;fill:var(--text-3);text-anchor:middle}
+.trend-foot{display:flex;justify-content:space-between;align-items:baseline;font-size:11px;color:var(--text-3);padding:0 3px;margin-top:4px}
+
+/* ---- 诱因分布 ---- */
+.gdist{padding:15px 16px}
+.gdist-row{display:flex;align-items:center;gap:10px;margin-bottom:11px}
+.gdist-row:last-child{margin-bottom:0}
+.gdist-row .nm{
+  font-size:12.5px;font-weight:600;width:56px;flex:0 0 auto;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.gdist-row .track{flex:1;height:9px;border-radius:99px;background:var(--card-2);overflow:hidden}
+.gdist-row .track span{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#8f8ef2,#5452e2);transition:width .4s cubic-bezier(.3,1.2,.5,1)}
+.gdist-row .ct{font-size:12.5px;font-weight:650;color:var(--text-2);width:52px;text-align:right;flex:0 0 auto;font-variant-numeric:tabular-nums}
+.gdist-row .ct em{font-style:normal;color:var(--text-3);font-weight:500;font-size:11px}
+
+/* 英文标签比中文长，分布图的名称列要给够宽度（否则条形的起点会参差不齐） */
+html[lang="en"] .tdist-row .nm{width:92px}
+html[lang="en"] .gdist-row .nm{width:86px}
+
+/* ============ 隐私锁 ============ */
+/* overflow-y:auto 让矮屏（横屏、小屏）能滚动；居中靠 .lk-inner 的 margin:auto，
+   这样内容放得下时居中、放不下时可滚，不会像 justify-content:center 那样把顶部裁掉。 */
+.lock{position:fixed;inset:0;z-index:90;background:var(--bg);display:flex;overflow-y:auto;overscroll-behavior:contain}
+.lock .lk-inner{
+  margin:auto;display:flex;flex-direction:column;align-items:center;
+  width:100%;max-width:520px;padding:20px 34px calc(20px + var(--safe-b));
+}
+.lock .lk-mark{
+  width:54px;height:54px;border-radius:18px;background:var(--grad);
+  display:flex;align-items:center;justify-content:center;margin-bottom:19px;
+  box-shadow:0 8px 22px rgba(84,82,226,.35);flex:0 0 auto;
+}
+[data-theme="dark"] .lock .lk-mark{box-shadow:0 8px 22px rgba(0,0,0,.55)}
+.lock .lk-mark::after{content:"";width:16px;height:16px;border-radius:50%;background:#fff}
+.lock .lk-t{font-size:16px;font-weight:700;margin-bottom:6px;letter-spacing:.3px}
+.lock .lk-s{font-size:12.5px;color:var(--text-3);margin-bottom:28px;height:18px}
+.pin-dots{display:flex;gap:15px;margin-bottom:38px}
+.pin-dots i{width:13px;height:13px;border-radius:50%;background:var(--line);transition:.18s;flex:0 0 auto}
+.pin-dots i.on{background:var(--accent);transform:scale(1.15);box-shadow:0 0 0 4px var(--accent-soft)}
+
+/* 键盘按键必须是正圆。
+   关键是**边长由同一个变量决定**：宽、高都取 --kp，再配 aspect-ratio 兜底。
+   早期写成 height:64px + border-radius:50%，但 3 列网格每列约 81px 宽，
+   81×64 配 50% 圆角就渲染成椭圆了。
+   --kp 同时受三件事约束：单列不能宽过容器（20vw）、4 行加间距不能高过屏幕
+   （(100vh - 230px)/4，230px 是标题/圆点/留白等非键盘部分的实测开销）、
+   以及一个上下限。--kpg 同理随高度收缩，横屏矮屏才不会把键盘顶出去。 */
+.keypad{
+  --kp: clamp(44px, min(20vw, calc((100vh - 230px) / 4)), 76px);
+  --kpg: clamp(6px, min(3.2vw, 1.8vh), 14px);
+  display:grid;
+  grid-template-columns:repeat(3, var(--kp));
+  gap:var(--kpg);
+  justify-content:center;
+}
+.keypad button{
+  width:var(--kp);height:var(--kp);aspect-ratio:1/1;border-radius:50%;
+  background:var(--card);border:1px solid var(--line-2);
+  font-size:clamp(18px, 6.2vw, 24px);font-weight:550;
+  font-variant-numeric:tabular-nums;transition:.14s;
+  box-shadow:var(--shadow);
+  display:flex;align-items:center;justify-content:center;
+}
+.keypad button:active{transform:scale(.92);background:var(--accent-soft);color:var(--accent)}
+.keypad button.plain{background:transparent;border:0;box-shadow:none;font-size:13.5px;color:var(--text-3)}
+.shake{animation:shake .4s}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-9px)}40%{transform:translateX(9px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
+
+/* 矮屏（横屏、小屏）收紧纵向留白，把省下的高度让给键盘 */
+@media (max-height:600px){
+  .lock .lk-inner{padding:12px 34px calc(12px + var(--safe-b))}
+  .lock .lk-mark{width:40px;height:40px;border-radius:14px;margin-bottom:10px}
+  .lock .lk-mark::after{width:12px;height:12px}
+  .lock .lk-t{font-size:15px;margin-bottom:2px}
+  .lock .lk-s{font-size:12px;margin-bottom:12px;height:16px}
+  .pin-dots{gap:12px;margin-bottom:14px}
+  .pin-dots i{width:11px;height:11px}
+}
+/* 极矮（老手机横屏）：留白已经压无可压，直接让位给键盘 —— 藏掉图标 */
+@media (max-height:420px){
+  .lock .lk-inner{padding:8px 34px calc(8px + var(--safe-b))}
+  .lock .lk-mark{display:none}
+  .lock .lk-s{margin-bottom:8px}
+  .pin-dots{margin-bottom:10px}
+}
+
+/* ============ Toast ============ */
+.toast{
+  position:fixed;left:50%;bottom:calc(104px + var(--safe-b));transform:translateX(-50%);
+  background:rgba(22,24,31,.94);color:#fff;font-size:13.5px;font-weight:550;
+  padding:10px 18px;border-radius:99px;z-index:100;opacity:0;transition:.25s;pointer-events:none;
+  backdrop-filter:blur(8px);
+  display:flex;align-items:center;gap:14px;
+  max-width:calc(100vw - 32px);
+  box-shadow:0 8px 24px rgba(10,12,20,.28);
+}
+[data-theme="dark"] .toast{background:rgba(240,242,248,.96);color:#191b23}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(-6px)}
+/* 只有带撤销按钮时才接管点击，平时不能挡住底下的内容 */
+.toast.has-act.on{pointer-events:auto}
+.toast .msg{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.toast .act{
+  font-size:13.5px;font-weight:750;color:#a5a4ff;flex:0 0 auto;
+  padding:3px 8px;border-radius:9px;transition:.15s;
+}
+.toast .act:active{background:rgba(255,255,255,.16)}
+[data-theme="dark"] .toast .act{color:#4340cf}
+[data-theme="dark"] .toast .act:active{background:rgba(0,0,0,.08)}
+
+/* ============ 超窄屏（<350px） ============ */
+@media (max-width:349px){
+  main{padding-left:10px;padding-right:10px}
+  .month-head{padding:14px 10px 8px}
+  .weekdays{padding:0 6px 4px}
+  .grid{gap:2.5px;padding:2px 6px 12px}
+  .cell{border-radius:10px}
+  .cell .dnum{font-size:13.5px}
+  .chips{gap:6px}
+  .chip{font-size:13px;height:43px}
+  .mini{gap:7px}
+  .big-grid{gap:8px}
+  .big{padding:13px}
+  .big .v{font-size:23px}
+  .tabbar{padding-left:10px;padding-right:10px}
+}
+</style>
+</head>
+<body>
+
+<!-- ===== 隐私锁 ===== -->
+<div class="lock" id="lockScreen" hidden>
+  <div class="lk-inner">
+    <div class="lk-mark"></div>
+    <div class="lk-t" id="lockTitle">输入密码</div>
+    <div class="lk-s" id="lockSub"></div>
+    <div class="pin-dots" id="pinDots"></div>
+    <div class="keypad" id="keypad"></div>
+  </div>
+</div>
+
+<div class="app" id="app">
+  <header class="topbar">
+    <div class="brand"><span class="mark"></span><span data-i18n="app.name">私密日志</span></div>
+    <button class="icon-btn" id="themeBtn" data-i18n-aria="theme.toggle" data-i18n-title="theme.toggle"></button>
+  </header>
+
+  <main>
+    <!-- ========== 日历 ========== -->
+    <section class="view" id="view-calendar">
+      <div id="remindBox"></div>
+
+      <div class="card">
+        <div class="month-head">
+          <div class="month-title"><span id="monthTitle">—</span><span class="sub" id="monthSub"></span></div>
+          <div style="display:flex;gap:2px">
+            <button class="nav-btn" id="prevMonth" data-i18n-aria="cal.prevMonth"></button>
+            <button class="nav-btn" id="nextMonth" data-i18n-aria="cal.nextMonth"></button>
+          </div>
+        </div>
+        <div class="weekdays" id="weekdays"></div>
+        <div class="grid" id="calGrid"></div>
+      </div>
+
+      <button class="btn-add" id="quickAdd"></button>
+
+      <div class="mini" id="miniStats"></div>
+
+      <div class="card">
+        <div class="day-head">
+          <div class="dt" id="dayTitle">—</div>
+          <div class="badge" id="dayBadge">—</div>
+        </div>
+        <ul class="rec-list" id="recList"></ul>
+        <div class="day-foot">
+          <button class="btn-ghost" id="addForDay" data-i18n="cal.backfill">+ 为这一天补记一次</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== 统计 ========== -->
+    <section class="view" id="view-stats" hidden>
+      <div class="sec-title" style="margin-top:6px" data-i18n="stats.overview">总览</div>
+      <div class="big-grid" id="bigStats"></div>
+
+      <div class="sec-title" data-i18n="stats.goal">目标达成</div>
+      <div class="card"><div class="goal" id="goalCard"></div></div>
+
+      <div class="sec-title" data-i18n="stats.last30">最近 30 天</div>
+      <div class="card">
+        <div class="chart">
+          <div class="bars" id="bars"></div>
+          <div class="axis"><span id="axisFrom">—</span><span data-i18n="common.today">今天</span></div>
+        </div>
+      </div>
+
+      <div class="sec-title" data-i18n="stats.trend">最近 12 个月</div>
+      <div class="card">
+        <div class="trend" id="trendWrap"></div>
+      </div>
+
+      <div class="sec-title" data-i18n="stats.heat">近半年热力图</div>
+      <div class="card">
+        <div class="heat-wrap"><div class="heat" id="heat"></div></div>
+        <div class="legend" style="padding:0 14px 14px">
+          <span data-i18n="stats.less">少</span>
+          <i style="background:var(--h0)"></i><i style="background:var(--h1)"></i>
+          <i style="background:var(--h2)"></i><i style="background:var(--h3)"></i><i style="background:var(--h4)"></i>
+          <span data-i18n="stats.more">多</span>
+        </div>
+      </div>
+
+      <div class="sec-title" data-i18n="stats.typeDist">类型分布</div>
+      <div class="card">
+        <div class="tdist" id="typeDist"></div>
+      </div>
+
+      <div class="sec-title" data-i18n="stats.tagDist">诱因分布</div>
+      <div class="card">
+        <div class="gdist" id="tagDist"></div>
+      </div>
+
+      <div class="sec-title" data-i18n="stats.detail">详细数据</div>
+      <div class="rows" id="detailRows"></div>
+    </section>
+
+    <!-- ========== 设置 ========== -->
+    <section class="view" id="view-settings" hidden>
+      <div class="sec-title" style="margin-top:6px" data-i18n="set.appearance">外观</div>
+      <div class="rows">
+        <div class="set-row">
+          <div class="sl"><span data-i18n="set.theme">主题</span></div>
+          <select class="sel" id="setTheme">
+            <option value="system" data-i18n="theme.system">跟随系统</option>
+            <option value="light" data-i18n="theme.light">浅色</option>
+            <option value="dark" data-i18n="theme.dark">深色</option>
+          </select>
+        </div>
+        <div class="set-row">
+          <div class="sl"><span data-i18n="set.language">语言</span></div>
+          <select class="sel" id="setLang">
+            <option value="system" data-i18n="lang.system">跟随系统</option>
+            <option value="zh" data-i18n="lang.zh">中文</option>
+            <option value="en" data-i18n="lang.en">English</option>
+          </select>
+        </div>
+        <div class="set-row">
+          <div class="sl"><span data-i18n="set.weekStart">每周起始日</span></div>
+          <select class="sel" id="setWeekStart">
+            <option value="1" data-i18n="set.monday">星期一</option>
+            <option value="0" data-i18n="set.sunday">星期日</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="sec-title" data-i18n="set.privacy">隐私</div>
+      <div class="rows">
+        <div class="set-row">
+          <div class="sl">
+            <span data-i18n="set.pin">隐私锁</span>
+            <span class="s" id="pinHint" data-i18n="set.pinHint">打开应用时需输入 4 位密码</span>
+          </div>
+          <div class="sw" id="swPin" role="switch" tabindex="0" aria-checked="false" data-i18n-aria="set.pin"></div>
+        </div>
+      </div>
+
+      <div class="sec-title" data-i18n="set.remind">频率提醒</div>
+      <div class="rows">
+        <div class="set-row">
+          <div class="sl">
+            <span data-i18n="set.remindOn">开启提醒</span>
+            <span class="s" data-i18n="set.remindOnHint">超出上限时在日历页提示</span>
+          </div>
+          <div class="sw" id="swRemind" role="switch" tabindex="0" aria-checked="false" data-i18n-aria="set.remind"></div>
+        </div>
+        <div class="set-row">
+          <div class="sl">
+            <span data-i18n="set.weekLimit">每周上限</span>
+            <span class="s" data-i18n="set.weekLimitHint">超过就提醒，也作为本周目标</span>
+          </div>
+          <div class="stepper" data-field="week">
+            <button data-d="-1" data-i18n-aria="common.decrease">−</button><b>3</b><button data-d="1" data-i18n-aria="common.increase">+</button>
+          </div>
+        </div>
+        <div class="set-row">
+          <div class="sl">
+            <span data-i18n="set.monthLimit">每月上限</span>
+            <span class="s" data-i18n="set.monthLimitHint">超过就提醒</span>
+          </div>
+          <div class="stepper" data-field="month">
+            <button data-d="-1" data-i18n-aria="common.decrease">−</button><b>10</b><button data-d="1" data-i18n-aria="common.increase">+</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="sec-title" data-i18n="set.daily">每日提醒</div>
+      <div class="rows">
+        <div class="set-row">
+          <div class="sl">
+            <span data-i18n="set.dailyOn">每日自查提醒</span>
+            <span class="s" id="dailyHint"></span>
+          </div>
+          <div class="sw" id="swDaily" role="switch" tabindex="0" aria-checked="false" data-i18n-aria="set.dailyOn"></div>
+        </div>
+        <div class="set-row">
+          <div class="sl"><span data-i18n="set.dailyTime">提醒时间</span></div>
+          <input type="time" class="tinput" id="setDailyTime" value="21:00">
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:12px">
+        <div class="note">
+          <b data-i18n="set.noteLimitTitle">上限该怎么定</b><br>
+          <span data-i18n-html="set.noteLimitBody"></span>
+        </div>
+      </div>
+
+      <div class="sec-title" data-i18n="set.data">数据</div>
+      <div class="rows" style="background:transparent;border:0;box-shadow:none;gap:10px;display:flex;flex-direction:column">
+        <button class="act-btn" id="btnExport" data-i18n="set.export">导出备份（JSON）</button>
+        <button class="act-btn" id="btnImport" data-i18n="set.import">从备份恢复</button>
+        <button class="act-btn danger" id="btnClear" data-i18n="set.clearAll">清空全部记录</button>
+        <input type="file" id="fileInput" accept="application/json,.json" hidden>
+      </div>
+
+      <div class="card" style="margin-top:12px">
+        <div class="note">
+          <b data-i18n="set.noteDataTitle">关于数据</b><br>
+          <span data-i18n-html="set.noteDataBody"></span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <nav class="tabbar">
+    <div class="inner">
+      <button class="tab active" data-view="calendar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16.5" rx="3.5"/><path d="M3 10h18M8 2.6v3.6M16 2.6v3.6"/></svg>
+        <span data-i18n="nav.calendar">日历</span>
+      </button>
+      <button class="tab" data-view="stats">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M5 20.5V11M12 20.5V3.5M19 20.5v-6"/></svg>
+        <span data-i18n="nav.stats">统计</span>
+      </button>
+      <button class="tab" data-view="settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3.5 7h17M3.5 12h17M3.5 17h17"/><circle cx="9" cy="7" r="2.4" fill="var(--card)"/><circle cx="15.5" cy="12" r="2.4" fill="var(--card)"/><circle cx="8" cy="17" r="2.4" fill="var(--card)"/></svg>
+        <span data-i18n="nav.settings">设置</span>
+      </button>
+    </div>
+  </nav>
+</div>
+
+<!-- ===== 记录编辑弹层 ===== -->
+<div class="sheet" id="sheet" hidden>
+  <div class="mask" id="sheetMask"></div>
+  <div class="panel">
+    <h3 id="sheetTitle">—</h3>
+
+    <div class="field">
+      <label data-i18n="sheet.kind">类型</label>
+      <div class="chips" id="kindChips"></div>
+    </div>
+
+    <div class="field vol-field hide" id="volField">
+      <label id="volLabel" data-i18n="sheet.vol">精液量（可选）</label>
+      <div class="vol-input">
+        <input type="number" id="editVol" inputmode="decimal" step="0.1" min="0" max="100" data-i18n-ph="sheet.volPh">
+        <span class="unit" data-i18n="unit.mL">mL</span>
+      </div>
+      <div class="vol-hint">
+        <span id="volHint" data-i18n="sheet.volHint">按实际测量值填写，不确定就留空</span>
+        <b id="volClear" data-i18n="common.clear">清除</b>
+      </div>
+    </div>
+
+    <div class="field">
+      <label data-i18n="sheet.time">时间</label>
+      <input type="time" id="editTime">
+    </div>
+    <div class="field">
+      <label data-i18n="sheet.note">备注（可选）</label>
+      <textarea id="editNote" data-i18n-ph="sheet.notePh"></textarea>
+    </div>
+    <div class="field">
+      <label data-i18n="sheet.tags">诱因 / 状态（可多选）</label>
+      <div class="tagwrap" id="tagChips"></div>
+      <div class="tag-mini" data-i18n="sheet.tagsHint">记下「什么情况下更容易发生」，回看时比单纯的次数更有参考价值。</div>
+    </div>
+    <div class="sheet-actions">
+      <button class="b-danger" id="editDelete" data-i18n="common.delete">删除</button>
+      <button class="b-plain" id="editCancel" data-i18n="common.cancel">取消</button>
+      <button class="b-primary" id="editSave" data-i18n="common.save">保存</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+'use strict';
+
+/* ================= 存储 ================= */
+/* 项目从「日迹 / do-you-fly？」改名而来，localStorage 的键也跟着换了。
+   旧键仍然会读一次并自动搬到新键 —— 改个名字不该让用户丢数据。 */
+var STORE_KEY = 'private-journal.v1';
+var LEGACY_STORE_KEYS = ['dyf.tracker.v1'];
+var DEFAULTS = {
+  version: 2,
+  records: {},
+  settings: {
+    theme: 'system', weekStart: 1, pin: '', lastKind: 'ej',
+    lang: 'system',        // system | zh | en
+    // 提醒阈值是「自律目标」而不是医学标准，默认取相对温和的起点，可自行调整
+    remind: { on: true, week: 3, month: 10 },
+    remindDismiss: {},
+    // 密码：新格式是 PBKDF2-SHA256 的 'p2:<迭代数>:<十六进制>'，配随机盐。
+    // pinSalt 为空表示还是早期的 DJB2 哈希，登录时走兼容分支，重设后自动升级。
+    pinSalt: '', pinIter: 0,
+    // 连续输错后的锁定状态：{ n: 累计错误次数, until: 解锁时间戳 }
+    pinFails: { n: 0, until: 0 },
+    lastTags: [],
+    daily: { on: false, time: '21:00' }
+  }
+};
+
+function clone(o){ return JSON.parse(JSON.stringify(o)); }
+function load(){
+  try{
+    var raw = localStorage.getItem(STORE_KEY);
+    if(!raw){
+      // 从旧键迁移
+      for(var li=0; li<LEGACY_STORE_KEYS.length; li++){
+        var old = localStorage.getItem(LEGACY_STORE_KEYS[li]);
+        if(old){
+          raw = old;
+          try{ localStorage.setItem(STORE_KEY, old); }catch(e2){}
+          break;
+        }
+      }
+    }
+    if(!raw) return clone(DEFAULTS);
+    var d = JSON.parse(raw);
+    d.records = d.records || {};
+    d.settings = Object.assign({}, DEFAULTS.settings, d.settings || {});
+    // 嵌套对象要单独合并，否则老备份里缺这些字段时会整块丢失
+    d.settings.remind = Object.assign({}, DEFAULTS.settings.remind, d.settings.remind || {});
+    d.settings.remindDismiss = d.settings.remindDismiss || {};
+    d.settings.daily = Object.assign({}, DEFAULTS.settings.daily, d.settings.daily || {});
+    d.settings.pinFails = Object.assign({}, DEFAULTS.settings.pinFails, d.settings.pinFails || {});
+    if(!(d.settings.lastTags instanceof Array)) d.settings.lastTags = [];
+    return d;
+  }catch(e){ return clone(DEFAULTS); }
+}
+function save(){
+  try{ localStorage.setItem(STORE_KEY, JSON.stringify(S)); }
+  catch(e){ toast(t('toast.saveFail')); }
+  _daysCache = null;   // 数据变了，天列表缓存失效
+}
+
+/* ================= 多语言 =================
+   界面文案统一走 t(key, params)。params 用 {name} 占位符。
+   日期/星期/单位这些有语序差异的，单独用下面几个格式化函数，不要拼字符串。 */
+var STRINGS = {
+zh: {
+  'app.name': '私密日志',
+  'app.title': '私密日志 · 日历记录',
+  'app.desc': '本地日历式记录工具，数据只保存在你的设备上，不联网、无账号。',
+  'unit.times': '次',
+  'unit.timesShort': '次',
+  'unit.days': '天',
+  'unit.mL': 'mL',
+
+  'nav.calendar': '日历',
+  'nav.stats': '统计',
+  'nav.settings': '设置',
+
+  'common.cancel': '取消',
+  'common.delete': '删除',
+  'common.save': '保存',
+  'common.clear': '清除',
+  'common.today': '今天',
+  'common.yesterday': '昨天',
+  'common.undo': '撤销',
+  'common.increase': '增加',
+  'common.decrease': '减少',
+  'common.dismiss': '关闭提醒',
+
+  'theme.system': '跟随系统',
+  'theme.light': '浅色',
+  'theme.dark': '深色',
+  'theme.toggle': '切换主题',
+  'theme.toast': '主题：{name}',
+
+  'lang.system': '跟随系统',
+  'lang.zh': '中文',
+  'lang.en': 'English',
+
+  'cal.prevMonth': '上个月',
+  'cal.nextMonth': '下个月',
+  'cal.monthSub': '本月 {n} 次',
+  'cal.addRecord': '添加记录',
+  'cal.addRecordHint': '选类型',
+  'cal.backfill': '+ 为这一天补记一次',
+  'cal.emptyDay': '这一天还没有记录',
+  'cal.noRecord': '无记录',
+  'cal.cellAria': '{date} {n} 次：{kinds}',
+  'cal.cellAriaEmpty': '{date} 无记录',
+  'cal.cellAriaMore': '{date} 共 {n} 次：{kinds} 等',
+
+  'kind.ej': '射精',
+  'kind.fl': '流精',
+  'kind.other': '其他',
+  'kind.none': '未分类',
+
+  'tag.stress': '压力大',
+  'tag.bored': '无聊',
+  'tag.insomnia': '睡不着',
+  'tag.alone': '独处',
+  'tag.media': '刷到内容',
+  'tag.habit': '习惯性',
+  'tag.tired': '疲惫',
+  'tag.anxious': '焦虑',
+
+  'mini.month': '本月',
+  'mini.week': '本周',
+  'mini.since': '距上次',
+
+  'stats.overview': '总览',
+  'stats.monthCount': '本月次数',
+  'stats.vsLast': '较上月 {pct}',
+  'stats.noLastMonth': '上月无记录',
+  'stats.weekCount': '本周次数',
+  'stats.last30Inline': '近 30 天 {n} 次',
+  'stats.sinceLast': '距上次',
+  'stats.hadToday': '今天有记录',
+  'stats.noData': '暂无数据',
+  'stats.keepGoing': '保持住',
+  'stats.total': '累计次数',
+  'stats.totalDays': '共 {n} 天有记录',
+  'stats.goal': '目标达成',
+  'stats.inGoal': '目前在目标范围内',
+  'stats.overGoal': '已经超出目标',
+  'stats.goalNote': '上限是给你自己定的自律目标，不是医学标准',
+  'stats.onTrack': '达标',
+  'stats.over': '超出',
+  'stats.week': '本周',
+  'stats.month': '本月',
+  'stats.goalStreak': '{n} 周连续达标，{note}',
+  'stats.streakNoteOk': '最近 {n} 周都控制在每周上限以内',
+  'stats.streakNoteZero': '上一周超过了上限，这周可以重新开始',
+  'stats.last30': '最近 30 天',
+  'stats.trend': '最近 12 个月',
+  'stats.heat': '近半年热力图',
+  'stats.typeDist': '类型分布',
+  'stats.tagDist': '诱因分布',
+  'stats.detail': '详细数据',
+  'stats.less': '少',
+  'stats.more': '多',
+  'stats.trendTotal': '12 个月合计 {n} 次',
+  'stats.trendAvg': '月均 {n} 次',
+  'stats.empty': '还没有记录',
+  'stats.noTags': '还没有打过标签',
+  'stats.tagFoot': '共 {total} 个标签打点，分布在 {days} 天。{extra}标签只是你自己的观察记录，不代表因果关系。',
+  'stats.tagFootMore': '另有 {n} 个标签次数较少，未列出。',
+
+  'detail.groupPace': '节奏',
+  'detail.groupFreq': '频率与测量',
+  'detail.groupTime': '时间线',
+  'detail.days': '记录总天数',
+  'detail.longestStreak': '最长连续记录',
+  'detail.currentStreak': '当前连续记录',
+  'detail.avgInterval': '平均间隔',
+  'detail.maxInterval': '最长间隔',
+  'detail.avg30': '近 30 天日均',
+  'detail.night': '本月深夜时段',
+  'detail.volAvg': '精液量均值',
+  'detail.volN': '有测量记录',
+  'detail.first': '首次记录',
+  'detail.last': '最近记录',
+
+  'remind.monthTag': '本月',
+  'remind.monthTitle': '本月次数偏多',
+  'remind.monthBody': '本月已 {n} 次，超过你设定的 {goal} 次。注意别影响到睡眠、工作和情绪。',
+  'remind.monthTip': '次数本身不是健康指标。真正需要留意的是：是不是想停却停不下来，有没有身体不适（酸痛、皮肤刺激等），以及是否在用它来排解压力。',
+  'remind.weekTag': '本周',
+  'remind.weekTitle': '本周频率偏高',
+  'remind.weekBody': '本周已 {n} 次，超过你设定的 {goal} 次，建议缓一缓。',
+  'remind.weekTip': '给自己留出间隔，观察几天身体和精神状态的变化。如果它开始挤占睡眠或工作，那才是更值得注意的信号。',
+  'remind.streakTag': '节奏',
+  'remind.streakTitle': '已经连续 {n} 天',
+  'remind.streakBody': '连续 {n} 天每天都有记录，中间没有间隔。',
+  'remind.streakTip': '连续天数比单月总数更能反映习惯。试着插入一天间隔，看看感受有什么不同。',
+  'remind.nightTag': '时段',
+  'remind.nightTitle': '深夜时段偏多',
+  'remind.nightBody': '本月有 {n} 次发生在 0:00–5:00。',
+  'remind.nightTip': '深夜最容易挤占睡眠。睡眠不足带来的影响，通常比次数本身更明显。',
+  'remind.why': '为什么这么说 ▾',
+
+  'set.appearance': '外观',
+  'set.theme': '主题',
+  'set.language': '语言',
+  'set.weekStart': '每周起始日',
+  'set.monday': '星期一',
+  'set.sunday': '星期日',
+  'set.privacy': '隐私',
+  'set.pin': '隐私锁',
+  'set.pinHint': '打开应用时需输入 4 位密码',
+  'set.pinHintLegacy': '旧版密码，建议关掉后重新设置以启用更强的加密',
+  'set.remind': '频率提醒',
+  'set.remindOn': '开启提醒',
+  'set.remindOnHint': '超出上限时在日历页提示',
+  'set.weekLimit': '每周上限',
+  'set.weekLimitHint': '超过就提醒，也作为本周目标',
+  'set.monthLimit': '每月上限',
+  'set.monthLimitHint': '超过就提醒',
+  'set.daily': '每日提醒',
+  'set.dailyOn': '每日自查提醒',
+  'set.dailyHintNative': '到点在通知栏提醒你回顾一下，关掉应用也会提醒',
+  'set.dailyHintWeb': '到点在通知栏提醒你回顾一下（需保持页面打开）',
+  'set.dailyTime': '提醒时间',
+  'set.data': '数据',
+  'set.export': '导出备份（JSON）',
+  'set.import': '从备份恢复',
+  'set.clearAll': '清空全部记录',
+  'set.noteLimitTitle': '上限该怎么定',
+  'set.noteLimitBody': '医学上并没有「每周或每月不能超过几次」的统一标准，次数本身也不构成健康指标。判断是否算问题，通常看三件事：<br>· 有没有影响到睡眠、工作、学习和情绪<br>· 是不是想停却停不下来<br>· 有没有身体不适（酸痛、皮肤刺激等）<br><br>所以这里的上限是给你自己定的<b>自律目标</b>，默认值只是一个相对温和的起点，觉得太松或太紧都可以自己调。<br><br><b>比总数更值得看的两个信号</b><br>连续天数和深夜时段——它们比单月总数更能反映习惯是否在失控，所以这两项也会一起提示。',
+  'set.noteDataTitle': '关于数据',
+  'set.noteDataBody': '所有记录只保存在这台设备的浏览器本地存储里，不上传、不联网、无账号。清除浏览器数据会一并删除记录，建议定期导出备份。<br><br><b>安装到手机</b><br>用手机浏览器打开本页 → 菜单 → 「添加到主屏幕」，即可像普通 App 一样全屏使用，离线也能打开。',
+
+  'sheet.new': '新增记录',
+  'sheet.edit': '编辑记录',
+  'sheet.kind': '类型',
+  'sheet.vol': '精液量（可选）',
+  'sheet.volLabel': '{name}量（可选）',
+  'sheet.volPh': '留空表示未测量',
+  'sheet.volHint': '按实际测量值填写，不确定就留空',
+  'sheet.time': '时间',
+  'sheet.note': '备注（可选）',
+  'sheet.notePh': '想写点什么就写，比如当时的状态、心情…',
+  'sheet.tags': '诱因 / 状态（可多选）',
+  'sheet.tagsHint': '记下「什么情况下更容易发生」，回看时比单纯的次数更有参考价值。',
+
+  'lock.enter': '输入密码',
+  'lock.set': '设置密码',
+  'lock.confirm': '确认密码',
+  'lock.subSet': '输入 4 位数字密码',
+  'lock.subConfirm': '请再输入一次',
+  'lock.wrong': '密码不对，还可以试 {n} 次',
+  'lock.locked': '密码错误次数过多，请等 {n} 秒',
+  'lock.mismatch': '两次不一致，请重新设置',
+  'lock.saving': '正在保存…',
+  'lock.saveFail': '保存失败，请重试',
+  'lock.verifyFail': '校验失败，请重试',
+  'lock.keyDel': '删除',
+  'notify.dailyBody': '今天过得怎么样？有没有影响到睡眠、工作和情绪？',
+
+  'toast.saveFail': '保存失败：存储空间不足',
+  'toast.logged': '已记录 · {label}',
+  'toast.saved': '已保存 · {label}',
+  'toast.deleted': '已删除 {t}',
+  'toast.restored': '已恢复',
+  'toast.undone': '已撤销',
+  'toast.gone': '记录已不存在',
+  'toast.exported': '备份已导出',
+  'toast.exportFail': '保存失败：{msg}',
+  'toast.exportFailGeneric': '保存失败，请重试',
+  'toast.exportEmpty': '没有可导出的内容',
+  'toast.noSaver': '这台设备没有文件保存界面',
+  'toast.noPicker': '这台设备没有文件选择界面',
+  'toast.imported': '导入成功，共 {n} 天记录',
+  'toast.importBad': '文件格式不正确',
+  'toast.cleared': '已清空',
+  'toast.noRecords': '目前没有记录',
+  'toast.remindOn': '频率提醒已开启',
+  'toast.remindOff': '频率提醒已关闭',
+  'toast.dailyOn': '已开启，到点在通知栏提醒',
+  'toast.dailyOnWeb': '已开启，到点会发通知',
+  'toast.dailyNoPerm': '未授权通知，只在应用内提示',
+  'toast.dailyOff': '已关闭每日提醒',
+  'toast.dailyTime': '提醒时间：{t}',
+  'toast.pinOn': '隐私锁已开启',
+  'toast.pinOff': '隐私锁已关闭',
+  'toast.pinCancel': '已取消设置',
+
+  'confirm.deleteRecord': '确定删除这条记录吗？',
+  'confirm.import': '导入将覆盖当前全部记录，确定继续？',
+  'confirm.clear1': '确定清空全部记录？此操作无法撤销，建议先导出备份。',
+  'confirm.clear2': '再确认一次：所有记录将被永久删除。',
+  'confirm.pinOff': '关闭隐私锁？'
+},
+en: {
+  'app.name': 'Private Journal',
+  'app.title': 'Private Journal · Calendar log',
+  'app.desc': 'A local, calendar-style tracker. Your data never leaves your device — no network, no account.',
+  'unit.times': 'times',
+  'unit.timesShort': '',
+  'unit.days': 'days',
+  'unit.mL': 'mL',
+
+  'nav.calendar': 'Calendar',
+  'nav.stats': 'Stats',
+  'nav.settings': 'Settings',
+
+  'common.cancel': 'Cancel',
+  'common.delete': 'Delete',
+  'common.save': 'Save',
+  'common.clear': 'Clear',
+  'common.today': 'Today',
+  'common.yesterday': 'Yesterday',
+  'common.undo': 'Undo',
+  'common.increase': 'Increase',
+  'common.decrease': 'Decrease',
+  'common.dismiss': 'Dismiss',
+
+  'theme.system': 'System',
+  'theme.light': 'Light',
+  'theme.dark': 'Dark',
+  'theme.toggle': 'Toggle theme',
+  'theme.toast': 'Theme: {name}',
+
+  'lang.system': 'System',
+  'lang.zh': '中文',
+  'lang.en': 'English',
+
+  'cal.prevMonth': 'Previous month',
+  'cal.nextMonth': 'Next month',
+  'cal.monthSub': '{n} this month',
+  'cal.addRecord': 'Add entry',
+  'cal.addRecordHint': 'pick a type',
+  'cal.backfill': '+ Add an entry for this day',
+  'cal.emptyDay': 'No entries on this day',
+  'cal.noRecord': 'no entries',
+  'cal.cellAria': '{date}, {n} times: {kinds}',
+  'cal.cellAriaEmpty': '{date}, no entries',
+  'cal.cellAriaMore': '{date}, {n} times: {kinds} and more',
+
+  'kind.ej': 'Ejaculation',
+  'kind.fl': 'Leakage',
+  'kind.other': 'Other',
+  'kind.none': 'Unclassified',
+
+  'tag.stress': 'Stressed',
+  'tag.bored': 'Bored',
+  'tag.insomnia': "Can't sleep",
+  'tag.alone': 'Alone',
+  'tag.media': 'Saw content',
+  'tag.habit': 'Habitual',
+  'tag.tired': 'Tired',
+  'tag.anxious': 'Anxious',
+
+  'mini.month': 'This month',
+  'mini.week': 'This week',
+  'mini.since': 'Since last',
+
+  'stats.overview': 'Overview',
+  'stats.monthCount': 'This month',
+  'stats.vsLast': '{pct} vs last month',
+  'stats.noLastMonth': 'No data last month',
+  'stats.weekCount': 'This week',
+  'stats.last30Inline': '{n} in last 30 days',
+  'stats.sinceLast': 'Since last',
+  'stats.hadToday': 'Logged today',
+  'stats.noData': 'No data yet',
+  'stats.keepGoing': 'Keep it up',
+  'stats.total': 'All time',
+  'stats.totalDays': '{n} days logged',
+  'stats.goal': 'Goals',
+  'stats.inGoal': 'Within your goals',
+  'stats.overGoal': 'Over your goals',
+  'stats.goalNote': 'These limits are your own targets, not medical thresholds',
+  'stats.onTrack': 'On track',
+  'stats.over': 'Over',
+  'stats.week': 'This week',
+  'stats.month': 'This month',
+  'stats.goalStreak': '{n} weeks on target, {note}',
+  'stats.streakNoteOk': 'the last {n} weeks stayed within the weekly limit',
+  'stats.streakNoteZero': 'last week went over — this week is a fresh start',
+  'stats.last30': 'Last 30 days',
+  'stats.trend': 'Last 12 months',
+  'stats.heat': 'Last 6 months',
+  'stats.typeDist': 'By type',
+  'stats.tagDist': 'By trigger',
+  'stats.detail': 'Details',
+  'stats.less': 'Less',
+  'stats.more': 'More',
+  'stats.trendTotal': '12-month total: {n}',
+  'stats.trendAvg': 'avg {n}/month',
+  'stats.empty': 'No entries yet',
+  'stats.noTags': 'No triggers tagged yet',
+  'stats.tagFoot': '{total} tag hits across {days} days. {extra}Tags are your own observations, not evidence of causation.',
+  'stats.tagFootMore': '{n} rarer tags not shown. ',
+
+  'detail.groupPace': 'RHYTHM',
+  'detail.groupFreq': 'FREQUENCY & MEASUREMENT',
+  'detail.groupTime': 'TIMELINE',
+  'detail.days': 'Days logged',
+  'detail.longestStreak': 'Longest streak',
+  'detail.currentStreak': 'Current streak',
+  'detail.avgInterval': 'Average interval',
+  'detail.maxInterval': 'Longest gap',
+  'detail.avg30': 'Daily avg (30d)',
+  'detail.night': 'Late-night this month',
+  'detail.volAvg': 'Average volume',
+  'detail.volN': 'Measurements',
+  'detail.first': 'First entry',
+  'detail.last': 'Latest entry',
+
+  'remind.monthTag': 'MONTH',
+  'remind.monthTitle': 'More entries than usual this month',
+  'remind.monthBody': '{n} entries this month, over your limit of {goal}. Watch out for sleep, work and mood.',
+  'remind.monthTip': 'The count itself is not a health indicator. What actually matters: whether you want to stop but cannot, whether there is physical discomfort (soreness, skin irritation), and whether you are using it to relieve stress.',
+  'remind.weekTag': 'WEEK',
+  'remind.weekTitle': 'Higher frequency this week',
+  'remind.weekBody': '{n} entries this week, over your limit of {goal}. Worth slowing down.',
+  'remind.weekTip': 'Leave some gaps and watch how your body and mood change over the next few days. If it starts eating into sleep or work, that is the signal worth noticing.',
+  'remind.streakTag': 'RHYTHM',
+  'remind.streakTitle': '{n} days in a row',
+  'remind.streakBody': '{n} consecutive days with an entry, no gaps in between.',
+  'remind.streakTip': 'A streak says more about a habit than a monthly total. Try inserting a day off and see how it feels.',
+  'remind.nightTag': 'TIME',
+  'remind.nightTitle': 'Lots of late-night entries',
+  'remind.nightBody': '{n} entries this month fell between 0:00 and 5:00.',
+  'remind.nightTip': 'Late night is where sleep gets eaten first. Sleep loss usually affects you more than the count itself.',
+  'remind.why': 'Why? ▾',
+
+  'set.appearance': 'Appearance',
+  'set.theme': 'Theme',
+  'set.language': 'Language',
+  'set.weekStart': 'Week starts on',
+  'set.monday': 'Monday',
+  'set.sunday': 'Sunday',
+  'set.privacy': 'Privacy',
+  'set.pin': 'Passcode lock',
+  'set.pinHint': 'Requires a 4-digit passcode to open',
+  'set.pinHintLegacy': 'Legacy passcode — turn it off and set it again for stronger hashing',
+  'set.remind': 'Frequency reminders',
+  'set.remindOn': 'Enable reminders',
+  'set.remindOnHint': 'Show a banner on the calendar when over the limit',
+  'set.weekLimit': 'Weekly limit',
+  'set.weekLimitHint': 'Warn when exceeded; also your weekly goal',
+  'set.monthLimit': 'Monthly limit',
+  'set.monthLimitHint': 'Warn when exceeded',
+  'set.daily': 'Daily reminder',
+  'set.dailyOn': 'Daily check-in',
+  'set.dailyHintNative': 'A notification at the chosen time — works even when the app is closed',
+  'set.dailyHintWeb': 'A notification at the chosen time (the page must stay open)',
+  'set.dailyTime': 'Reminder time',
+  'set.data': 'Data',
+  'set.export': 'Export backup (JSON)',
+  'set.import': 'Restore from backup',
+  'set.clearAll': 'Delete all entries',
+  'set.noteLimitTitle': 'How to choose the limits',
+  'set.noteLimitBody': 'There is no established standard for "how many times per week or month is too many", and the count itself is not a health indicator. Whether something is a problem usually comes down to three things:<br>· Does it affect sleep, work, study or mood?<br>· Do you want to stop but cannot?<br>· Is there physical discomfort (soreness, skin irritation)?<br><br>So the limits here are <b>your own self-set targets</b>. The defaults are just a moderate starting point — adjust them freely in either direction.<br><br><b>Two signals worth more than a total</b><br>Consecutive days and late-night sessions say more about whether a habit is slipping out of control, so those are surfaced as well.',
+  'set.noteDataTitle': 'About your data',
+  'set.noteDataBody': 'Everything is stored in this device\'s browser local storage. Nothing is uploaded, there is no network access and no account. Clearing browser data will delete your entries too, so export a backup from time to time.<br><br><b>Install on your phone</b><br>Open this page in a mobile browser → menu → "Add to Home Screen" to use it full-screen like a normal app, offline included.',
+
+  'sheet.new': 'New entry',
+  'sheet.edit': 'Edit entry',
+  'sheet.kind': 'Type',
+  'sheet.vol': 'Amount (optional)',
+  'sheet.volLabel': '{name} amount (optional)',
+  'sheet.volPh': 'Leave empty if not measured',
+  'sheet.volHint': 'Enter your measured value; leave empty if unsure',
+  'sheet.time': 'Time',
+  'sheet.note': 'Note (optional)',
+  'sheet.notePh': 'Anything you want to note — mood, state, what led to it…',
+  'sheet.tags': 'Triggers (multi-select)',
+  'sheet.tagsHint': 'Noting the situations it tends to happen in is more useful later than the raw count.',
+
+  'lock.enter': 'Enter passcode',
+  'lock.set': 'Set passcode',
+  'lock.confirm': 'Confirm passcode',
+  'lock.subSet': 'Enter a 4-digit passcode',
+  'lock.subConfirm': 'Enter it again',
+  'lock.wrong': 'Wrong passcode, {n} tries left',
+  'lock.locked': 'Too many attempts, wait {n}s',
+  'lock.mismatch': "Didn't match — please set it again",
+  'lock.saving': 'Saving…',
+  'lock.saveFail': 'Could not save, try again',
+  'lock.verifyFail': 'Verification failed, try again',
+  'lock.keyDel': 'Del',
+  'notify.dailyBody': 'How did today go? Is it affecting your sleep, work or mood?',
+
+  'toast.saveFail': 'Save failed: out of storage',
+  'toast.logged': 'Logged · {label}',
+  'toast.saved': 'Saved · {label}',
+  'toast.deleted': 'Deleted {t}',
+  'toast.restored': 'Restored',
+  'toast.undone': 'Undone',
+  'toast.gone': 'Entry no longer exists',
+  'toast.exported': 'Backup exported',
+  'toast.exportFail': 'Save failed: {msg}',
+  'toast.exportFailGeneric': 'Save failed, please try again',
+  'toast.exportEmpty': 'Nothing to export',
+  'toast.noSaver': 'This device has no file-save dialog',
+  'toast.noPicker': 'This device has no file picker',
+  'toast.imported': 'Imported · {n} days',
+  'toast.importBad': 'Invalid file format',
+  'toast.cleared': 'Cleared',
+  'toast.noRecords': 'No entries yet',
+  'toast.remindOn': 'Frequency reminders on',
+  'toast.remindOff': 'Frequency reminders off',
+  'toast.dailyOn': 'On — a notification will arrive at that time',
+  'toast.dailyOnWeb': 'On — a notification will fire at that time',
+  'toast.dailyNoPerm': 'Notifications not allowed — in-app only',
+  'toast.dailyOff': 'Daily reminder off',
+  'toast.dailyTime': 'Reminder time: {t}',
+  'toast.pinOn': 'Passcode lock enabled',
+  'toast.pinOff': 'Passcode lock disabled',
+  'toast.pinCancel': 'Setup cancelled',
+
+  'confirm.deleteRecord': 'Delete this entry?',
+  'confirm.import': 'Importing will overwrite all current entries. Continue?',
+  'confirm.clear1': 'Delete all entries? This cannot be undone — export a backup first.',
+  'confirm.clear2': 'Confirm once more: every entry will be permanently deleted.',
+  'confirm.pinOff': 'Turn off the passcode lock?'
+}
+};
+
+var LANG = 'zh';
+function t(key, params){
+  var table = STRINGS[LANG] || STRINGS.zh;
+  var s = table[key];
+  if(s === undefined) s = STRINGS.zh[key];
+  if(s === undefined) return key;
+  if(params){
+    s = s.replace(/\{(\w+)\}/g, function(m, k){
+      return (params[k] === undefined || params[k] === null) ? m : String(params[k]);
+    });
+  }
+  return s;
+}
+
+/* 日期 / 单位这些有语序差异的，单独格式化，不要用字符串拼接 */
+var WD_ZH = ['日','一','二','三','四','五','六'];
+var WD_EN_SHORT = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+var WD_EN = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+var MO_EN_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+var MO_EN_FULL = ['January','February','March','April','May','June',
+                  'July','August','September','October','November','December'];
+
+function wdShort(i){ return LANG === 'zh' ? WD_ZH[i] : WD_EN_SHORT[i]; }
+function wdLong(i){ return LANG === 'zh' ? ('周' + WD_ZH[i]) : WD_EN[i]; }
+function monthLabel(m){ return LANG === 'zh' ? ((m+1) + '月') : MO_EN_SHORT[m]; }
+function monthTitle(y, m){ return LANG === 'zh' ? (y + '年' + (m+1) + '月') : (MO_EN_FULL[m] + ' ' + y); }
+function dayLabel(m, d){ return LANG === 'zh' ? ((m+1) + '月' + d + '日') : (MO_EN_SHORT[m] + ' ' + d); }
+/* 英文要区分单复数，中文不用 */
+function nTimes(n){ return LANG === 'zh' ? (n + ' 次') : (n + (Number(n) === 1 ? ' time' : ' times')); }
+function nDays(n){ return LANG === 'zh' ? (n + ' 天') : (n + (Number(n) === 1 ? ' day' : ' days')); }
+
+function detectLang(){
+  var pref = S.settings.lang;
+  if(pref === 'zh' || pref === 'en') return pref;
+  var n = String(navigator.language || navigator.userLanguage || 'zh').toLowerCase();
+  return n.indexOf('zh') === 0 ? 'zh' : 'en';
+}
+
+/* 静态文案靠属性驱动：data-i18n / data-i18n-html / data-i18n-ph / data-i18n-aria */
+function applyI18n(){
+  var i, els;
+  els = document.querySelectorAll('[data-i18n]');
+  for(i=0;i<els.length;i++) els[i].textContent = t(els[i].getAttribute('data-i18n'));
+  els = document.querySelectorAll('[data-i18n-html]');
+  for(i=0;i<els.length;i++) els[i].innerHTML = t(els[i].getAttribute('data-i18n-html'));
+  els = document.querySelectorAll('[data-i18n-ph]');
+  for(i=0;i<els.length;i++) els[i].setAttribute('placeholder', t(els[i].getAttribute('data-i18n-ph')));
+  els = document.querySelectorAll('[data-i18n-aria]');
+  for(i=0;i<els.length;i++) els[i].setAttribute('aria-label', t(els[i].getAttribute('data-i18n-aria')));
+  els = document.querySelectorAll('[data-i18n-title]');
+  for(i=0;i<els.length;i++) els[i].setAttribute('title', t(els[i].getAttribute('data-i18n-title')));
+  document.title = t('app.title');
+  var m = document.querySelector('meta[name="description"]');
+  if(m) m.setAttribute('content', t('app.desc'));
+  document.documentElement.setAttribute('lang', LANG === 'zh' ? 'zh-CN' : 'en');
+}
+
+var S = load();
+
+/* ================= 工具 ================= */
+function pad(n){ return String(n).padStart(2,'0'); }
+function keyOf(d){ return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
+function parseKey(k){ var p = k.split('-').map(Number); return new Date(p[0], p[1]-1, p[2]); }
+function todayKey(){ return keyOf(new Date()); }
+function addDays(d,n){ return new Date(d.getFullYear(), d.getMonth(), d.getDate()+n); }
+function dayDiff(a,b){ return Math.round((parseKey(a) - parseKey(b)) / 86400000); }
+function nowHM(){ var d = new Date(); return pad(d.getHours())+':'+pad(d.getMinutes()); }
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+function recsOf(k){ return S.records[k] || []; }
+function dayCount(k){ return recsOf(k).length; }
+/* 天列表被统计逻辑反复用到（一次渲染要问好几遍），缓存起来，save() 时失效 */
+var _daysCache = null;
+function esc(s){ return String(s).replace(/[&<>"']/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; }); }
+function startOfWeek(d){
+  var ws = S.settings.weekStart;
+  var x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  return addDays(x, -((x.getDay() - ws + 7) % 7));
+}
+/* ---- 密码：只保留旧 DJB2 实现用于兼容老数据，新密码一律走 PBKDF2 ---- */
+function hashPin(p){
+  var h = 5381;
+  for(var i=0;i<p.length;i++) h = ((h<<5) + h + p.charCodeAt(i)) >>> 0;
+  return h.toString(16);
+}
+var PBKDF2_ITER = 120000;
+function toHex(u8){ var s=''; for(var i=0;i<u8.length;i++) s += ('0'+u8[i].toString(16)).slice(-2); return s; }
+function hexToBytes(hex){
+  var out = new Uint8Array(hex.length/2);
+  for(var i=0;i<out.length;i++) out[i] = parseInt(hex.substr(i*2,2),16);
+  return out;
+}
+function randSalt(){
+  var a = new Uint8Array(16);
+  if(window.crypto && crypto.getRandomValues) crypto.getRandomValues(a);
+  else for(var i=0;i<16;i++) a[i] = Math.floor(Math.random()*256);
+  return toHex(a);
+}
+/* 优先 WebCrypto 的 PBKDF2-SHA256；在极老的 WebView 上没有 crypto.subtle 时
+   退化成加盐迭代哈希 —— 强度不如 PBKDF2，但比裸哈希强，且不会让功能直接不可用 */
+function derivePin(pin, saltHex, iter){
+  iter = iter || PBKDF2_ITER;
+  var sub = window.crypto && crypto.subtle;
+  if(sub && sub.importKey && window.TextEncoder){
+    var enc = new TextEncoder();
+    return sub.importKey('raw', enc.encode(pin), 'PBKDF2', false, ['deriveBits'])
+      .then(function(k){
+        return sub.deriveBits(
+          { name:'PBKDF2', salt: hexToBytes(saltHex), iterations: iter, hash:'SHA-256' }, k, 256);
+      })
+      .then(function(bits){ return 'p2:' + iter + ':' + toHex(new Uint8Array(bits)); });
+  }
+  var h = 5381, s = saltHex + '|' + pin;
+  for(var i=0;i<20000;i++){
+    h = 5381;
+    for(var j=0;j<s.length;j++) h = ((h<<5) + h + s.charCodeAt(j)) >>> 0;
+    s = h.toString(16);
+  }
+  return Promise.resolve('fb:' + saltHex + ':' + h.toString(16));
+}
+function verifyPin(pin){
+  var st = S.settings;
+  if(!st.pin) return Promise.resolve(false);
+  if(st.pinSalt) return derivePin(pin, st.pinSalt, st.pinIter || PBKDF2_ITER).then(function(h){ return h === st.pin; });
+  return Promise.resolve(hashPin(pin) === st.pin);   // 旧哈希兼容
+}
+function isLegacyPin(){ return !!S.settings.pin && !S.settings.pinSalt; }
+
+/* ---- 输错锁定：第 5 次起锁 30 秒，之后每次翻倍（最多约 32 分钟） ---- */
+var PIN_MAX_TRY = 5, PIN_LOCK_STEP = 30000;
+function pinLockLeft(){
+  var f = S.settings.pinFails || {};
+  return Math.max(0, Math.ceil(((f.until || 0) - Date.now()) / 1000));
+}
+function pinFail(){
+  var f = S.settings.pinFails;
+  f.n = (f.n || 0) + 1;
+  if(f.n >= PIN_MAX_TRY){
+    var over = f.n - PIN_MAX_TRY;                     // 第 5 次锁 30s，第 6 次 60s …
+    f.until = Date.now() + PIN_LOCK_STEP * Math.pow(2, Math.min(over, 6));
+  }
+  save();
+  return f;
+}
+function pinReset(){ S.settings.pinFails = { n:0, until:0 }; save(); }
+
+/* ================= 记录类型 =================
+   历史记录可能没有 k 字段，一律当作「未分类」处理，不擅自改写。
+   名称走 i18n，用 kind.<id> 取。 */
+var KINDS = [
+  { id:'ej',    vol:true  },
+  { id:'fl',    vol:true  },
+  { id:'other', vol:false }
+];
+var KIND_MAP = {};
+(function(){ for(var i=0;i<KINDS.length;i++) KIND_MAP[KINDS[i].id] = KINDS[i]; })();
+
+/* ================= 诱因 / 状态标签 =================
+   记下「什么情况下更容易发生」，回看时比单纯的次数更有参考价值。
+   标签只做分布统计，不做任何因果判断。名称走 i18n，用 tag.<id> 取。 */
+var TAGS = [
+  { id:'stress'   },
+  { id:'bored'    },
+  { id:'insomnia' },
+  { id:'alone'    },
+  { id:'media'    },
+  { id:'habit'    },
+  { id:'tired'    },
+  { id:'anxious'  }
+];
+var TAG_MAP = {};
+(function(){ for(var i=0;i<TAGS.length;i++) TAG_MAP[TAGS[i].id] = TAGS[i]; })();
+function kindLabel(id){ return t('kind.' + id); }
+function tagLabel(id){ return t('tag.' + id); }
+function tagName(id){ return TAG_MAP[id] ? tagLabel(id) : ''; }
+/* 过滤掉不认识的标签，避免脏数据把界面搞乱 */
+function tagsOf(rec){
+  if(!rec || !(rec.g instanceof Array)) return [];
+  var out = [];
+  for(var i=0;i<rec.g.length;i++) if(TAG_MAP[rec.g[i]]) out.push(rec.g[i]);
+  return out;
+}
+function tagsText(rec){
+  var ids = tagsOf(rec), names = [];
+  for(var i=0;i<ids.length;i++) names.push(tagName(ids[i]));
+  return names.join(' · ');
+}
+
+function kindOf(rec){ return (rec && rec.k && KIND_MAP[rec.k]) ? rec.k : ''; }
+function kindName(rec){ var k = kindOf(rec); return k ? kindLabel(k) : t('kind.none'); }
+function kindNeedsVol(k){ return !!(k && KIND_MAP[k] && KIND_MAP[k].vol); }
+function kindColor(k){ return k ? 'var(--k-' + k + ')' : 'var(--text-3)'; }
+function normVol(rec){
+  if(!rec || rec.v === null || rec.v === undefined || rec.v === '') return null;
+  var n = Number(rec.v);
+  return (isFinite(n) && n >= 0) ? n : null;
+}
+function volText(rec){
+  var n = normVol(rec);
+  return n === null ? '' : (Math.round(n * 10) / 10) + ' mL';
+}
+function fmtVol(n){ return (Math.round(Number(n) * 10) / 10) + ' mL'; }
+function lastKind(){
+  var k = S.settings.lastKind;
+  return KIND_MAP[k] ? k : 'ej';
+}
+
+/* ================= 状态 ================= */
+var view = 'calendar';
+var cursor = new Date();
+var selected = todayKey();
+var editing = { key:null, id:null, kind:'', volOn:false, tags:[] };
+var unlocked = false;
+
+/* ================= 主题 ================= */
+function applyTheme(){
+  // 注意别用 t 当局部变量名 —— 那是全局的翻译函数
+  var th = S.settings.theme;
+  if(th === 'system'){
+    th = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+  }
+  document.documentElement.setAttribute('data-theme', th);
+  var m = document.querySelector('meta[name="theme-color"]');
+  if(m) m.setAttribute('content', th === 'dark' ? '#0e0f14' : '#f3f4f8');
+  var btn = document.getElementById('themeBtn');
+  btn.innerHTML = th === 'dark'
+    ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="4.3"/><path d="M12 2.2v2.3M12 19.5v2.3M2.2 12h2.3M19.5 12h2.3M5.1 5.1l1.6 1.6M17.3 17.3l1.6 1.6M18.9 5.1l-1.6 1.6M6.7 17.3l-1.6 1.6"/></svg>'
+    : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.6A8.6 8.6 0 1 1 9.4 3.5a6.8 6.8 0 0 0 11.1 11.1z"/></svg>';
+}
+
+/* ================= Toast ================= */
+var toastTimer = null, toastAct = null;
+/* action 可选：{ label, fn } —— 用来做「撤销」这类可挽回操作 */
+function toast(msg, action){
+  var el = document.getElementById('toast');
+  toastAct = action || null;
+  el.innerHTML = '<span class="msg"></span>' + (action ? '<button class="act" type="button"></button>' : '');
+  el.querySelector('.msg').textContent = msg;
+  el.classList.toggle('has-act', !!action);
+  if(action){
+    var b = el.querySelector('.act');
+    b.textContent = action.label;
+    b.onclick = function(e){
+      e.stopPropagation();
+      clearTimeout(toastTimer);
+      el.classList.remove('on');
+      var fn = toastAct && toastAct.fn;
+      toastAct = null;
+      if(fn) fn();
+    };
+  }
+  el.classList.add('on');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){
+    el.classList.remove('on');
+    toastAct = null;
+  }, action ? 6000 : 1900);
+}
+
+/* ================= 记录操作 ================= */
+/* o = { t:时间, n:备注, k:类型, v:精液量(mL), g:诱因标签数组 } */
+function addRecord(dayKey, o){
+  o = o || {};
+  if(!S.records[dayKey]) S.records[dayKey] = [];
+  var rec = { id: uid(), t: o.t || nowHM(), n: o.n || '' };
+  if(o.k) rec.k = o.k;
+  if(o.v !== undefined && o.v !== null && o.v !== '') rec.v = Number(o.v);
+  if(o.g && o.g.length) rec.g = o.g.slice();
+  S.records[dayKey].push(rec);
+  S.records[dayKey].sort(function(a,b){ return a.t.localeCompare(b.t); });
+  save();
+  return rec;
+}
+function removeRecord(dayKey, id){
+  if(!S.records[dayKey]) return;
+  S.records[dayKey] = S.records[dayKey].filter(function(r){ return r.id !== id; });
+  if(!S.records[dayKey].length) delete S.records[dayKey];
+  save();
+}
+function updateRecord(dayKey, id, o){
+  var list = S.records[dayKey]; if(!list) return;
+  for(var i=0;i<list.length;i++){
+    if(list[i].id !== id) continue;
+    var r = list[i];
+    r.t = o.t; r.n = o.n;
+    if(o.k) r.k = o.k; else delete r.k;
+    if(o.v !== undefined && o.v !== null && o.v !== '') r.v = Number(o.v); else delete r.v;
+    if(o.g && o.g.length) r.g = o.g.slice(); else delete r.g;
+  }
+  list.sort(function(a,b){ return a.t.localeCompare(b.t); });
+  save();
+}
+/* 删除后 6 秒内可以撤销 —— 记录这种东西误删一次就真没了，值得留条退路 */
+function removeRecordWithUndo(dayKey, id){
+  var list = S.records[dayKey]; if(!list) return null;
+  var idx = -1;
+  for(var i=0;i<list.length;i++) if(list[i].id === id) idx = i;
+  if(idx < 0) return null;
+  var rec = list[idx];
+  removeRecord(dayKey, id);
+  return { rec:rec, idx:idx };
+}
+function restoreRecord(dayKey, rec, idx){
+  if(!S.records[dayKey]) S.records[dayKey] = [];
+  var at = Math.max(0, Math.min(idx, S.records[dayKey].length));
+  S.records[dayKey].splice(at, 0, rec);
+  S.records[dayKey].sort(function(a,b){ return a.t.localeCompare(b.t); });
+  save();
+}
+/* 长按日历格的快捷记录：沿用上次的类型和标签，不弹表单 */
+function quickRecord(key){
+  var k = lastKind();
+  var isToday = (key === todayKey());
+  var rec = addRecord(key, {
+    t: isToday ? nowHM() : '21:00',
+    k: k,
+    g: (S.settings.lastTags || []).filter(function(t){ return !!TAG_MAP[t]; })
+  });
+  selected = key;
+  if(!isToday){
+    var d = parseKey(key);
+    cursor = new Date(d.getFullYear(), d.getMonth(), 1);
+  }
+  renderAll();
+  if(navigator.vibrate) navigator.vibrate([10, 40, 14]);
+  toast(t('toast.logged', { label: kindLabel(k) }), { label: t('common.undo'), fn:function(){
+    removeRecord(key, rec.id);
+    renderAll();
+    toast(t('toast.undone'));
+  }});
+}
+
+/* ================= 每日自查提醒 =================
+   APK 里交给原生 AlarmManager，关掉应用也会提醒；
+   网页版没有后台能力，只能在页面开着的时候到点弹一条系统通知。 */
+function supportsNativeReminder(){
+  return !!(window.RijiNative && window.RijiNative.setDailyReminder);
+}
+var webRemindTimer = null;
+function applyDailyReminder(){
+  var d = S.settings.daily;
+  if(supportsNativeReminder()){
+    try{
+      // 通知文案一起传过去：原生不知道用户把应用语言切成了哪种
+      window.RijiNative.setDailyReminder(
+        !!d.on, d.time || '21:00',
+        t('app.name') + ' · ' + t('set.dailyOn'),
+        t('notify.dailyBody'));
+    }catch(e){ /* 原生调用失败就当没有这个能力，不影响应用本身 */ }
+    return;
+  }
+  if(webRemindTimer){ clearTimeout(webRemindTimer); webRemindTimer = null; }
+  if(!d.on || !('Notification' in window) || Notification.permission !== 'granted') return;
+  var p = (d.time || '21:00').split(':');
+  var now = new Date();
+  var at = new Date(now.getFullYear(), now.getMonth(), now.getDate(),
+                   parseInt(p[0], 10) || 21, parseInt(p[1], 10) || 0, 0, 0);
+  if(at <= now) at = addDays(at, 1);
+  var ms = at - now;
+  if(ms > 2147483647) return;   // 超出 setTimeout 上限，明天再说
+  webRemindTimer = setTimeout(function(){
+    try{
+      new Notification(t('app.name') + ' · ' + t('set.dailyOn'), {
+        body: t('notify.dailyBody'),
+        tag: 'dyf-daily'
+      });
+    }catch(e){ /* 通知被系统拦掉就算了，不影响应用本身 */ }
+    applyDailyReminder();
+  }, ms);
+}
+
+/* ================= 统计计算 ================= */
+function allDays(){
+  if(!_daysCache) _daysCache = Object.keys(S.records).sort();
+  return _daysCache;
+}
+function totalCount(){
+  var sum = 0, d = allDays();
+  for(var i=0;i<d.length;i++) sum += S.records[d[i]].length;
+  return sum;
+}
+function monthTotal(date){
+  var y = date.getFullYear(), m = date.getMonth(), n = 0, ks = allDays();
+  for(var i=0;i<ks.length;i++){
+    var p = parseKey(ks[i]);
+    if(p.getFullYear() === y && p.getMonth() === m) n += S.records[ks[i]].length;
+  }
+  return n;
+}
+function rangeTotal(days){
+  var n = 0, today = new Date();
+  for(var i=0;i<days;i++) n += dayCount(keyOf(addDays(today, -i)));
+  return n;
+}
+function weekTotal(){
+  var s = startOfWeek(new Date()), n = 0;
+  for(var i=0;i<7;i++) n += dayCount(keyOf(addDays(s, i)));
+  return n;
+}
+function daysSinceLast(){
+  var ks = allDays();
+  if(!ks.length) return null;
+  return dayDiff(todayKey(), ks[ks.length-1]);
+}
+function currentStreak(){
+  if(!S.records[todayKey()]) return 0;
+  var n = 0, d = new Date();
+  while(S.records[keyOf(d)]){ n++; d = addDays(d, -1); }
+  return n;
+}
+function longestStreak(){
+  var ks = allDays();
+  if(!ks.length) return 0;
+  var best = 1, cur = 1;
+  for(var i=1;i<ks.length;i++){
+    cur = (dayDiff(ks[i], ks[i-1]) === 1) ? cur + 1 : 1;
+    if(cur > best) best = cur;
+  }
+  return best;
+}
+function avgInterval(){
+  var ks = allDays();
+  if(ks.length < 2) return null;
+  return (dayDiff(ks[ks.length-1], ks[0]) / (ks.length - 1));
+}
+function streakMax(){
+  var ks = allDays();
+  if(!ks.length) return null;
+  var best = 0, cur = 1;
+  for(var i=1;i<ks.length;i++){
+    var g = dayDiff(ks[i], ks[i-1]);
+    if(g > cur) cur = g;
+  }
+  return cur;
+}
+/* 类型计数 + 精液量汇总（只统计需要记录体积的类型） */
+function typeStats(){
+  var counts = {}, total = 0, volSum = 0, volN = 0;
+  var ks = allDays();
+  for(var i=0;i<ks.length;i++){
+    var list = S.records[ks[i]];
+    for(var j=0;j<list.length;j++){
+      var r = list[j], k = kindOf(r);
+      counts[k || 'none'] = (counts[k || 'none'] || 0) + 1;
+      total++;
+      if(kindNeedsVol(k)){
+        var n = normVol(r);
+        if(n !== null){ volSum += n; volN++; }
+      }
+    }
+  }
+  return { counts:counts, total:total, volN:volN, volAvg: volN ? volSum / volN : null };
+}
+function renderTypeDist(){
+  var st = typeStats();
+  var el = document.getElementById('typeDist');
+  if(!st.total){
+    el.innerHTML = '<div class="empty" style="padding:20px 0"><span class="em">○</span>' + t('stats.empty') + '</div>';
+    return;
+  }
+  var order = [];
+  for(var i=0;i<KINDS.length;i++) order.push(KINDS[i].id);
+  if(st.counts['none']) order.push('none');
+
+  var html = '';
+  for(var j=0;j<order.length;j++){
+    var id = order[j], c = st.counts[id] || 0;
+    if(!c) continue;
+    var pct = Math.round(c / st.total * 100);
+    html += '<div class="tdist-row" data-kind="' + (id === 'none' ? '' : id) + '">'
+      + '<span class="nm">' + esc(id === 'none' ? t('kind.none') : kindLabel(id)) + '</span>'
+      + '<span class="track"><span style="width:' + Math.max(pct, 3) + '%"></span></span>'
+      + '<span class="ct">' + c + '<em> ' + t('unit.times') + '</em></span>'
+      + '</div>';
+  }
+  el.innerHTML = html;
+}
+
+/* ---- 诱因分布 ---- */
+function tagStats(){
+  var counts = {}, total = 0, ks = allDays();
+  for(var i=0;i<ks.length;i++){
+    var list = S.records[ks[i]];
+    for(var j=0;j<list.length;j++){
+      var ids = tagsOf(list[j]);
+      for(var m=0;m<ids.length;m++){ counts[ids[m]] = (counts[ids[m]] || 0) + 1; total++; }
+    }
+  }
+  return { counts:counts, total:total };
+}
+function countTaggedDays(){
+  var n = 0, ks = allDays();
+  for(var i=0;i<ks.length;i++){
+    var list = S.records[ks[i]];
+    for(var j=0;j<list.length;j++) if(tagsOf(list[j]).length){ n++; break; }
+  }
+  return n;
+}
+function renderTagDist(){
+  var el = document.getElementById('tagDist');
+  var st = tagStats();
+  if(!st.total){
+    el.innerHTML = '<div class="empty" style="padding:20px 0"><span class="em">○</span>' + t('stats.noTags') + '</div>';
+    return;
+  }
+  var rows = [];
+  for(var i=0;i<TAGS.length;i++){
+    var c = st.counts[TAGS[i].id] || 0;
+    if(c) rows.push({ id:TAGS[i].id, n:c });
+  }
+  rows.sort(function(a,b){ return b.n - a.n; });
+  var max = rows[0].n, html = '';
+  for(var j=0;j<rows.length && j<6;j++){
+    var r = rows[j];
+    html += '<div class="gdist-row">'
+      + '<span class="nm">' + esc(tagLabel(r.id)) + '</span>'
+      + '<span class="track"><span style="width:' + Math.max(Math.round(r.n / max * 100), 4) + '%"></span></span>'
+      + '<span class="ct">' + r.n + '<em> ' + t('unit.times') + '</em></span>'
+      + '</div>';
+  }
+  html += '<div class="tag-mini">' + esc(t('stats.tagFoot', {
+    total: st.total,
+    days: countTaggedDays(),
+    extra: rows.length > 6 ? t('stats.tagFootMore', { n: rows.length - 6 }) : ''
+  })) + '</div>';
+  el.innerHTML = html;
+}
+
+/* ---- 最近 N 个月的次数折线 ---- */
+function monthSeries(n){
+  var now = new Date(), out = [];
+  for(var i=n-1;i>=0;i--){
+    var d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    out.push({ y:d.getFullYear(), m:d.getMonth(), n:monthTotal(d) });
+  }
+  return out;
+}
+function renderTrend(){
+  var el = document.getElementById('trendWrap');
+  var data = monthSeries(12), total = 0, max = 1;
+  for(var i=0;i<data.length;i++){ total += data[i].n; if(data[i].n > max) max = data[i].n; }
+
+  var W = 320, H = 132, PT = 19, PB = 23, PL = 12, PR = 12;
+  var iw = W - PL - PR, ih = H - PT - PB;
+  var pts = [];
+  for(var i=0;i<data.length;i++){
+    pts.push([PL + iw * i / (data.length - 1), PT + ih * (1 - data[i].n / max)]);
+  }
+  var dLine = '';
+  for(var i=0;i<pts.length;i++){
+    dLine += (i ? 'L' : 'M') + pts[i][0].toFixed(1) + ' ' + pts[i][1].toFixed(1);
+  }
+  var base = (PT + ih).toFixed(1);
+  var dArea = dLine + 'L' + pts[pts.length-1][0].toFixed(1) + ' ' + base
+                    + 'L' + pts[0][0].toFixed(1) + ' ' + base + 'Z';
+
+  var g = '';
+  for(var k=0;k<=2;k++){
+    var gy = (PT + ih * k / 2).toFixed(1);
+    g += '<line class="gl" x1="' + PL + '" y1="' + gy + '" x2="' + (W-PR) + '" y2="' + gy + '"/>';
+  }
+
+  // 月份标签从**末尾往前**每隔两个取一个：这样既均匀，又一定包含最后一个月
+  var labelAt = {};
+  for(var li = data.length - 1; li >= 0; li -= 2) labelAt[li] = 1;
+
+  var marks = '', labels = '', maxShown = false;
+  for(var i=0;i<data.length;i++){
+    var last = (i === data.length - 1);
+    marks += '<circle class="pt' + (last ? ' now' : '') + '" cx="' + pts[i][0].toFixed(1)
+           + '" cy="' + pts[i][1].toFixed(1) + '" r="' + (last ? 4 : 2.6) + '"/>';
+    // 只给首、尾和最高点标数值；最高点只标一次，否则并列最高会糊成一片
+    var isMax = (data[i].n === max && max > 0 && !maxShown);
+    if(last || i === 0 || isMax){
+      if(isMax) maxShown = true;
+      marks += '<text class="vl" x="' + pts[i][0].toFixed(1) + '" y="'
+             + (pts[i][1] - 8).toFixed(1) + '">' + data[i].n + '</text>';
+    }
+    if(labelAt[i]){
+      labels += '<text class="xl" x="' + pts[i][0].toFixed(1) + '" y="' + (H - 6) + '">'
+              + monthLabel(data[i].m) + '</text>';
+    }
+  }
+
+  el.innerHTML =
+    '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="xMidYMid meet">'
+    + g
+    + '<path class="ar" d="' + dArea + '"/>'
+    + '<path class="ln" d="' + dLine + '"/>'
+    + marks + labels
+    + '</svg>'
+    + '<div class="trend-foot"><span>' + esc(t('stats.trendTotal', { n: total })) + '</span>'
+    + '<span>' + esc(t('stats.trendAvg', { n: (total / data.length).toFixed(1) })) + '</span></div>';
+}
+
+/* ---- 目标达成 ---- */
+/* 从上一周开始往前数，连续「整周不超过周上限」的周数。
+   本周还没过完所以不计入；数到第一周有记录之前就停，避免新用户被算成达标一百多周。 */
+function goalStreakWeeks(){
+  var ks = allDays();
+  if(!ks.length) return 0;
+  var first = ks[0], goal = S.settings.remind.week;
+  var n = 0, s = startOfWeek(new Date());
+  for(var i=1;i<=104;i++){
+    var st = addDays(s, -7*i);
+    if(keyOf(addDays(st, 6)) < first) break;
+    var tot = 0;
+    for(var j=0;j<7;j++) tot += dayCount(keyOf(addDays(st, j)));
+    if(tot <= goal) n++; else break;
+  }
+  return n;
+}
+function renderGoal(){
+  var el = document.getElementById('goalCard');
+  var cfg = S.settings.remind;
+  var wk = weekTotal(), mo = monthTotal(new Date());
+  var wGoal = cfg.week, mGoal = cfg.month;
+  var okW = wk <= wGoal, okM = mo <= mGoal;
+  var ok = okW && okM, streak = goalStreakWeeks();
+
+  function bar(cur, goal){
+    var pct = Math.min(100, Math.round(cur / goal * 100));
+    return '<div class="goal-bar' + (cur > goal ? ' over' : '') + '">'
+         + '<span style="width:' + Math.max(pct, 2) + '%"></span></div>';
+  }
+  var note = streak > 0
+    ? t('stats.streakNoteOk', { n: streak })
+    : t('stats.streakNoteZero');
+
+  el.innerHTML =
+      '<div class="goal-top">'
+    +   '<div><div class="t">' + esc(ok ? t('stats.inGoal') : t('stats.overGoal')) + '</div>'
+    +   '<div class="s">' + esc(t('stats.goalNote')) + '</div></div>'
+    +   '<div class="goal-pill ' + (ok ? 'ok' : 'over') + '">' + esc(ok ? t('stats.onTrack') : t('stats.over')) + '</div>'
+    + '</div>'
+    + '<div class="goal-row"><div class="lab"><span>' + esc(t('stats.week')) + '</span><span><b>' + wk + '</b> / ' + wGoal + ' ' + t('unit.times') + '</span></div>' + bar(wk, wGoal) + '</div>'
+    + '<div class="goal-row"><div class="lab"><span>' + esc(t('stats.month')) + '</span><span><b>' + mo + '</b> / ' + mGoal + ' ' + t('unit.times') + '</span></div>' + bar(mo, mGoal) + '</div>'
+    + '<div class="goal-streak"><b>' + streak + '</b><span>' + esc(t('stats.goalStreak', { n: streak, note: note })) + '</span></div>';
+}
+
+/* ================= 频率提醒 =================
+   医学上没有「每周/每月不得超过几次」的统一标准，次数本身并不构成健康指标，
+   判断是否算问题主要看：是否影响睡眠/工作/情绪、是否想停停不下来、有无身体不适。
+   所以这里的上限定位成「用户自己定的自律目标」，另外补两个更有意义的信号：
+   连续天数、深夜时段。 */
+function periodKeys(){
+  var now = new Date();
+  return {
+    month: now.getFullYear() + '-' + pad(now.getMonth() + 1),
+    week: keyOf(startOfWeek(now)),
+    day: keyOf(now)
+  };
+}
+function dismissKeyOf(id){
+  var pk = periodKeys();
+  if(id === 'month')  return 'M:' + pk.month;
+  if(id === 'week')   return 'W:' + pk.week;
+  if(id === 'night')  return 'N:' + pk.month;
+  if(id === 'streak') return 'S:' + pk.day;
+  return id;
+}
+function nightCount(date){
+  var y = date.getFullYear(), m = date.getMonth(), n = 0, ks = allDays();
+  for(var i=0;i<ks.length;i++){
+    var p = parseKey(ks[i]);
+    if(p.getFullYear() !== y || p.getMonth() !== m) continue;
+    var list = S.records[ks[i]];
+    for(var j=0;j<list.length;j++){
+      var h = parseInt(list[j].t.slice(0, 2), 10);
+      if(h >= 0 && h < 5) n++;
+    }
+  }
+  return n;
+}
+function remindRules(){
+  var cfg = S.settings.remind || {};
+  if(!cfg.on) return [];
+  var dis = S.settings.remindDismiss || {};
+  var now = new Date();
+  var mo = monthTotal(now), wk = weekTotal();
+  var out = [];
+
+  if(mo > cfg.month && !dis[dismissKeyOf('month')]){
+    out.push({
+      id:'month', level:'warn', tag:t('remind.monthTag'), title:t('remind.monthTitle'),
+      body:t('remind.monthBody', { n: mo, goal: cfg.month }),
+      tip:t('remind.monthTip')
+    });
+  }
+  if(wk > cfg.week && !dis[dismissKeyOf('week')]){
+    out.push({
+      id:'week', level:'warn', tag:t('remind.weekTag'), title:t('remind.weekTitle'),
+      body:t('remind.weekBody', { n: wk, goal: cfg.week }),
+      tip:t('remind.weekTip')
+    });
+  }
+  var st = currentStreak();
+  if(st >= 3 && !dis[dismissKeyOf('streak')]){
+    out.push({
+      id:'streak', level:'note', tag:t('remind.streakTag'), title:t('remind.streakTitle', { n: st }),
+      body:t('remind.streakBody', { n: st }),
+      tip:t('remind.streakTip')
+    });
+  }
+  var ni = nightCount(now);
+  if(ni >= 3 && !dis[dismissKeyOf('night')]){
+    out.push({
+      id:'night', level:'note', tag:t('remind.nightTag'), title:t('remind.nightTitle'),
+      body:t('remind.nightBody', { n: ni }),
+      tip:t('remind.nightTip')
+    });
+  }
+  return out;
+}
+function renderRemind(){
+  var el = document.getElementById('remindBox');
+  if(!el) return;
+  var rules = remindRules();
+  if(!rules.length){ el.innerHTML = ''; return; }
+  var html = '';
+  for(var i=0;i<rules.length;i++){
+    var r = rules[i];
+    html += '<div class="remind ' + r.level + '">'
+      + '<div class="rm-head">'
+      +   '<span class="rm-tag">' + esc(r.tag) + '</span>'
+      +   '<span class="rm-title">' + esc(r.title) + '</span>'
+      +   '<button class="rm-x" data-rule="' + r.id + '" aria-label="' + esc(t('common.dismiss')) + '">×</button>'
+      + '</div>'
+      + '<div class="rm-body">' + esc(r.body) + '</div>'
+      + (r.tip ? '<span class="rm-more">' + esc(t('remind.why')) + '</span><div class="rm-tip">' + esc(r.tip) + '</div>' : '')
+      + '</div>';
+  }
+  el.innerHTML = html;
+}
+function dismissRemind(id){
+  var dis = S.settings.remindDismiss || {};
+  dis[dismissKeyOf(id)] = 1;
+  // 只保留当前周期还用得到的键，避免长期堆积
+  var keep = {}, ids = ['month','week','streak','night'];
+  for(var i=0;i<ids.length;i++){
+    var k = dismissKeyOf(ids[i]);
+    if(dis[k]) keep[k] = 1;
+  }
+  S.settings.remindDismiss = keep;
+  save();
+  renderRemind();
+}
+
+/* ================= 渲染：日历 ================= */
+function renderCalendar(){
+  var y = cursor.getFullYear(), m = cursor.getMonth();
+  document.getElementById('monthTitle').textContent = monthTitle(y, m);
+  var mc = monthTotal(cursor);
+  document.getElementById('monthSub').textContent = mc ? t('cal.monthSub', { n: mc }) : '';
+
+  // 星期表头
+  var wd = document.getElementById('weekdays');
+  wd.innerHTML = '';
+  for(var i=0;i<7;i++){
+    var g = (S.settings.weekStart + i) % 7;
+    var s = document.createElement('span');
+    s.textContent = wdShort(g);
+    if(g === 0 || g === 6) s.className = 'wk';
+    wd.appendChild(s);
+  }
+
+  var first = new Date(y, m, 1);
+  var offset = (first.getDay() - S.settings.weekStart + 7) % 7;
+  var start = addDays(first, -offset);
+  var tk = todayKey();
+  var grid = document.getElementById('calGrid');
+  grid.innerHTML = '';
+
+  for(var i=0;i<42;i++){
+    var d = addDays(start, i);
+    var k = keyOf(d);
+    var inMonth = (d.getMonth() === m);
+    var recs = recsOf(k);
+    var lvl = Math.min(4, recs.length);
+
+    var cell = document.createElement('button');
+    cell.type = 'button';
+    cell.className = 'cell' + (inMonth ? '' : ' dim') + (k === tk ? ' today' : '') + (k === selected ? ' sel' : '') + (lvl ? ' lv'+lvl : '');
+    cell.dataset.key = k;
+
+    // 圆点按记录类型着色，一眼看出当天都有哪些类型
+    var dots = '';
+    if(recs.length){
+      var shown = Math.min(4, recs.length);
+      for(var j=0;j<shown;j++) dots += '<i style="background:' + kindColor(kindOf(recs[j])) + '"></i>';
+      if(recs.length > 4) dots += '<b>' + recs.length + '</b>';
+    }
+    // 圆点是纯色标记，读屏软件读不出来，所以补一段文字描述
+    var dp = dayLabel(d.getMonth(), d.getDate()) + ' ' + wdLong(d.getDay());
+    if(k === tk) dp += ' ' + t('common.today');
+    var lb;
+    if(!recs.length){
+      lb = t('cal.cellAriaEmpty', { date: dp });
+    }else{
+      var kn = [];
+      for(var j2=0;j2<recs.length && j2<3;j2++) kn.push(kindName(recs[j2]));
+      lb = t(recs.length > 3 ? 'cal.cellAriaMore' : 'cal.cellAria', {
+        date: dp, n: recs.length, kinds: kn.join(LANG === 'zh' ? '、' : ', ')
+      });
+    }
+    cell.setAttribute('aria-label', lb);
+    cell.innerHTML = '<span class="dnum">' + d.getDate() + '</span><span class="dots">' + dots + '</span>';
+    grid.appendChild(cell);
+  }
+}
+
+/* ================= 渲染：当日详情 ================= */
+function renderDay(){
+  var d = parseKey(selected);
+  var tk = todayKey();
+  var recs = recsOf(selected);
+
+  var tail = wdLong(d.getDay());
+  if(selected === tk) tail += ' · ' + t('common.today');
+  else if(selected === keyOf(addDays(new Date(), -1))) tail += ' · ' + t('common.yesterday');
+  document.getElementById('dayTitle').innerHTML =
+    esc(dayLabel(d.getMonth(), d.getDate())) + '<em>' + esc(tail) + '</em>';
+  document.getElementById('dayBadge').textContent = nTimes(recs.length);
+
+  var ul = document.getElementById('recList');
+  if(!recs.length){
+    ul.innerHTML = '<li class="empty"><span class="em">○</span>' + esc(t('cal.emptyDay')) + '</li>';
+  }else{
+    var html = '';
+    for(var i=0;i<recs.length;i++){
+      var r = recs[i];
+      var vt = volText(r), tt = tagsText(r);
+      html += '<li class="rec-item" data-id="' + r.id + '" tabindex="0" role="button" '
+        + 'aria-label="' + esc(r.t + ' ' + kindName(r) + (vt ? ' ' + vt : '') + (tt ? ' ' + tt : '')) + '">'
+        + '<span class="t">' + esc(r.t) + '</span>'
+        + '<span class="info">'
+        +   '<span class="row1">'
+        +     '<span class="kbadge" data-kind="' + kindOf(r) + '">' + esc(kindName(r)) + '</span>'
+        +     (vt ? '<span class="vol">' + esc(vt) + '</span>' : '')
+        +   '</span>'
+        +   (r.n ? '<span class="n">' + esc(r.n) + '</span>' : '')
+        +   (tt ? '<span class="tg">' + esc(tt) + '</span>' : '')
+        + '</span>'
+        + '<span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></span>'
+        + '</li>';
+    }
+    ul.innerHTML = html;
+  }
+}
+
+/* ================= 渲染：迷你统计 ================= */
+function renderMini(){
+  var ds = daysSinceLast();
+  var dsText = ds === null ? '—' : (ds === 0 ? t('common.today') : ds);
+  var dsUnit = (ds === null || ds === 0) ? '' : '<i>' + esc(t('unit.days')) + '</i>';
+  document.getElementById('miniStats').innerHTML =
+    '<div class="m"><div class="v">' + monthTotal(new Date()) + '<i>' + esc(t('unit.timesShort')) + '</i></div><div class="k">' + esc(t('mini.month')) + '</div></div>' +
+    '<div class="m"><div class="v">' + weekTotal() + '<i>' + esc(t('unit.timesShort')) + '</i></div><div class="k">' + esc(t('mini.week')) + '</div></div>' +
+    '<div class="m"><div class="v">' + dsText + dsUnit + '</div><div class="k">' + esc(t('mini.since')) + '</div></div>';
+}
+
+/* ================= 渲染：统计页 ================= */
+function renderStats(){
+  var now = new Date();
+  var thisMonth = monthTotal(now);
+  var lastMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  var lastMonth = monthTotal(lastMonthDate);
+
+  var diffHtml = '<div class="d" style="color:var(--text-3)">—</div>';
+  if(lastMonth > 0 || thisMonth > 0){
+    if(lastMonth === 0){
+      diffHtml = '<div class="d up">' + esc(t('stats.noLastMonth')) + '</div>';
+    }else{
+      var pct = Math.round((thisMonth - lastMonth) / lastMonth * 100);
+      var cls = pct > 0 ? 'up' : (pct < 0 ? 'down' : '');
+      var sign = pct > 0 ? '+' : '';
+      diffHtml = '<div class="d ' + cls + '">' + esc(t('stats.vsLast', { pct: sign + pct + '%' })) + '</div>';
+    }
+  }
+
+  var ds = daysSinceLast();
+  var dsVal = ds === null ? '—' : ds;
+  var dsUnit = (ds === null) ? '' : '<i>' + esc(t('unit.days')) + '</i>';
+
+  var r30 = rangeTotal(30);
+  var avg30 = (r30 / 30).toFixed(2);
+  var tShort = esc(t('unit.timesShort'));
+
+  document.getElementById('bigStats').innerHTML =
+    '<div class="big"><div class="v">' + thisMonth + '<i>' + tShort + '</i></div><div class="k">' + esc(t('stats.monthCount')) + '</div>' + diffHtml + '</div>' +
+    '<div class="big"><div class="v">' + weekTotal() + '<i>' + tShort + '</i></div><div class="k">' + esc(t('stats.weekCount')) + '</div><div class="d" style="color:var(--text-3)">' + esc(t('stats.last30Inline', { n: r30 })) + '</div></div>' +
+    '<div class="big"><div class="v">' + dsVal + dsUnit + '</div><div class="k">' + esc(t('stats.sinceLast')) + '</div><div class="d" style="color:var(--text-3)">' + esc(ds === 0 ? t('stats.hadToday') : (ds === null ? t('stats.noData') : t('stats.keepGoing'))) + '</div></div>' +
+    '<div class="big"><div class="v">' + totalCount() + '<i>' + tShort + '</i></div><div class="k">' + esc(t('stats.total')) + '</div><div class="d" style="color:var(--text-3)">' + esc(t('stats.totalDays', { n: allDays().length })) + '</div></div>';
+
+  // 30 天柱状图
+  var bars = document.getElementById('bars');
+  var vals = [], max = 0;
+  for(var i=29;i>=0;i--){
+    var c = dayCount(keyOf(addDays(now, -i)));
+    vals.push(c);
+    if(c > max) max = c;
+  }
+  if(max === 0) max = 1;
+  var bh = '';
+  for(var i=0;i<vals.length;i++){
+    var h = vals[i] ? Math.max(9, Math.round(vals[i] / max * 100)) : 2;
+    var cls = 'b' + (vals[i] ? ' on' : '') + (i === vals.length - 1 ? ' today' : '');
+    bh += '<div class="' + cls + '" title="' + esc(nTimes(vals[i])) + '"><span style="height:' + h + '%"></span></div>';
+  }
+  bars.innerHTML = bh;
+  var from = addDays(now, -29);
+  document.getElementById('axisFrom').textContent = dayLabel(from.getMonth(), from.getDate());
+
+  // 热力图（26 周）
+  var heat = document.getElementById('heat');
+  var end = startOfWeek(now);
+  var startW = addDays(end, -7 * 25);
+  var tk = todayKey();
+  var hh = '';
+  for(var w=0; w<26; w++){
+    hh += '<div class="col">';
+    for(var dd=0; dd<7; dd++){
+      var day = addDays(startW, w*7 + dd);
+      var kk = keyOf(day);
+      var c2 = dayCount(kk);
+      var lv = Math.min(4, c2);
+      var cl = 'hc' + (lv ? ' l' + lv : '') + (kk > tk ? ' future' : '');
+      hh += '<div class="' + cl + '" title="' + esc(kk + ' · ' + (c2 ? nTimes(c2) : t('cal.noRecord'))) + '"></div>';
+    }
+    hh += '</div>';
+  }
+  heat.innerHTML = hh;
+
+  // 详细数据：按主题分三组，比一口气 11 行好读
+  var ai = avgInterval();
+  var st = typeStats();
+  var mx = streakMax();
+  var groups = [
+    ['detail.groupPace', [
+      ['detail.days', nDays(allDays().length)],
+      ['detail.longestStreak', nDays(longestStreak())],
+      ['detail.currentStreak', nDays(currentStreak())],
+      ['detail.avgInterval', ai === null ? '—' : nDays(ai.toFixed(1))],
+      ['detail.maxInterval', mx === null ? '—' : nDays(mx)]
+    ]],
+    ['detail.groupFreq', [
+      ['detail.avg30', nTimes(avg30)],
+      ['detail.night', nTimes(nightCount(new Date()))],
+      ['detail.volAvg', st.volAvg === null ? '—' : st.volAvg.toFixed(1) + ' ' + t('unit.mL')],
+      ['detail.volN', st.volN ? nTimes(st.volN) : '—']
+    ]],
+    ['detail.groupTime', [
+      ['detail.first', allDays().length ? allDays()[0] : '—'],
+      ['detail.last', allDays().length ? allDays()[allDays().length-1] : '—']
+    ]]
+  ];
+  var rh = '';
+  for(var gi=0; gi<groups.length; gi++){
+    rh += '<div class="rows-sub">' + esc(t(groups[gi][0])) + '</div>';
+    var grp = groups[gi][1];
+    for(var i=0;i<grp.length;i++){
+      rh += '<div class="row"><span class="rk">' + esc(t(grp[i][0])) + '</span><span class="rv">' + esc(grp[i][1]) + '</span></div>';
+    }
+  }
+  document.getElementById('detailRows').innerHTML = rh;
+
+  renderTypeDist();
+  renderTagDist();
+  renderTrend();
+  renderGoal();
+}
+
+/* ================= 渲染：设置页 ================= */
+function renderSettings(){
+  document.getElementById('setTheme').value = S.settings.theme;
+  document.getElementById('setWeekStart').value = String(S.settings.weekStart);
+
+  var swPin = document.getElementById('swPin');
+  swPin.classList.toggle('on', !!S.settings.pin);
+  swPin.setAttribute('aria-checked', S.settings.pin ? 'true' : 'false');
+  document.getElementById('pinHint').textContent = t(isLegacyPin() ? 'set.pinHintLegacy' : 'set.pinHint');
+
+  var rm = S.settings.remind;
+  var swR = document.getElementById('swRemind');
+  swR.classList.toggle('on', !!rm.on);
+  swR.setAttribute('aria-checked', rm.on ? 'true' : 'false');
+  var steps = document.querySelectorAll('.stepper');
+  for(var i=0;i<steps.length;i++){
+    var f = steps[i].getAttribute('data-field');
+    var max = (f === 'month') ? 999 : 99;
+    steps[i].querySelector('b').textContent = rm[f];
+    steps[i].querySelector('[data-d="-1"]').disabled = (rm[f] <= 1);
+    steps[i].querySelector('[data-d="1"]').disabled = (rm[f] >= max);
+    steps[i].parentNode.style.opacity = rm.on ? '1' : '.45';
+  }
+
+  var d = S.settings.daily;
+  var swD = document.getElementById('swDaily');
+  swD.classList.toggle('on', !!d.on);
+  swD.setAttribute('aria-checked', d.on ? 'true' : 'false');
+  var ti = document.getElementById('setDailyTime');
+  ti.value = d.time || '21:00';
+  ti.disabled = !d.on;
+  document.getElementById('dailyHint').textContent =
+    t(supportsNativeReminder() ? 'set.dailyHintNative' : 'set.dailyHintWeb');
+
+  document.getElementById('setLang').value = S.settings.lang || 'system';
+}
+
+/* ================= 总渲染 ================= */
+function renderAll(){
+  renderRemind();
+  renderCalendar();
+  renderDay();
+  renderMini();
+  renderStats();
+  renderSettings();
+}
+
+/* ================= 视图切换 ================= */
+function switchView(v){
+  view = v;
+  var map = { calendar:'view-calendar', stats:'view-stats', settings:'view-settings' };
+  for(var k in map) document.getElementById(map[k]).hidden = (k !== v);
+  var tabs = document.querySelectorAll('.tab');
+  for(var i=0;i<tabs.length;i++) tabs[i].classList.toggle('active', tabs[i].getAttribute('data-view') === v);
+  window.scrollTo({ top:0, behavior:'auto' });
+}
+
+/* ================= 弹层 ================= */
+/* 「添加记录」按钮带图标，文案跟着语言变，所以由 JS 渲染 */
+function renderQuickAdd(){
+  document.getElementById('quickAdd').innerHTML =
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">'
+    + '<path d="M12 5v14M5 12h14"/></svg>'
+    + esc(t('cal.addRecord')) + '<small>' + esc(t('cal.addRecordHint')) + '</small>';
+}
+
+/* 类型按钮由 JS 渲染，因为文案要跟着语言变 */
+function renderKindChips(){
+  var el = document.getElementById('kindChips');
+  var h = '';
+  for(var i=0;i<KINDS.length;i++){
+    h += '<button type="button" class="chip" data-kind="' + KINDS[i].id + '">'
+       + '<i></i>' + esc(kindLabel(KINDS[i].id)) + '</button>';
+  }
+  el.innerHTML = h;
+}
+
+/* 选中类型；只有需要记录体积的类型才展开精液量输入。
+   keepVol 用于历史记录：本身带 v 但没类型时也要显示体积输入，
+   否则「打开编辑再保存」会把已有的 v 悄悄删掉。 */
+function setKind(kind, keepVol){
+  editing.kind = kind || '';
+  var chips = document.querySelectorAll('#kindChips .chip');
+  for(var i=0;i<chips.length;i++){
+    chips[i].classList.toggle('on', chips[i].getAttribute('data-kind') === kind);
+  }
+  var need = kindNeedsVol(kind) || !!keepVol;
+  editing.volOn = need;
+  var f = document.getElementById('volField');
+  f.classList.toggle('show', need);
+  f.classList.toggle('hide', !need);
+  document.getElementById('volLabel').textContent = KIND_MAP[kind]
+    ? t('sheet.volLabel', { name: kindLabel(kind) })
+    : t('sheet.vol');
+  if(!need) document.getElementById('editVol').value = '';
+}
+
+/* ---- 诱因标签（多选） ---- */
+function renderTagChips(){
+  var el = document.getElementById('tagChips');
+  var h = '';
+  for(var i=0;i<TAGS.length;i++){
+    var on = editing.tags.indexOf(TAGS[i].id) >= 0;
+    h += '<button type="button" class="tag' + (on ? ' on' : '') + '" data-tag="' + TAGS[i].id + '" '
+       + 'aria-pressed="' + (on ? 'true' : 'false') + '">' + esc(tagLabel(TAGS[i].id)) + '</button>';
+  }
+  el.innerHTML = h;
+}
+function toggleTag(id){
+  if(!TAG_MAP[id]) return;
+  var i = editing.tags.indexOf(id);
+  if(i >= 0) editing.tags.splice(i, 1); else editing.tags.push(id);
+  renderTagChips();
+}
+
+function openSheet(key, id){
+  editing.key = key; editing.id = id || null; editing.tags = [];
+  var isNew = !id;
+  document.getElementById('sheetTitle').textContent = t(isNew ? 'sheet.new' : 'sheet.edit');
+  document.getElementById('editDelete').style.display = isNew ? 'none' : '';
+
+  var rec = null;
+  if(!isNew){
+    var list = recsOf(key);
+    for(var i=0;i<list.length;i++){ if(list[i].id === id) rec = list[i]; }
+  }
+
+  if(rec){
+    var v0 = normVol(rec);
+    setKind(kindOf(rec), v0 !== null);   // 历史数据没有类型时保持不选中，不擅自改写
+    document.getElementById('editVol').value = (v0 === null) ? '' : v0;
+    document.getElementById('editTime').value = rec.t;
+    document.getElementById('editNote').value = rec.n || '';
+    editing.tags = tagsOf(rec).slice();
+  }else{
+    setKind(lastKind());    // 新增时沿用上次的类型，方便一键记录
+    document.getElementById('editVol').value = '';
+    document.getElementById('editTime').value = (key === todayKey()) ? nowHM() : '21:00';
+    document.getElementById('editNote').value = '';
+    // 标签也沿用上次，常见的诱因往往反复出现
+    editing.tags = (S.settings.lastTags || []).filter(function(t){ return !!TAG_MAP[t]; });
+  }
+  renderTagChips();
+  document.getElementById('sheet').hidden = false;
+}
+function closeSheet(){ document.getElementById('sheet').hidden = true; }
+
+/* ================= 隐私锁 ================= */
+var pinBuf = '';
+var pinStage = 'unlock'; // unlock | set1 | set2
+var pinFirst = '';
+var lockTick = null;
+
+function renderPinDots(){
+  var el = document.getElementById('pinDots');
+  var h = '';
+  for(var i=0;i<4;i++) h += '<i class="' + (i < pinBuf.length ? 'on' : '') + '"></i>';
+  el.innerHTML = h;
+}
+function buildKeypad(){
+  var kp = document.getElementById('keypad');
+  var h = '';
+  for(var i=1;i<=9;i++) h += '<button data-k="' + i + '" aria-label="' + i + '">' + i + '</button>';
+  h += '<button class="plain" data-k="cancel" aria-label="' + esc(t('common.cancel')) + '">' + esc(t('common.cancel')) + '</button>';
+  h += '<button data-k="0" aria-label="0">0</button>';
+  h += '<button class="plain" data-k="del" aria-label="' + esc(t('lock.keyDel')) + '">' + esc(t('lock.keyDel')) + '</button>';
+  kp.innerHTML = h;
+}
+function setLockSub(txt){ document.getElementById('lockSub').textContent = txt; }
+function shakeLock(){
+  var el = document.getElementById('lockScreen');
+  el.classList.add('shake');
+  setTimeout(function(){ el.classList.remove('shake'); }, 420);
+}
+/* 锁定期内每秒刷新倒计时，让用户知道还要等多久 */
+function startLockTick(){
+  stopLockTick();
+  lockTick = setInterval(function(){
+    if(pinStage !== 'unlock') return;
+    var left = pinLockLeft();
+    if(left > 0) setLockSub(t('lock.locked', { n: left }));
+  }, 1000);
+}
+function stopLockTick(){ if(lockTick){ clearInterval(lockTick); lockTick = null; } }
+
+function showLock(stage){
+  pinStage = stage; pinBuf = '';
+  if(stage !== 'set2') pinFirst = '';   // 进入确认阶段时要保留第一次输入的密码
+  document.getElementById('lockScreen').hidden = false;
+  var el = document.getElementById('lockTitle');
+  if(stage === 'unlock'){
+    el.textContent = t('lock.enter');
+    var left = pinLockLeft();
+    setLockSub(left > 0 ? t('lock.locked', { n: left }) : t('app.name'));
+    startLockTick();
+  }else{
+    stopLockTick();
+    if(stage === 'set1'){ el.textContent = t('lock.set'); setLockSub(t('lock.subSet')); }
+    else { el.textContent = t('lock.confirm'); setLockSub(t('lock.subConfirm')); }
+  }
+  document.querySelectorAll('.keypad button.plain')[0].style.visibility = (stage === 'unlock') ? 'hidden' : 'visible';
+  renderPinDots();
+}
+function hideLock(){
+  stopLockTick();
+  document.getElementById('lockScreen').hidden = true;
+  unlocked = true;
+}
+
+function pinInput(k){
+  if(k === 'del'){ pinBuf = pinBuf.slice(0,-1); renderPinDots(); return; }
+  if(k === 'cancel'){
+    if(pinStage === 'unlock') return;
+    hideLock();
+    S.settings.pin = ''; S.settings.pinSalt = ''; S.settings.pinIter = 0;
+    save();
+    renderSettings();
+    toast(t('toast.pinCancel'));
+    return;
+  }
+  // 锁定期内直接吞掉输入
+  if(pinStage === 'unlock' && pinLockLeft() > 0){
+    setLockSub(t('lock.locked', { n: pinLockLeft() }));
+    return;
+  }
+  if(pinBuf.length >= 4) return;
+  pinBuf += k;
+  renderPinDots();
+  if(pinBuf.length < 4) return;
+
+  var entered = pinBuf;   // 先存下来：后面的异步流程里 pinBuf 会被清空
+  setTimeout(function(){
+    if(pinStage === 'unlock'){
+      verifyPin(entered).then(function(ok){
+        if(ok){ pinReset(); hideLock(); return; }
+        var f = pinFail();
+        shakeLock();
+        pinBuf = ''; renderPinDots();
+        var left = pinLockLeft();
+        if(left > 0){ setLockSub(t('lock.locked', { n: left })); startLockTick(); }
+        else setLockSub(t('lock.wrong', { n: Math.max(0, PIN_MAX_TRY - f.n) }));
+      }).catch(function(){
+        pinBuf = ''; renderPinDots();
+        setLockSub(t('lock.verifyFail'));
+      });
+    }else if(pinStage === 'set1'){
+      pinFirst = entered; pinBuf = '';
+      showLock('set2');
+    }else{
+      if(entered === pinFirst){
+        var salt = randSalt(), iter = PBKDF2_ITER;
+        setLockSub(t('lock.saving'));
+        derivePin(entered, salt, iter).then(function(h){
+          S.settings.pin = h;
+          S.settings.pinSalt = salt;
+          S.settings.pinIter = iter;
+          pinReset();
+          save();
+          renderSettings();
+          hideLock();
+          toast(t('toast.pinOn'));
+        }).catch(function(){
+          pinBuf = ''; pinFirst = ''; renderPinDots();
+          setLockSub(t('lock.saveFail'));
+        });
+      }else{
+        shakeLock();
+        pinBuf = ''; pinFirst = '';
+        showLock('set1');
+        setLockSub(t('lock.mismatch'));
+      }
+    }
+  }, 90);
+}
+
+/* ================= 事件绑定 ================= */
+function bind(){
+  /* 开关是个 div，得自己补上键盘可达性：能 Tab 到、能按空格/回车切换 */
+  function bindSwitch(el, fn){
+    el.addEventListener('click', fn);
+    el.addEventListener('keydown', function(e){
+      if(e.key === ' ' || e.key === 'Enter' || e.key === 'Spacebar'){
+        e.preventDefault(); fn();
+      }
+    });
+  }
+
+  // 月切换
+  document.getElementById('prevMonth').innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>';
+  document.getElementById('nextMonth').innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>';
+  document.getElementById('prevMonth').onclick = function(){
+    cursor = new Date(cursor.getFullYear(), cursor.getMonth() - 1, 1);
+    renderCalendar();
+  };
+  document.getElementById('nextMonth').onclick = function(){
+    cursor = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1);
+    renderCalendar();
+  };
+
+  // 长按日历格：沿用上次的类型直接记一次，不用走弹层。
+  // 用"时间窗"而不是布尔标志来抑制长按后紧跟的那次 click ——
+  // 布尔标志如果没被下一次点击消费掉就会一直挂着，把后面的点击全吞了。
+  var lpTimer = null, lpAt = 0;
+  var grid = document.getElementById('calGrid');
+  function lpCancel(){ if(lpTimer){ clearTimeout(lpTimer); lpTimer = null; } }
+  grid.addEventListener('pointerdown', function(e){
+    var cell = e.target.closest ? e.target.closest('.cell') : null;
+    if(!cell) return;
+    lpCancel();
+    var key = cell.dataset.key;
+    lpTimer = setTimeout(function(){
+      lpTimer = null;
+      lpAt = Date.now();
+      quickRecord(key);
+    }, 520);
+  });
+  ['pointerup','pointercancel','pointerleave'].forEach(function(ev){
+    grid.addEventListener(ev, lpCancel);
+  });
+  window.addEventListener('scroll', lpCancel, true);
+
+  // 点击日期
+  document.getElementById('calGrid').addEventListener('click', function(e){
+    if(Date.now() - lpAt < 700) return;   // 刚长按过，这次 click 是同一手势的尾巴
+    var cell = e.target.closest ? e.target.closest('.cell') : null;
+    if(!cell) return;
+    var k = cell.dataset.key;
+    selected = k;
+    var d = parseKey(k);
+    if(d.getMonth() !== cursor.getMonth() || d.getFullYear() !== cursor.getFullYear()){
+      cursor = new Date(d.getFullYear(), d.getMonth(), 1);
+    }
+    renderCalendar();
+    renderDay();
+    if(navigator.vibrate) navigator.vibrate(8);
+  });
+
+  // 添加记录（今天）：先选类型，再保存
+  document.getElementById('quickAdd').onclick = function(){
+    var k = todayKey();
+    selected = k;
+    cursor = new Date();
+    renderCalendar(); renderDay();
+    openSheet(k, null);
+  };
+
+  // 类型选择
+  document.getElementById('kindChips').addEventListener('click', function(e){
+    var b = e.target.closest ? e.target.closest('.chip') : null;
+    if(!b) return;
+    setKind(b.getAttribute('data-kind'));
+    if(navigator.vibrate) navigator.vibrate(6);
+  });
+  // 诱因标签（多选）
+  document.getElementById('tagChips').addEventListener('click', function(e){
+    var b = e.target.closest ? e.target.closest('.tag') : null;
+    if(!b) return;
+    toggleTag(b.getAttribute('data-tag'));
+    if(navigator.vibrate) navigator.vibrate(5);
+  });
+  document.getElementById('volClear').onclick = function(){
+    document.getElementById('editVol').value = '';
+    document.getElementById('editVol').focus();
+  };
+
+  // 为选中日补记
+  document.getElementById('addForDay').onclick = function(){
+    openSheet(selected, null);
+  };
+
+  // 点击记录条目（键盘用户按回车/空格同样可以打开）
+  function openRecFrom(item){ if(item) openSheet(selected, item.dataset.id); }
+  document.getElementById('recList').addEventListener('click', function(e){
+    openRecFrom(e.target.closest ? e.target.closest('.rec-item') : null);
+  });
+  document.getElementById('recList').addEventListener('keydown', function(e){
+    if(e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
+    var item = e.target.closest ? e.target.closest('.rec-item') : null;
+    if(!item) return;
+    e.preventDefault();
+    openRecFrom(item);
+  });
+
+  // 弹层
+  document.getElementById('sheetMask').onclick = closeSheet;
+  document.getElementById('editCancel').onclick = closeSheet;
+  document.getElementById('editSave').onclick = function(){
+    var tm = document.getElementById('editTime').value || nowHM();
+    var note = document.getElementById('editNote').value.trim();
+    var k = editing.kind || '';
+
+    // 只在体积输入可见时读取；必须能解析成非负数，否则按未测量处理
+    var v = '';
+    var raw = document.getElementById('editVol').value;
+    if(editing.volOn && raw !== ''){
+      var num = Number(raw);
+      if(isFinite(num) && num >= 0) v = num;
+    }
+
+    var payload = { t:tm, n:note, k:k, v:v, g:editing.tags.slice() };
+    if(editing.id) updateRecord(editing.key, editing.id, payload);
+    else addRecord(editing.key, payload);
+
+    if(k) S.settings.lastKind = k;
+    S.settings.lastTags = editing.tags.slice();   // 常见诱因往往反复出现，下次默认带上
+    save();
+
+    closeSheet();
+    renderAll();
+    if(navigator.vibrate) navigator.vibrate(12);
+    var label = k ? kindLabel(k) : t('kind.none');
+    toast(t(editing.id ? 'toast.saved' : 'toast.logged', { label: label })
+          + (v !== '' ? ' ' + fmtVol(v) : ''));
+  };
+  document.getElementById('editDelete').onclick = function(){
+    if(!editing.id) return;
+    if(!confirm(t('confirm.deleteRecord'))) return;
+    var key = editing.key, id = editing.id;
+    closeSheet();
+    var undone = removeRecordWithUndo(key, id);
+    renderAll();
+    if(!undone){ toast(t('toast.gone')); return; }
+    toast(t('toast.deleted', { t: undone.rec.t }), { label: t('common.undo'), fn:function(){
+      restoreRecord(key, undone.rec, undone.idx);
+      renderAll();
+      toast(t('toast.restored'));
+    }});
+  };
+
+  // 主题
+  // 一键在浅色/深色之间切换（以当前实际生效的主题为准，"跟随系统"只在设置页里选）
+  document.getElementById('themeBtn').onclick = function(){
+    var resolved = document.documentElement.getAttribute('data-theme');
+    var next = (resolved === 'dark') ? 'light' : 'dark';
+    S.settings.theme = next; save();
+    applyTheme(); renderSettings();
+    toast(t('theme.toast', { name: t(next === 'dark' ? 'theme.dark' : 'theme.light') }));
+  };
+
+  // 底部导航
+  document.querySelectorAll('.tab').forEach(function(b){
+    b.onclick = function(){ switchView(b.getAttribute('data-view')); };
+  });
+
+  // 设置项
+  document.getElementById('setTheme').onchange = function(e){
+    S.settings.theme = e.target.value; save(); applyTheme();
+  };
+  // 语言切换：换完要整体重渲染，因为文案散在静态属性和 JS 里两处
+  document.getElementById('setLang').onchange = function(e){
+    S.settings.lang = e.target.value; save();
+    applyLang();
+    toast(t('app.name') + ' · ' + (LANG === 'zh' ? '中文' : 'English'));
+  };
+  document.getElementById('setWeekStart').onchange = function(e){
+    S.settings.weekStart = parseInt(e.target.value, 10); save();
+    renderAll();
+  };
+  bindSwitch(document.getElementById('swPin'), function(){
+    if(S.settings.pin){
+      if(confirm(t('confirm.pinOff'))){
+        S.settings.pin = ''; S.settings.pinSalt = ''; S.settings.pinIter = 0;
+        pinReset(); save(); renderSettings(); toast(t('toast.pinOff'));
+      }
+    }else{
+      showLock('set1');
+    }
+  });
+
+  // 频率提醒
+  bindSwitch(document.getElementById('swRemind'), function(){
+    S.settings.remind.on = !S.settings.remind.on;
+    save(); renderSettings(); renderRemind();
+    toast(t(S.settings.remind.on ? 'toast.remindOn' : 'toast.remindOff'));
+  });
+
+  // 每日自查提醒
+  bindSwitch(document.getElementById('swDaily'), function(){
+    var d = S.settings.daily;
+    d.on = !d.on;
+    save();
+    applyDailyReminder();
+    renderSettings();   // 先同步刷 UI，再去请求通知权限（授权是异步的，不能卡住界面）
+    if(!d.on){ toast(t('toast.dailyOff')); return; }
+    if(!supportsNativeReminder() && 'Notification' in window && Notification.permission === 'default'){
+      Notification.requestPermission().then(function(p){
+        applyDailyReminder(); renderSettings();
+        toast(t(p === 'granted' ? 'toast.dailyOnWeb' : 'toast.dailyNoPerm'));
+      });
+      toast(t('toast.dailyOnWeb'));
+      return;
+    }
+    toast(t('toast.dailyOn'));
+  });
+  document.getElementById('setDailyTime').onchange = function(e){
+    S.settings.daily.time = e.target.value || '21:00';
+    save(); applyDailyReminder(); renderSettings();
+    toast(t('toast.dailyTime', { t: S.settings.daily.time }));
+  };
+  document.querySelectorAll('.stepper').forEach(function(st){
+    st.addEventListener('click', function(e){
+      var b = e.target.closest ? e.target.closest('button[data-d]') : null;
+      if(!b || b.disabled) return;
+      var f = st.getAttribute('data-field');
+      var max = (f === 'month') ? 999 : 99;
+      var v = S.settings.remind[f] + parseInt(b.getAttribute('data-d'), 10);
+      S.settings.remind[f] = Math.min(max, Math.max(1, v));
+      save(); renderSettings(); renderRemind();
+    });
+  });
+  document.getElementById('remindBox').addEventListener('click', function(e){
+    var el = e.target;   // 别用 t 当变量名，会盖住全局的翻译函数 t()
+    var x = el.closest ? el.closest('.rm-x') : null;
+    if(x){ dismissRemind(x.getAttribute('data-rule')); return; }
+    var card = el.closest ? el.closest('.remind') : null;
+    if(card && card.querySelector('.rm-tip')) card.classList.toggle('open');
+  });
+
+  // 导出：APK 里没有下载链路（WebView 不会自己处理 blob: 链接），
+  // 交给原生走 SAF 让用户选保存位置；浏览器里仍然用 blob 下载。
+  document.getElementById('btnExport').onclick = function(){
+    var data = { app:t('app.name'), exportedAt:new Date().toISOString(), payload:S };
+    var json = JSON.stringify(data, null, 2);
+    var name = 'private-journal-' + todayKey() + '.json';
+    if(window.RijiNative && window.RijiNative.exportBackup){
+      try{ window.RijiNative.exportBackup(name, json); return; }catch(e){ /* 落到下面的浏览器分支 */ }
+    }
+    var blob = new Blob([json], { type:'application/json' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+    toast(t('toast.exported'));
+  };
+
+  // 导入
+  document.getElementById('btnImport').onclick = function(){ document.getElementById('fileInput').click(); };
+  document.getElementById('fileInput').onchange = function(e){
+    var f = e.target.files && e.target.files[0];
+    if(!f) return;
+    var rd = new FileReader();
+    rd.onload = function(){
+      try{
+        var j = JSON.parse(rd.result);
+        var p = j.payload || j;
+        if(!p || typeof p !== 'object' || !p.records) throw new Error('bad');
+        if(!confirm(t('confirm.import'))) return;
+        // 密码相关字段要整体保留（pin / pinSalt / pinIter 必须配套，否则永远解不开）
+        var keep = { pin:S.settings.pin, pinSalt:S.settings.pinSalt, pinIter:S.settings.pinIter };
+        S.records = p.records || {};
+        S.settings = Object.assign({}, DEFAULTS.settings, p.settings || {}, keep);
+        S.settings.remind = Object.assign({}, DEFAULTS.settings.remind, (p.settings && p.settings.remind) || {});
+        S.settings.daily = Object.assign({}, DEFAULTS.settings.daily, (p.settings && p.settings.daily) || {});
+        S.settings.remindDismiss = {};   // 换了数据源，之前的关闭记录就不适用了
+        S.settings.pinFails = { n:0, until:0 };
+        S.settings.lastTags = [];
+        save(); applyLang(); applyTheme(); applyDailyReminder();
+        toast(t('toast.imported', { n: allDays().length }));
+      }catch(err){ toast(t('toast.importBad')); }
+    };
+    rd.readAsText(f);
+    e.target.value = '';
+  };
+
+  // 清空
+  document.getElementById('btnClear').onclick = function(){
+    if(!allDays().length){ toast(t('toast.noRecords')); return; }
+    if(!confirm(t('confirm.clear1'))) return;
+    if(!confirm(t('confirm.clear2'))) return;
+    S.records = {}; save(); renderAll();
+    toast(t('toast.cleared'));
+  };
+
+  // 键盘
+  document.getElementById('keypad').addEventListener('click', function(e){
+    var b = e.target.closest ? e.target.closest('button') : null;
+    if(!b) return;
+    pinInput(b.dataset.k);
+  });
+
+  // 系统主题变化
+  if(window.matchMedia){
+    var mq = window.matchMedia('(prefers-color-scheme: dark)');
+    var fn = function(){ if(S.settings.theme === 'system') applyTheme(); };
+    mq.addEventListener ? mq.addEventListener('change', fn) : mq.addListener(fn);
+  }
+
+  // 键盘快捷键（桌面端）
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape'){
+      if(!document.getElementById('sheet').hidden) closeSheet();
+      else if(!document.getElementById('lockScreen').hidden) return;
+    }
+  });
+}
+
+/* ================= 启动 ================= */
+/* 切换语言要整体重来一遍：静态文案在属性上，动态文案在 JS 里，
+   类型/标签按钮、数字键盘也都是渲染出来的，所以统一在这里重刷。 */
+function applyLang(){
+  LANG = detectLang();
+  applyI18n();
+  renderQuickAdd();
+  renderKindChips();
+  buildKeypad();
+  renderTagChips();
+  renderAll();
+}
+
+bind();
+applyLang();          // 内部会调 renderAll，所以放在 bind 之后
+applyTheme();
+switchView('calendar');
+applyDailyReminder();
+
+// 隐私锁
+if(S.settings.pin){
+  showLock('unlock');
+}else{
+  hideLock();
+}
+
+// Service Worker（离线可用）
+if('serviceWorker' in navigator && location.protocol.indexOf('http') === 0){
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('sw.js').catch(function(){});
+  });
+}
+
+// 暴露给调试（也供自动化测试驱动锁屏等内部流程）
+window.__dyf = {
+  S:S, render:renderAll, save:save, applyLang:applyLang, t:t,
+  get lang(){ return LANG; },
+  STRINGS: STRINGS,
+  lock:{ show:showLock, hide:hideLock, input:pinInput },
+  stats:{ monthTotal:monthTotal, weekTotal:weekTotal, goalStreak:goalStreakWeeks, tagStats:tagStats },
+  rules:remindRules,
+  // 原生申请通知权限是异步的，结果回来后由这里显示提示语（保证跟界面语言一致）
+  onNotifPerm: function(granted){ toast(t(granted ? 'toast.dailyOn' : 'toast.dailyNoPerm')); },
+  // 原生（导出/选择文件）需要提示时调用这里，文案仍然取自当前语言
+  toastKey: function(key, param){ toast(t(key, param ? { msg: param } : undefined)); }
+};
+})();
+</script>
+</body>
+</html>

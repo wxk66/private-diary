@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 无工具栏、浅底深字；状态栏/导航栏颜色由 MainActivity 跟随网页主题动态设置 -->
+    <style name="AppTheme" parent="@android:style/Theme.DeviceDefault.Light.NoActionBar">
+        <item name="android:windowBackground">#FFF3F4F8</item>
+        <item name="android:statusBarColor">#FFF3F4F8</item>
+        <item name="android:navigationBarColor">#FFF3F4F8</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+    </style>
+</resources>

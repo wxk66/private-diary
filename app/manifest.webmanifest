@@ -1,0 +1,18 @@
+{
+  "name": "私密日志 · 日历记录",
+  "short_name": "私密日志",
+  "description": "本地日历式记录工具，数据只保存在你的设备上，不联网、无账号。",
+  "lang": "zh-CN",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f2f3f7",
+  "theme_color": "#5b5bd6",
+  "categories": ["health", "lifestyle", "productivity"],
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

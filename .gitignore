@@ -1,0 +1,21 @@
+# 签名密钥：绝对不要提交
+# 泄露它等于任何人都能签出可以覆盖安装到用户手机上的包
+app/android/keystore/*.jks
+
+# 生成的临时测试页（tools/build-tests.js 每次跑都会重建）
+app/tools/_e2e.html
+app/tools/_demo*.html
+
+# 构建过程产物
+app/android/dist/*.idsig
+app/android/dist/build.log
+
+# 编辑器 / 系统
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# 工作记录（非项目内容）
+.workbuddy-ai/

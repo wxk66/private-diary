@@ -1,0 +1,12 @@
+# 统一换行符：仓库里一律 LF，检出时按平台自动处理
+# （Windows 上不加这个，git 会一路警告 "LF will be replaced by CRLF"，
+#  而且不同平台改同一个文件会产生整文件级别的 diff）
+* text=auto eol=lf
+
+# 二进制文件不要做换行符转换，否则会被改坏
+*.png binary
+*.jpg binary
+*.ico binary
+*.apk binary
+*.jks binary
+*.idsig binary
