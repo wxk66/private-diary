@@ -141,15 +141,20 @@ The switch takes effect immediately — no reinstall, no reload.
 
 ## Installation
 
-### Option 1: Install on your phone (PWA)
+### Option 1: Install on your phone (PWA — easiest)
 
-1. Open `app/index.html` in a mobile browser
-   - It must be served over HTTP (service workers can't register on `file://`, so offline mode won't work)
-   - Locally: run `python -m http.server 8777 --bind 127.0.0.1` from the `app/` directory
+1. Open **<https://wxk66.github.io/private-diary/>** in a mobile browser
 2. Browser menu → "**Add to Home Screen**"
 3. A "Private Diary" icon appears — tap to launch
 
 It runs as a standalone full-screen window with no address bar, and **works offline**.
+
+> That URL only delivers the page — it **never receives or stores any records**.
+> Everything stays in your own phone's local storage. Prefer not to use a public
+> URL? Serve it yourself as shown in Option 3.
+>
+> Note: opening `app/index.html` directly over `file://` won't register the service
+> worker, so offline mode won't work — it must be served over HTTP(S).
 
 ### Option 2: Install the APK
 

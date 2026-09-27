@@ -1,0 +1,55 @@
+name: Deploy web app
+
+# 网页版是零依赖的单文件应用，直接把 app/ 里那几个静态文件发到 Pages 即可。
+# 只监听真正会影响产物的路径，改 README / Android 侧不会触发重新部署。
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'app/index.html'
+      - 'app/sw.js'
+      - 'app/manifest.webmanifest'
+      - 'app/*.png'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 同一时间只跑一个部署；新的推送直接取代排队中的旧任务
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # 只发布运行网页真正需要的文件，别把 tools/（测试脚本）、
+      # android/（打包工程）、preview/（截图）也一并挂到公网上
+      - name: Stage site
+        run: |
+          mkdir -p _site
+          cp app/index.html app/sw.js app/manifest.webmanifest _site/
+          cp app/*.png _site/
+          touch _site/.nojekyll
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
