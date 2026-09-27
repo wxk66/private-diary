@@ -294,6 +294,8 @@ python -m http.server 8777 --bind 127.0.0.1
 private-diary/
 ├─ README.md / README-en.md      中英文文档
 ├─ LICENSE                       MIT
+├─ index.html                    GitHub Pages 入口（跳转到 app/index.html）
+├─ .nojekyll                     让 Pages 跳过 Jekyll 处理
 ├─ app/
 │  ├─ index.html                 全部功能（单文件，零依赖，约 2500 行）
 │  ├─ manifest.webmanifest       PWA 安装配置
@@ -309,8 +311,13 @@ private-diary/
 │  │  ├─ shots.js                生成 preview/ 下的截图（中英双语）
 │  │  └─ gen-icons.js            生成应用图标与通知栏单色图标
 │  └─ android/                   APK 打包工程（详见 app/android/README.md）
+├─ .gitattributes                统一换行符
 └─ .gitignore
 ```
+
+> **网页版怎么上线的**：仓库开了 GitHub Pages，源设为 `main` 分支根目录。
+> 所以往 `main` 推一次代码，站点就自动重新构建，不需要额外的工作流文件。
+> 根目录的 `index.html` 只是给 Pages 一个干净入口，真正的应用一直在 `app/` 下。
 
 ---
 

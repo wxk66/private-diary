@@ -308,6 +308,8 @@ to the new key automatically.
 private-diary/
 ├─ README.md / README-en.md      docs (Chinese / English)
 ├─ LICENSE                       MIT
+├─ index.html                    GitHub Pages entry (redirects to app/index.html)
+├─ .nojekyll                     tells Pages to skip Jekyll processing
 ├─ app/
 │  ├─ index.html                 everything (single file, zero dependencies, ~2500 lines)
 │  ├─ manifest.webmanifest       PWA install config
@@ -323,8 +325,14 @@ private-diary/
 │  │  ├─ shots.js                regenerates preview/ screenshots (both languages)
 │  │  └─ gen-icons.js            generates app icons and the monochrome notification icon
 │  └─ android/                   APK build project (see app/android/README.md)
+├─ .gitattributes                normalizes line endings
 └─ .gitignore
 ```
+
+> **How the web version is hosted**: GitHub Pages is enabled with its source set to the
+> root of the `main` branch. Pushing to `main` rebuilds the site automatically — no
+> workflow file needed. The root `index.html` only exists to give Pages a clean entry
+> point; the actual app always lives under `app/`.
 
 ---
 
