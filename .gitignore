@@ -19,3 +19,6 @@ Thumbs.db
 
 # 工作记录（非项目内容）
 .workbuddy-ai/
+
+# 本地推广文案草稿（不随仓库发布）
+linuxdo-post.md
