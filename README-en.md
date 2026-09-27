@@ -119,15 +119,11 @@ rather than "time to log" — the point of this app is not to encourage you to d
 Full **English / 中文** support, switchable in Settings or left on "follow system".
 The switch takes effect immediately — no reinstall, no reload.
 
-<p align="center">
-  <img src="app/preview/calendar.png" width="220" alt="中文日历">
-  <img src="app/preview/stats.png" width="220" alt="中文统计">
-  <img src="app/preview/add-record.png" width="220" alt="中文表单">
-</p>
-
 ---
 
 ## Screenshots
+
+**English UI**
 
 | Calendar | Stats | Entry form | Dark theme |
 |:---:|:---:|:---:|:---:|
@@ -136,6 +132,12 @@ The switch takes effect immediately — no reinstall, no reload.
 | Reminders | Settings | Passcode | Passcode (dark) |
 |:---:|:---:|:---:|:---:|
 | <img src="app/preview/en-reminder.png" width="180"> | <img src="app/preview/en-settings.png" width="180"> | <img src="app/preview/en-lock.png" width="180"> | <img src="app/preview/lock-dark.png" width="180"> |
+
+**中文界面**
+
+| 日历 | 统计 | 记录表单 |
+|:---:|:---:|:---:|
+| <img src="app/preview/calendar.png" width="180"> | <img src="app/preview/stats.png" width="180"> | <img src="app/preview/add-record.png" width="180"> |
 
 ---
 
@@ -293,12 +295,48 @@ to the new key automatically.
 
 ## Privacy & data
 
-- Everything is stored in the browser/WebView **localStorage** under the key `private-diary.v1`
+- Everything stays on your device — see [Data format](#data-format) above for the storage layout
 - The app makes **no network requests at all**; the APK requests no network permission, and
   there is no `fetch` / `XMLHttpRequest` anywhere in the code
 - No account, no telemetry, no crash reporting
 - The passcode is stored only as a PBKDF2 derivation plus a random salt — never in plaintext
 - Uninstalling the app or clearing site data deletes your entries, so **export a backup regularly**
+
+---
+
+## FAQ
+
+**Does my data get uploaded anywhere?**
+No. The app makes **no network requests at all**, and the APK requests no network permission.
+Everything stays on your device.
+
+**How do I move to a new phone?**
+Settings → Export backup → transfer the JSON → Restore from backup.
+Note that the browser version and the APK have separate storage, so cross-install migration
+uses the same flow.
+
+**I forgot my passcode.**
+There is no backdoor in a client-side lock. You can clear the app data to reset it, but
+**your entries will be lost with it** — which is why exporting a backup now and then is worth it.
+
+**Why does the APK need notification permission?**
+Only for the daily check-in reminder, and it is **only requested when you actually turn that
+feature on**. Leave it off and the app never asks.
+
+**Why doesn't the daily reminder fire in the web version?**
+Web pages have no background execution. It only works while the page is open.
+Install the APK if you want it to fire with the app closed.
+
+---
+
+## Known limitations
+
+- **The passcode lock is client-side.** It stops someone who casually picks up your phone, but
+  not someone who can clear the app's data. A 4-digit passcode is only 10,000 combinations;
+  PBKDF2 with a salt raises the cost of offline brute force but doesn't change the order of
+  magnitude. The threat model is "someone else has my phone" — so don't use your birthday.
+- **The APK uses an inexact alarm** (`setInexactRepeating`) for the daily reminder, so it can
+  fire a few minutes off. In exchange, it needs no `SCHEDULE_EXACT_ALARM` permission.
 
 ---
 
@@ -379,42 +417,9 @@ The build chain is `aapt2 → javac → d8 → zipalign → apksigner`, with no 
 
 ---
 
-## FAQ
+## Acknowledgements
 
-**Does my data get uploaded anywhere?**
-No. The app makes **no network requests at all**, and the APK requests no network permission.
-Everything stays on your device.
-
-**How do I move to a new phone?**
-Settings → Export backup → transfer the JSON → Restore from backup.
-Note that the browser version and the APK have separate storage, so cross-install migration
-uses the same flow.
-
-**I forgot my passcode.**
-There is no backdoor in a client-side lock. You can clear the app data to reset it, but
-**your entries will be lost with it** — which is why exporting a backup now and then is worth it.
-
-**Why does the APK need notification permission?**
-Only for the daily check-in reminder, and it is **only requested when you actually turn that
-feature on**. Leave it off and the app never asks.
-
-**Why doesn't the daily reminder fire in the web version?**
-Web pages have no background execution. It only works while the page is open.
-Install the APK if you want it to fire with the app closed.
-
----
-
-## Known limitations
-
-- **The passcode lock is client-side.** It stops someone who casually picks up your phone, but
-  not someone who can clear the app's data. A 4-digit passcode is only 10,000 combinations;
-  PBKDF2 with a salt raises the cost of offline brute force but doesn't change the order of
-  magnitude. The threat model is "someone else has my phone" — so don't use your birthday.
-- **The APK uses an inexact alarm** (`setInexactRepeating`) for the daily reminder, so it can
-  fire a few minutes off. In exchange, it needs no `SCHEDULE_EXACT_ALARM` permission.
-- **The APK package name is still `com.wxk.riji`.** Changing it would make Android treat it as a
-  different app, breaking in-place upgrades, so it was deliberately kept. The name users see
-  comes from `strings.xml` and is already "私密日志".
+Thanks to the [linux.do](https://linux.do) community for their support of this project.
 
 ---
 
