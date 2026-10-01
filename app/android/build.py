@@ -43,8 +43,8 @@ KS_ALIAS = 'riji'
 ASSETS = ['index.html', 'manifest.webmanifest', 'sw.js',
           'icon-192.png', 'icon-512.png', 'apple-touch-icon.png', 'favicon.png']
 
-VERSION = '1.2.0'
-VERSION_CODE = '5'
+VERSION = '1.3.0'
+VERSION_CODE = '6'
 
 # 编译器/打包器统一用 JDK 17：R8 (d8) 8.2.2 与 JDK 21+ 不兼容
 # （JDK 23 编译出的内部类会让 d8 抛 NPE），找不到才退回系统 JDK

@@ -37,6 +37,11 @@
 
   try{
     /* ============ [1] 初始渲染 ============ */
+    eq('底部导航 4 个 tab', $$('.tab').length, 4);
+    eq('首页 tab 在最左', $$('.tab')[0].getAttribute('data-view'), 'home');
+    eq('日历 tab 在首页右边', $$('.tab')[1].getAttribute('data-view'), 'calendar');
+    eq('默认落地页是首页', $('#view-home').hidden, false);
+    eq('日历页默认隐藏', $('#view-calendar').hidden, true);
     eq('日历 42 格', $$('#calGrid .cell').length, 42);
     eq('月份标题', $('#monthTitle').textContent, now.getFullYear() + '年' + (now.getMonth()+1) + '月');
     eq('星期表头 7 列', $$('#weekdays span').length, 7);
@@ -47,7 +52,7 @@
     eq('热力图 26 列', $$('#heat .col').length, 26);
     eq('热力图 182 格', $$('#heat .hc').length, 182);
     eq('总览卡 4 张', $$('#bigStats .big').length, 4);
-    eq('详细数据 11 行', $$('#detailRows .row').length, 11);
+    eq('详细数据 14 行', $$('#detailRows .row').length, 14);
     eq('详细数据分 3 组', $$('#detailRows .rows-sub').length, 3);
     eq('类型分布空态', $$('#typeDist .empty').length, 1);
     eq('诱因分布空态', $$('#tagDist .empty').length, 1);
@@ -55,6 +60,16 @@
     eq('趋势图已渲染', $$('#trendWrap svg').length, 1);
     eq('趋势折线 1 条', $$('#trendWrap .ln').length, 1);
     eq('趋势点 12 个', $$('#trendWrap .pt').length, 12);
+    // 还没有任何用时记录，趋势图应该是空态而不是一条贴地的零线
+    eq('用时趋势空态', $$('#durTrendWrap .empty').length, 1);
+    // 首页计时器的初始状态
+    eq('计时读数初始为 00:00', $('#timerTime').textContent, '00:00');
+    eq('首页迷你统计 3 格', $$('#homeMini .m').length, 3);
+    eq('空闲时不显示任何提示文字', $('#timerState').textContent, '');
+    eq('首页没有多余的说明卡片', $$('#view-home .note').length, 0);
+    ok('初始未在计时', D.timer.running() === false);
+    ok('开始按钮有 aria-label', ($('#timerBtn').getAttribute('aria-label') || '').length > 0);
+    ok('加号按钮有 aria-label', ($('#timerPlus').getAttribute('aria-label') || '').length > 0);
 
     /* ============ [2] 类型选项存在且齐全 ============ */
     eq('类型 chip 3 个', $$('#kindChips .chip').length, 3);
@@ -241,7 +256,7 @@
     }), JSON.stringify(store().settings.remindDismiss));
 
     /* ============ [12] 统计页 ============ */
-    click($$('.tab')[1]);
+    click($$('.tab')[2]);
     eq('统计页显示', $('#view-stats').hidden, false);
     eq('类型分布 3 行', $$('#typeDist .tdist-row').length, 3);
     var distNames = $$('#typeDist .tdist-row .nm').map(function(e){ return e.textContent.trim(); });
@@ -278,14 +293,14 @@
     eq('记录总天数 1 天', dayRow.querySelector('.rv').textContent, '1 天');
 
     /* ============ [13] 月份切换 / 设置 / 主题 ============ */
-    click($$('.tab')[0]);
+    click($$('.tab')[1]);
     var m0 = $('#monthTitle').textContent;
     click($('#prevMonth'));
     ok('上个月标题变化', $('#monthTitle').textContent !== m0);
     click($('#nextMonth'));
     eq('回到本月', $('#monthTitle').textContent, m0);
 
-    click($$('.tab')[2]);
+    click($$('.tab')[3]);
     eq('设置页显示', $('#view-settings').hidden, false);
     var ws = $('#setWeekStart');
     ws.value = '0';
@@ -302,6 +317,75 @@
     ok('主题已切换', t0 !== t1, t0 + '->' + t1);
     eq('下拉框同步', $('#setTheme').value, t1);
 
+    /* ============ [13b] 主题色 ============ */
+    eq('主题色默认 violet', D.accent.id(), 'violet');
+    eq('html 上带 data-accent', document.documentElement.getAttribute('data-accent'), 'violet');
+    eq('色板 6 个色块', $$('#accentPicker .accent-dot').length, 6);
+    eq('色板顺序固定', $$('#accentPicker .accent-dot').map(function(e){
+      return e.getAttribute('data-accent');
+    }).join(','), 'violet,blue,cyan,green,amber,rose');
+    eq('当前色块唯一选中', $$('#accentPicker .accent-dot.on').length, 1);
+    eq('选中的是 violet', $('#accentPicker .accent-dot.on').getAttribute('data-accent'), 'violet');
+    eq('选中色块 aria-checked', $('#accentPicker .accent-dot.on').getAttribute('aria-checked'), 'true');
+    eq('色板 role', $('#accentPicker').getAttribute('role'), 'radiogroup');
+    eq('色块 role', $('#accentPicker .accent-dot[data-accent="blue"]').getAttribute('role'), 'radio');
+    ok('色块带 aria-label',
+       ($('#accentPicker .accent-dot[data-accent="blue"]').getAttribute('aria-label') || '').length > 0);
+    ok('提示行显示当前色名', $('#accentHint').textContent.indexOf('紫罗兰') >= 0, $('#accentHint').textContent);
+
+    // 每个色块的底色应该是它自己的颜色，而不是当前主题色
+    var dotBg = $$('#accentPicker .accent-dot').map(function(e){
+      return getComputedStyle(e).backgroundColor;
+    });
+    ok('六个色块颜色各不相同', new Set(dotBg).size === 6, dotBg.join(' / '));
+
+    // 换色：html 属性、派生变量、真实渲染都要跟着变
+    var accentVarBefore = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+    // .tab 上有 transition，刚切过去时读背景色拿到的是过渡起点，等它走完
+    var activeBg = function(){ return getComputedStyle($('.tab.active')).backgroundColor; };
+    await sleep(280);
+    var softBefore = activeBg();
+
+    click($('#accentPicker .accent-dot[data-accent="green"]'));
+    eq('data-accent 已切换', document.documentElement.getAttribute('data-accent'), 'green');
+    eq('选择已持久化', store().settings.accent, 'green');
+    eq('选中态移到绿色', $('#accentPicker .accent-dot.on').getAttribute('data-accent'), 'green');
+    eq('原色块取消选中',
+       $('#accentPicker .accent-dot[data-accent="violet"]').getAttribute('aria-checked'), 'false');
+    ok('提示行跟着变', $('#accentHint').textContent.indexOf('森绿') >= 0, $('#accentHint').textContent);
+    ok('toast 报了色名', $('#toast').textContent.indexOf('森绿') >= 0, $('#toast').textContent);
+
+    // 深浅两套主题的色值不同，所以跟 --accent 自身比，别写死某个十六进制
+    var accentVarAfter = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+    ok('--accent 变量真的变了', accentVarAfter !== accentVarBefore, accentVarBefore + ' -> ' + accentVarAfter);
+    ok('派生变量跟着走',
+       getComputedStyle(document.documentElement).getPropertyValue('--accent-soft').indexOf(accentVarAfter) >= 0,
+       getComputedStyle(document.documentElement).getPropertyValue('--accent-soft'));
+
+    await sleep(280);
+    var softAfter = activeBg();
+    ok('导航选中底色真的换了', softAfter !== softBefore, softBefore + ' -> ' + softAfter);
+    var softRgb = softAfter.match(/[\d.]+/g).map(Number);
+    ok('换的是绿色系（G 通道最大）', softRgb[1] > softRgb[0] && softRgb[1] > softRgb[2], softAfter);
+
+    // 重复点同一个色块不该重复触发
+    var tGreen = $('#toast').textContent;
+    click($('#accentPicker .accent-dot[data-accent="green"]'));
+    eq('重复点击不变', store().settings.accent, 'green');
+    eq('重复点击不弹提示', $('#toast').textContent, tGreen);
+
+    // 脏数据兜底：备份里可能是手改过的色名
+    D.S.settings.accent = 'not-a-color';
+    D.accent.apply();
+    D.render();
+    eq('未知色名回落到 violet', D.accent.id(), 'violet');
+    eq('回落后 html 属性也是 violet', document.documentElement.getAttribute('data-accent'), 'violet');
+    // 回落状态下点 violet 要能真的把脏值写回存储
+    click($('#accentPicker .accent-dot[data-accent="violet"]'));
+    eq('点默认色把脏值写回', store().settings.accent, 'violet');
+
+    eq('html 属性回到 violet', document.documentElement.getAttribute('data-accent'), 'violet');
+
     /* ============ [14] 可访问性 ============ */
     eq('隐私锁开关 role', $('#swPin').getAttribute('role'), 'switch');
     eq('隐私锁开关 tabindex', $('#swPin').getAttribute('tabindex'), '0');
@@ -309,7 +393,7 @@
     eq('每日提醒开关 role', $('#swDaily').getAttribute('role'), 'switch');
     eq('开关 aria-checked 跟随状态', $('#swRemind').getAttribute('aria-checked'),
        store().settings.remind.on ? 'true' : 'false');
-    click($$('.tab')[0]);
+    click($$('.tab')[1]);
     ok('记录行可聚焦', $('#recList .rec-item').getAttribute('tabindex') === '0');
     eq('记录行 role', $('#recList .rec-item').getAttribute('role'), 'button');
     ok('记录行有 aria-label', ($('#recList .rec-item').getAttribute('aria-label') || '').length > 0);
@@ -328,7 +412,7 @@
     click($('#editCancel'));
 
     /* ============ [15] 每日提醒设置 ============ */
-    click($$('.tab')[2]);
+    click($$('.tab')[3]);
     eq('默认关闭每日提醒', store().settings.daily.on, false);
     click($('#swDaily'));
     eq('开启每日提醒', store().settings.daily.on, true);
@@ -342,7 +426,7 @@
     eq('关闭后时间输入框禁用', $('#setDailyTime').disabled, true);
 
     /* ============ [16] 撤销删除 ============ */
-    click($$('.tab')[0]);
+    click($$('.tab')[1]);
     var beforeDel = recs().length;
     click($$('#recList .rec-item')[0]);
     // confirm() 在无头环境里由测试桩接管，直接放行
@@ -357,19 +441,23 @@
 
     /* ============ [17] 长按快速记录 ============ */
     var beforeLP = recs().length;
+    // 记录按时间排序，长按用的是「现在」的时刻，不一定排在最后 ——
+    // 所以按 id 差集找新增的那条，别用 recs()[length-1]
+    var idsBeforeLP = recs().map(function(r){ return r.id; });
     var lpCell = $('#calGrid .cell[data-key="' + TK + '"]');
     lpCell.dispatchEvent(new PointerEvent('pointerdown', { bubbles:true, cancelable:true }));
     await sleep(640);
     lpCell.dispatchEvent(new PointerEvent('pointerup', { bubbles:true, cancelable:true }));
     eq('长按新增一条', recs().length, beforeLP + 1);
-    ok('长按用上次的类型', recs()[recs().length-1].k === store().settings.lastKind,
-       recs()[recs().length-1].k);
+    var lpRec = recs().filter(function(r){ return idsBeforeLP.indexOf(r.id) < 0; })[0];
+    ok('长按用上次的类型', !!lpRec && lpRec.k === store().settings.lastKind,
+       lpRec ? String(lpRec.k) : 'none');
     ok('长按提示可撤销', $('#toast').textContent.indexOf('已记录') >= 0, $('#toast').textContent);
     click($('#toast .act'));
     eq('撤销长按记录', recs().length, beforeLP);
 
     /* ============ [18] 隐私锁：PBKDF2 + 失败锁定 ============ */
-    click($$('.tab')[2]);
+    click($$('.tab')[3]);
     click($('#swPin'));
     eq('锁屏出现', $('#lockScreen').hidden, false);
     eq('4 个密码点', $$('#pinDots i').length, 4);
@@ -403,6 +491,128 @@
     eq('正确密码解锁', $('#lockScreen').hidden, true);
     eq('解锁后错误计数清零', store().settings.pinFails.n, 0);
 
+    /* ============ [18b] 指纹解锁 ============
+       浏览器里没有 window.RijiNative，所以先确认「网页端整块不渲染」，
+       再装一个桩模拟原生桥，把设备检测和整套指纹流程跑一遍。 */
+    ok('无原生桥时不支持指纹', D.bio.supported() === false);
+    ok('无原生桥时指纹按钮隐藏', $('#bioBtn').hidden === true);
+    eq('无原生桥时不显示设置项', $('#bioRow').hidden, true);
+
+    var bioCalls = 0, bioCancels = 0, bioCode = 0;
+    window.RijiNative = {
+      biometricState: function(){ return bioCode; },
+      biometricUnlock: function(){ bioCalls++; },
+      cancelBiometric: function(){ bioCancels++; }
+    };
+    ok('装上原生桥后检测到指纹可用', D.bio.supported() === true);
+    ok('默认开启指纹解锁', D.bio.enabled() === true);
+
+    click($$('.tab')[3]);
+    D.render();   // 指纹开关的显隐由渲染时决定，装上桥之后要重渲染一次
+    eq('设置页露出指纹解锁开关', $('#bioRow').hidden, false);
+    eq('指纹开关默认点亮', $('#swBio').classList.contains('on'), true);
+    eq('指纹开关 aria-checked', $('#swBio').getAttribute('aria-checked'), 'true');
+    eq('指纹开关 role', $('#swBio').getAttribute('role'), 'switch');
+
+    /* ---- 设备检测：没有指纹设备就不允许开启 ---- */
+    bioCode = 1;   // 没有指纹硬件
+    D.render();
+    eq('无指纹设备时设置项仍可见', $('#bioRow').hidden, false);
+    eq('无指纹设备时开关置灰', $('#swBio').getAttribute('disabled'), 'disabled');
+    eq('无指纹设备时开关不亮', $('#swBio').classList.contains('on'), false);
+    eq('无指纹设备时状态为 none', D.bio.state(), 'none');
+    ok('提示未检测到指纹设备', $('#bioHint').textContent.indexOf('未检测到') >= 0, $('#bioHint').textContent);
+    ok('检测不过时不自动唤起', D.bio.enabled() === false);
+    var bioSaved = store().settings.bioUnlock;
+    click($('#swBio'));   // 置灰只是视觉与指针事件，这里直接派发事件绕过它，验证逻辑层也拦得住
+    eq('检测不过时点不动开关', store().settings.bioUnlock, bioSaved);
+    ok('检测不过时给出原因', $('#toast').textContent.indexOf('未检测到') >= 0, $('#toast').textContent);
+
+    bioCode = 2;   // 有硬件但没录入
+    D.render();
+    eq('未录入时状态为 unenrolled', D.bio.state(), 'unenrolled');
+    ok('未录入时提示去录入', $('#bioHint').textContent.indexOf('录入') >= 0, $('#bioHint').textContent);
+    eq('未录入时开关仍置灰', $('#swBio').getAttribute('disabled'), 'disabled');
+
+    bioCode = 3;   // 系统没设锁屏
+    D.render();
+    eq('无锁屏时状态为 nolock', D.bio.state(), 'nolock');
+    ok('无锁屏时提示去设锁屏', $('#bioHint').textContent.indexOf('锁屏') >= 0, $('#bioHint').textContent);
+
+    bioCode = 0;   // 检测通过
+    D.render();
+    eq('检测通过时状态为 ok', D.bio.state(), 'ok');
+    eq('检测通过后开关可点', $('#swBio').hasAttribute('disabled'), false);
+    eq('检测通过后开关点亮', $('#swBio').classList.contains('on'), true);
+    ok('检测通过后提示正常', $('#bioHint').textContent.indexOf('指纹') >= 0, $('#bioHint').textContent);
+
+    click($('#swBio'));
+    eq('关闭后开关熄灭', $('#swBio').classList.contains('on'), false);
+    eq('关闭已持久化', store().settings.bioUnlock, false);
+    eq('关闭后不再自动唤起', D.bio.enabled(), false);
+    click($('#swBio'));
+    eq('重新开启', store().settings.bioUnlock, true);
+
+    // 锁屏：指纹按钮出现，并且自动唤起一次
+    D.lock.show('unlock');
+    eq('锁屏显示指纹按钮', $('#bioBtn').hidden, false);
+    eq('锁屏标记 has-bio', $('#lockScreen').classList.contains('has-bio'), true);
+    await sleep(430);
+    ok('自动唤起了指纹', bioCalls >= 1, String(bioCalls));
+    ok('提示按压指纹传感器', $('#lockSub').textContent.indexOf('指纹') >= 0, $('#lockSub').textContent);
+
+    D.bio.result(null);            // 清掉「正在验证」，模拟上一次被取消
+    var c0 = bioCalls;
+    click($('#bioBtn'));
+    ok('点按钮会再次唤起', bioCalls > c0, String(bioCalls));
+
+    D.bio.result(false);
+    eq('指纹失败时锁屏保留', $('#lockScreen').hidden, false);
+    ok('失败提示改用密码', $('#lockSub').textContent.indexOf('密码') >= 0, $('#lockSub').textContent);
+
+    var subBefore = $('#lockSub').textContent;
+    D.bio.result(null);
+    eq('用户主动取消不改提示', $('#lockSub').textContent, subBefore);
+    eq('用户主动取消不解锁', $('#lockScreen').hidden, false);
+
+    D.bio.result(true);
+    eq('指纹通过后解锁', $('#lockScreen').hidden, true);
+    ok('解锁时通知原生收尾', bioCancels >= 1, String(bioCancels));
+    ok('提示指纹通过', $('#toast').textContent.indexOf('指纹') >= 0, $('#toast').textContent);
+
+    // 指纹只是捷径：密码这条路必须一直通
+    D.lock.show('unlock');
+    await sleep(430);
+    pin('2468');
+    await sleep(700);
+    eq('有指纹时密码解锁仍然可用', $('#lockScreen').hidden, true);
+
+    // 指纹设备中途被删掉（比如用户去系统设置里删了指纹）：锁屏不该再弹指纹
+    bioCode = 1;
+    D.lock.show('unlock');
+    eq('设备消失后锁屏不显示指纹按钮', $('#bioBtn').hidden, true);
+    eq('设备消失后不带 has-bio', $('#lockScreen').classList.contains('has-bio'), false);
+    D.lock.hide();
+    bioCode = 0;
+
+    // 隐私锁关掉时指纹开关要置灰（直接改内存设置，避免动到后面的用例）
+    var pinBackup = D.S.settings.pin;
+    D.S.settings.pin = '';
+    D.render();
+    eq('关掉隐私锁后指纹开关置灰', $('#swBio').getAttribute('disabled'), 'disabled');
+    eq('置灰时开关不亮', $('#swBio').classList.contains('on'), false);
+    ok('置灰时给出原因', $('#bioHint').textContent.indexOf('隐私锁') >= 0, $('#bioHint').textContent);
+    D.S.settings.pin = pinBackup;
+    D.render();
+    eq('恢复后开关重新点亮', $('#swBio').classList.contains('on'), true);
+
+    delete window.RijiNative;
+    D.render();
+    ok('移除原生桥后回到不支持状态', D.bio.supported() === false);
+    eq('网页端整块不渲染指纹设置', $('#bioRow').hidden, true);
+    eq('网页端锁屏也没有指纹按钮', $('#bioBtn').hidden, true);
+    D.lock.hide();
+
     /* ============ [19] 数据完整性 ============ */
     var s = store();
     eq('数据版本号', s.version, 2);
@@ -430,7 +640,7 @@
        JSON.stringify(s.settings.lastTags));
 
     /* ============ [20] 连续天数 / 深夜时段提醒 ============ */
-    click($$('.tab')[0]);
+    click($$('.tab')[1]);
     function addOn(off, time){
       var dd = new Date(now.getFullYear(), now.getMonth(), now.getDate() - off);
       var kk = dd.getFullYear() + '-' + pad(dd.getMonth()+1) + '-' + pad(dd.getDate());
@@ -443,18 +653,42 @@
     addOn(2, '02:30');
     addOn(3, '03:00');
 
+    // 「深夜时段」统计的是**本月 0:00–5:00** 的记录。这里刻意不假设现在是几点：
+    //  - 凌晨跑测试时，今天新增的记录本身就落在深夜时段里，条数不止补记那三条；
+    //  - 月初跑测试时（比如 10 月 1 日），补记的昨天/前天落在上个月，一条都不算。
+    // 所以期望值直接按同一套规则从数据算出来，断言只负责验证「界面上的数字 = 数据」。
+    var expectNight = 0;
+    Object.keys(store().records).forEach(function(k){
+      var p = new Date(Number(k.slice(0,4)), Number(k.slice(5,7)) - 1, Number(k.slice(8,10)));
+      if(p.getFullYear() !== now.getFullYear() || p.getMonth() !== now.getMonth()) return;
+      store().records[k].forEach(function(r){
+        var h = parseInt(r.t.slice(0,2), 10);
+        if(h >= 0 && h < 5) expectNight++;
+      });
+    });
+    // 独立锚点：补记的三条里落在本月的那些，必须被算进去（这几条是测试自己造的）
+    var addedInMonth = 0;
+    for(var off=1; off<=3; off++){
+      var dd = new Date(now.getFullYear(), now.getMonth(), now.getDate() - off);
+      if(dd.getFullYear() === now.getFullYear() && dd.getMonth() === now.getMonth()) addedInMonth++;
+    }
+    ok('补记的深夜记录都算进了本月统计', expectNight >= addedInMonth,
+       'expectNight=' + expectNight + ' addedInMonth=' + addedInMonth);
+
+    var wantNight = (expectNight >= 3);
+
     var rt = $('#remindBox').textContent || '';
     ok('触发连续天数提醒', rt.indexOf('已经连续 4 天') >= 0, rt);
-    ok('触发深夜时段提醒', rt.indexOf('深夜时段偏多') >= 0, rt);
-    eq('两条提示级提醒', $$('#remindBox .remind.note').length, 2);
-    eq('提醒总数 2 张', $$('#remindBox .remind').length, 2);
+    eq('深夜提醒按阈值 3 决定是否出现', rt.indexOf('深夜时段偏多') >= 0, wantNight);
+    eq('提示级提醒条数', $$('#remindBox .remind.note').length, wantNight ? 2 : 1);
+    eq('提醒总数', $$('#remindBox .remind').length, wantNight ? 2 : 1);
     ok('已关闭的本周提醒不再出现', rt.indexOf('本周频率偏高') < 0, rt);
 
-    click($$('.tab')[1]);
+    click($$('.tab')[2]);
     var nightRow = $$('#detailRows .row').filter(function(r){
       return r.querySelector('.rk').textContent === '本月深夜时段';
     })[0];
-    eq('深夜计数 3 次', nightRow.querySelector('.rv').textContent, '3 次');
+    eq('深夜计数 = 本月 0:00–5:00 的记录数', nightRow.querySelector('.rv').textContent, expectNight + ' 次');
     var srec = store().records, allRecs = 0;
     Object.keys(srec).forEach(function(k2){ allRecs += srec[k2].length; });
     eq('今天 6 条记录', srec[TK].length, 6);
@@ -482,6 +716,116 @@
     delete D.S.records[freeKey];
     D.save(); D.render();
 
+    /* ============ [21b] 首页计时 ============ */
+    click($$('.tab')[0]);
+    eq('切回首页', $('#view-home').hidden, false);
+    ok('切到首页时仍未计时', D.timer.running() === false);
+
+    click($('#timerBtn'));
+    ok('点三角形进入计时', D.timer.running() === true);
+    ok('按钮切换为结束态', $('#timerBtn').classList.contains('stop'));
+    ok('计时状态已落盘', store().settings.timer.start > 0);
+    ok('计时中提示变了', $('#timerState').textContent.indexOf('计时中') >= 0, $('#timerState').textContent);
+
+    // 把开始时间往前挪 200 秒，模拟已经计了 3 分 20 秒
+    D.S.settings.timer = { start: Date.now() - 200000 };
+    D.save();
+    D.timer.render();
+    eq('计时读数 03:20', $('#timerTime').textContent, '03:20');
+
+    var beforeStop = recs().length;
+    click($('#timerBtn'));
+    ok('点结束后不再计时', D.timer.running() === false);
+    eq('结束后提示文字清空', $('#timerState').textContent, '');
+    eq('结束后计时归零', store().settings.timer.start, 0);
+    eq('自动新增了一条记录', recs().length, beforeStop + 1);
+
+    var timed = recs().filter(function(r){ return typeof r.d === 'number'; })[0];
+    ok('这条记录带着用时', !!timed, JSON.stringify(recs()));
+    ok('用时约等于 200 秒', timed && timed.d >= 199 && timed.d <= 202, timed ? String(timed.d) : 'none');
+    eq('结束后自动打开记录页', $('#sheet').hidden, false);
+    eq('打开的是编辑态', $('#sheetTitle').textContent, '编辑记录');
+    eq('用时回填到「分」', $('#editDurMin').value, String(Math.floor(timed.d / 60)));
+    eq('用时回填到「秒」', $('#editDurSec').value, (timed.d % 60) ? String(timed.d % 60) : '');
+    eq('编辑态出现删除按钮', $('#editDelete').style.display, '');
+
+    click($('#editCancel'));
+    eq('取消后弹层关闭', $('#sheet').hidden, true);
+    ok('取消弹层也不会丢用时', store().records[TK].filter(function(r){
+      return r.id === timed.id;
+    })[0].d === timed.d);
+
+    /* ============ [21c] 用时可以手填、可以清除 ============ */
+    click($('#timerPlus'));
+    eq('加号直接打开新增弹层', $('#sheet').hidden, false);
+    eq('新增时用时留空', $('#editDurMin').value, '');
+    eq('新增时秒也留空', $('#editDurSec').value, '');
+    $('#editDurMin').value = '2';
+    $('#editDurSec').value = '30';
+    click($('#editSave'));
+    ok('手填用时已保存为 150 秒', !!recs().filter(function(r){ return r.d === 150; })[0],
+       JSON.stringify(recs().map(function(r){ return r.d; })));
+
+    // 秒数超过 59 要被夹到 59，而不是进位或存成 90
+    click($('#quickAdd'));
+    $('#editDurMin').value = '1';
+    $('#editDurSec').value = '90';
+    click($('#editSave'));
+    ok('秒数被夹到 59（合计 119 秒）', !!recs().filter(function(r){ return r.d === 119; })[0],
+       JSON.stringify(recs().map(function(r){ return r.d; })));
+
+    // 清除按钮
+    click($('#quickAdd'));
+    var idsBefore = recs().map(function(r){ return r.id; });
+    $('#editDurMin').value = '5';
+    $('#editDurSec').value = '12';
+    click($('#durClear'));
+    eq('清除按钮清空「分」', $('#editDurMin').value, '');
+    eq('清除按钮清空「秒」', $('#editDurSec').value, '');
+    click($('#editSave'));
+    var added = recs().filter(function(r){ return idsBefore.indexOf(r.id) < 0; })[0];
+    ok('清空后不写入 d 字段', added && added.d === undefined, JSON.stringify(added));
+
+    // 编辑已有记录时能改用时
+    click($$('#recList .rec-item').filter(function(li){ return li.dataset.id === timed.id; })[0]);
+    eq('回填原来的用时（分）', $('#editDurMin').value, String(Math.floor(timed.d / 60)));
+    $('#editDurMin').value = '4';
+    $('#editDurSec').value = '5';
+    click($('#editSave'));
+    eq('用时被改成 245 秒', store().records[TK].filter(function(r){
+      return r.id === timed.id;
+    })[0].d, 245);
+
+    /* ============ [21d] 列表与统计里的用时 ============ */
+    ok('记录列表显示用时', $$('#recList .dur').length >= 1, $('#recList').textContent);
+    ok('用时按分秒展示', $('#recList .dur').textContent.indexOf('分') >= 0,
+       $('#recList .dur').textContent);
+    ok('记录行 aria-label 含用时',
+       ($('#recList .dur').closest('.rec-item').getAttribute('aria-label') || '').indexOf('分') >= 0);
+
+    click($$('.tab')[2]);
+    eq('用时趋势折线 1 条', $$('#durTrendWrap .ln').length, 1);
+    eq('用时趋势点 12 个', $$('#durTrendWrap .pt').length, 12);
+    ok('用时趋势脚注含合计', $('#durTrendWrap .trend-foot').textContent.indexOf('合计') >= 0,
+       $('#durTrendWrap .trend-foot').textContent);
+
+    function rowVal(name){
+      var r = $$('#detailRows .row').filter(function(x){
+        return x.querySelector('.rk').textContent === name;
+      })[0];
+      return r ? r.querySelector('.rv').textContent : null;
+    }
+    ok('平均用时已计算', rowVal('平均用时') !== '—', String(rowVal('平均用时')));
+    ok('最长用时已计算', rowVal('最长用时') !== '—', String(rowVal('最长用时')));
+    eq('有计时记录 3 次', rowVal('有计时记录'), '3 次');
+
+    var dsStat = D.dur.stats();
+    eq('用时合计 = 245 + 150 + 119', dsStat.sum, 514);
+    eq('计时次数 3', dsStat.n, 3);
+    eq('最长用时 245 秒', dsStat.max, 245);
+    eq('平均用时约 171 秒', Math.round(dsStat.avg), 171);
+    ok('首页今日用时已更新', $('#homeMini .m .v').textContent !== '—', $('#homeMini').textContent);
+
     /* ============ [22] 多语言 ============ */
     var zhKeys = Object.keys(D.STRINGS.zh).sort();
     var enKeys = Object.keys(D.STRINGS.en).sort();
@@ -503,7 +847,7 @@
 
     eq('初始为中文', D.lang, 'zh');
     var zhBrand = $('.brand span:last-child').textContent.trim();
-    var zhTab1 = $$('.tab span')[1].textContent.trim();
+    var zhTab1 = $$('.tab span')[2].textContent.trim();
 
     // —— 切到英文 ——
     var selLang = $('#setLang');
@@ -512,7 +856,8 @@
     eq('切换后 LANG 为 en', D.lang, 'en');
     eq('语言已持久化', store().settings.lang, 'en');
     eq('品牌名变英文', $('.brand span:last-child').textContent.trim(), 'Private Diary');
-    eq('导航变英文', $$('.tab span')[1].textContent.trim(), 'Stats');
+    eq('首页 tab 变英文', $$('.tab span')[0].textContent.trim(), 'Home');
+    eq('导航变英文', $$('.tab span')[2].textContent.trim(), 'Stats');
     eq('html lang 属性已更新', document.documentElement.getAttribute('lang'), 'en');
     eq('类型按钮变英文', $('#kindChips .chip[data-kind="ej"]').textContent.trim(), 'Ejaculation');
     eq('标签按钮变英文', $('#tagChips .tag[data-tag="stress"]').textContent.trim(), 'Stressed');
@@ -541,7 +886,7 @@
     selLang.dispatchEvent(new Event('change'));
     eq('切回中文', D.lang, 'zh');
     eq('品牌名回中文', $('.brand span:last-child').textContent.trim(), zhBrand);
-    eq('导航回中文', $$('.tab span')[1].textContent.trim(), zhTab1);
+    eq('导航回中文', $$('.tab span')[2].textContent.trim(), zhTab1);
     eq('html lang 属性回中文', document.documentElement.getAttribute('lang'), 'zh-CN');
     eq('类型按钮回中文', $('#kindChips .chip[data-kind="ej"]').textContent.trim(), '射精');
 

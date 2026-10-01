@@ -1,6 +1,6 @@
 /* 私密日志 · 离线缓存 Service Worker */
 /* 改动 index.html 后把这个版本号 +1，否则用户会继续看到缓存里的旧页面 */
-var CACHE = 'pj-v4';
+var CACHE = 'pj-v5';
 var ASSETS = [
   './',
   './index.html',

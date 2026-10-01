@@ -41,7 +41,6 @@ const LAYOUT_JS = `(async function(){
   var R = {};
 
   R.vw = vw(); R.vh = vh();
-  R.sw = document.documentElement.scrollWidth;
 
   // 元素是否处在可滚动祖先里（那种溢出是故意的，不算问题）
   function inScrollBox(el){
@@ -54,20 +53,42 @@ const LAYOUT_JS = `(async function(){
     return false;
   }
 
-  // 1) 横向溢出
-  R.over = [];
-  var all = document.querySelectorAll('body *');
-  for(var i=0;i<all.length;i++){
-    var e = all[i];
-    if(!e.getClientRects().length) continue;
-    var cs = getComputedStyle(e);
-    if(cs.display === 'none' || cs.visibility === 'hidden') continue;
-    var b = e.getBoundingClientRect();
-    if(b.width > 0 && b.right > vw() + 1 && !inScrollBox(e)){
-      R.over.push(e.tagName + '.' + String(e.className || '').split(' ')[0]);
+  // 横向溢出：默认页是首页，先量首页，切到日历后再量一次
+  function overflow(){
+    var out = [];
+    var all = document.querySelectorAll('body *');
+    for(var i=0;i<all.length;i++){
+      var e = all[i];
+      if(!e.getClientRects().length) continue;
+      var cs = getComputedStyle(e);
+      if(cs.display === 'none' || cs.visibility === 'hidden') continue;
+      var b = e.getBoundingClientRect();
+      if(b.width > 0 && b.right > vw() + 1 && !inScrollBox(e)){
+        out.push(e.tagName + '.' + String(e.className || '').split(' ')[0]);
+      }
     }
+    return out.slice(0, 6);
   }
-  R.over = R.over.slice(0, 6);
+  function hgt(s){ var e = document.querySelector(s); return e ? Math.round(e.getBoundingClientRect().height) : -1; }
+
+  // 0) 首页（默认落地页）
+  R.homeOver = overflow();
+  R.home = { tbtn: hgt('.tbtn'), tplus: hgt('.tplus') };
+  R.homeBtnFits = (function(){
+    var g = document.querySelector('.timer-btns');
+    if(!g) return true;
+    var b = g.getBoundingClientRect();
+    return b.left >= -1 && b.right <= vw() + 1;
+  })();
+
+  // 剩下的检查都在日历页做
+  document.querySelectorAll('.tab')[1].click();
+  await sleep(180);
+
+  R.sw = document.documentElement.scrollWidth;
+
+  // 1) 横向溢出
+  R.over = overflow();
 
   // 2) 日历 42 格、第 7 列不越界
   var cells = document.querySelectorAll('#calGrid .cell');
@@ -83,7 +104,6 @@ const LAYOUT_JS = `(async function(){
   R.tbTop = Math.round(document.querySelector('.tabbar .inner').getBoundingClientRect().top);
 
   // 4) 触控目标高度（Android 建议 >= 44px）
-  function hgt(s){ var e = document.querySelector(s); return e ? Math.round(e.getBoundingClientRect().height) : -1; }
   R.touch = { add: hgt('.btn-add'), tab: hgt('.tab'), nav: hgt('.nav-btn'), rec: hgt('.rec-item'), chip: hgt('.chip') };
 
   // 5) 滚到底，看底栏有没有压住内容
@@ -93,6 +113,19 @@ const LAYOUT_JS = `(async function(){
   var last = boxes[boxes.length - 1].getBoundingClientRect();
   R.gap = R.tbTop - Math.round(last.bottom);
   window.scrollTo(0, 0);
+
+  // 5b) 设置页：主题色色板在窄屏下会不会被挤出去
+  document.querySelectorAll('.tab')[3].click();
+  await sleep(200);
+  R.setOver = overflow();
+  var pk = document.getElementById('accentPicker').getBoundingClientRect();
+  R.accent = {
+    fits: pk.left >= -1 && pk.right <= vw() + 1,
+    count: document.querySelectorAll('.accent-dot').length,
+    dot: Math.round(document.querySelector('.accent-dot').getBoundingClientRect().width)
+  };
+  document.querySelectorAll('.tab')[1].click();
+  await sleep(160);
 
   // 6) 记录弹层：内容放不下时能否滚动到底、按钮能否点到
   document.getElementById('quickAdd').click();
@@ -128,6 +161,15 @@ const LAYOUT_JS = `(async function(){
     btnCount: document.querySelectorAll('#keypad button').length,
     dotsTop: Math.round(document.querySelector('.pin-dots').getBoundingClientRect().top)
   };
+
+  // 7b) 指纹按钮出现时键盘还放得下吗？
+  // 浏览器里没有原生桥，按钮不会自己露出来，这里手工摆出那一态再量一次。
+  document.getElementById('lockScreen').classList.add('has-bio');
+  document.getElementById('bioBtn').hidden = false;
+  await sleep(90);
+  var kp2 = document.getElementById('keypad').getBoundingClientRect();
+  R.lock.bioFits = kp2.bottom <= vh() + 1 && kp2.top >= -1;
+  R.lock.bioBtnH = Math.round(document.getElementById('bioBtn').getBoundingClientRect().height);
   return R;
 })()`;
 
@@ -150,12 +192,21 @@ function judgeLayout(d) {
   const p = [];
   if (d.sw > d.vw) p.push(`页面横向溢出 scrollWidth ${d.sw} > ${d.vw}`);
   if (d.over.length) p.push('越界元素 ' + d.over.join(','));
+  if (d.homeOver.length) p.push('首页越界元素 ' + d.homeOver.join(','));
+  if (d.setOver.length) p.push('设置页越界元素 ' + d.setOver.join(','));
+  if (!d.accent.fits) p.push('主题色色板溢出');
+  if (d.accent.count !== 6) p.push(`主题色色块数 ${d.accent.count}（应为 6）`);
+  if (d.accent.dot > 0 && d.accent.dot < 28) p.push(`主题色色块过小 ${d.accent.dot}px`);
+  if (!d.homeBtnFits) p.push('首页计时按钮组越界');
+  if (d.home.tbtn > 0 && d.home.tbtn < 44) p.push(`计时主按钮过小 ${d.home.tbtn}px`);
+  if (d.home.tplus > 0 && d.home.tplus < 44) p.push(`加号按钮过小 ${d.home.tplus}px`);
   if (d.cells !== 42) p.push(`日历格子数 ${d.cells}（应为 42）`);
   if (d.col7 > d.vw) p.push('日历第 7 列越界');
   if (!d.tabsOk) p.push('底部导航越界');
   if (d.gap < 0) p.push(`底栏遮挡内容 ${-d.gap}px`);
   if (!d.sheet.actVisible) p.push('弹层操作按钮不可见');
   if (!d.lock.fits) p.push('隐私锁键盘溢出屏幕');
+  if (!d.lock.bioFits) p.push('出现指纹按钮时键盘溢出屏幕');
   if (!d.lock.circle) p.push(`隐私锁按键不是正圆（${d.lock.btnW}×${d.lock.btnH} 比例 ${d.lock.ratio}）`);
   if (d.lock.btnCount !== 12) p.push(`键盘按键数 ${d.lock.btnCount}（应为 12）`);
   if (d.touch.add > 0 && d.touch.add < 44) p.push(`主按钮过小 ${d.touch.add}px`);
@@ -251,7 +302,8 @@ function sleepSync(ms) {
         ` 按键 ${(d.lock.btnW + '×' + d.lock.btnH).padEnd(15)}` +
         ` 圆 ${d.lock.circle ? '是' : '否'}` +
         ` 底栏余量 ${String(d.gap).padStart(4)}px` +
-        ` 弹层按钮 ${d.sheet.actVisible ? '可见' : '不可见'}`
+        ` 弹层按钮 ${d.sheet.actVisible ? '可见' : '不可见'}` +
+        ` 指纹态键盘 ${d.lock.bioFits ? '放得下' : '溢出'}`
       );
       if (problems.length) console.log('         ' + problems.join('; '));
     }

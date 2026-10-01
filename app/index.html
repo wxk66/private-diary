@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-theme="light">
+<html lang="zh-CN" data-theme="light" data-accent="violet">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -19,19 +19,43 @@
   --bg:#f3f4f8; --card:#ffffff; --card-2:#f6f7fb;
   --line:#e5e7f0; --line-2:#eef0f6;
   --text:#191b23; --text-2:#575e6d; --text-3:#99a0af;
-  --accent:#5452e2; --accent-2:#4340cf; --accent-soft:#ededfd; --accent-on:#ffffff;
   --danger:#e5484d; --danger-soft:#fdeeee;
-  --i1:#eceefc; --i2:#d9daf8; --i3:#b9bbf3; --i4:#9294e9;
-  --h0:#eceef4; --h1:#dad9f7; --h2:#bdbef2; --h3:#9698ea; --h4:#6d70e2;
+
+  /* ---- 主题色 ----
+     只有 --accent 是手写的，其余全部由它派生（color-mix 本来就在用，见 .topbar）。
+     这样加一套配色只需要在文件末尾补一行 --accent，派生值会自动跟着变。
+     浅色主题下 --accent 偏深（要能压住白字），深色主题下换成同色相的亮版本。 */
+  --accent:#5452e2;
+  --accent-on:#ffffff;                                         /* 填充块上的文字/图标 */
+  --accent-2:color-mix(in srgb, var(--accent) 86%, #000);      /* 浅底上的强调文字，更深 */
+  --accent-soft:color-mix(in srgb, var(--accent) 11%, #fff);   /* 选中态浅底 */
+  --accent-invert:color-mix(in srgb, var(--accent) 55%, #fff); /* 深色底（toast）上的强调色 */
+  --grad:linear-gradient(150deg, color-mix(in srgb, var(--accent) 82%, #fff), color-mix(in srgb, var(--accent) 90%, #000));
+  --glow:color-mix(in srgb, var(--accent) 6%, transparent);
+  --shadow-accent:color-mix(in srgb, var(--accent) 32%, transparent);
+  /* 日历按次数着色（1~4 级）与热力图的深浅梯度 */
+  --i1:color-mix(in srgb, var(--accent) 10%, #fff);
+  --i2:color-mix(in srgb, var(--accent) 24%, #fff);
+  --i3:color-mix(in srgb, var(--accent) 42%, #fff);
+  --i4:color-mix(in srgb, var(--accent) 64%, #fff);
+  --h0:#eceef4;
+  --h1:color-mix(in srgb, var(--accent) 22%, #fff);
+  --h2:color-mix(in srgb, var(--accent) 40%, #fff);
+  --h3:color-mix(in srgb, var(--accent) 62%, #fff);
+  --h4:color-mix(in srgb, var(--accent) 84%, #fff);
+
+  /* ---- 记录类型色 ----
+     刻意**不跟着主题色走**：它们是数据本身的颜色（日历圆点、类型分布、类型按钮），
+     换了主题色还要保持稳定，否则「射精=紫」这件事在换色后就对不上历史了。
+     另外 --k-fl 是青色，如果跟着主题色走，选青色主题时就和它撞了。 */
   --k-ej:#5452e2; --k-fl:#0d9e90; --k-other:#8b94a5;
   --k-ej-bg:#ededfd; --k-fl-bg:#e0f5f2; --k-other-bg:#eef1f5;
+
   --warn-fg:#b45309; --warn-bg:#fdf4e3; --warn-line:#f0ddb2;
   --press:rgba(20,22,45,.06);
   --shadow:0 1px 2px rgba(23,26,54,.045), 0 8px 24px rgba(23,26,54,.055);
   --shadow-lg:0 16px 48px rgba(23,26,54,.22);
   --shadow-bar:0 10px 32px rgba(23,26,54,.14);
-  --grad:linear-gradient(150deg,#6a69f0,#4947d4);
-  --glow:rgba(84,82,226,.055);
   --radius:18px; --radius-sm:12px;
   --safe-b:env(safe-area-inset-bottom,0px);
   --safe-t:env(safe-area-inset-top,0px);
@@ -40,20 +64,62 @@
   --bg:#0e0f14; --card:#161822; --card-2:#1c1f2b;
   --line:#262a38; --line-2:#20232e;
   --text:#f0f2f8; --text-2:#a6adbd; --text-3:#6f7789;
-  --accent:#8a8af8; --accent-2:#a4a4fb; --accent-soft:#262848; --accent-on:#11131d;
   --danger:#ff6b71; --danger-soft:#2c1b1e;
-  --i1:#20223a; --i2:#2e3160; --i3:#484b8c; --i4:#666ac2;
-  --h0:#20232e; --h1:#2c2f55; --h2:#3f4384; --h3:#585da8; --h4:#7e83dd;
+
+  /* 深色主题：同一套派生规则，只是换成往黑处混、底色换成 --bg。
+     强调色在这里是「亮」的，所以填充块上的字要反过来用深色（见下面的按钮规则）——
+     青色/绿色/琥珀这类亮色上压白字，对比度只有 2.5:1，读不清。 */
+  --accent:#8a8af8;
+  --accent-on:#11131d;
+  --accent-2:color-mix(in srgb, var(--accent) 80%, #fff);
+  --accent-soft:color-mix(in srgb, var(--accent) 15%, #161822);
+  --accent-invert:color-mix(in srgb, var(--accent) 58%, #000);
+  --grad:linear-gradient(150deg, var(--accent), color-mix(in srgb, var(--accent) 78%, #000));
+  --glow:color-mix(in srgb, var(--accent) 7%, transparent);
+  --shadow-accent:color-mix(in srgb, var(--accent) 26%, transparent);
+  --i1:color-mix(in srgb, var(--accent) 15%, #0e0f14);
+  --i2:color-mix(in srgb, var(--accent) 28%, #0e0f14);
+  --i3:color-mix(in srgb, var(--accent) 49%, #0e0f14);
+  --i4:color-mix(in srgb, var(--accent) 73%, #0e0f14);
+  --h0:#20232e;
+  --h1:color-mix(in srgb, var(--accent) 26%, #0e0f14);
+  --h2:color-mix(in srgb, var(--accent) 45%, #0e0f14);
+  --h3:color-mix(in srgb, var(--accent) 62%, #0e0f14);
+  --h4:color-mix(in srgb, var(--accent) 88%, #0e0f14);
+
   --k-ej:#8a8af8; --k-fl:#34d4bc; --k-other:#7d8798;
   --k-ej-bg:#262848; --k-fl-bg:#14312c; --k-other-bg:#232633;
+
   --warn-fg:#f2b544; --warn-bg:#2d2513; --warn-line:#4a3d1c;
   --press:rgba(255,255,255,.08);
   --shadow:0 1px 2px rgba(0,0,0,.42), 0 8px 24px rgba(0,0,0,.30);
   --shadow-lg:0 16px 48px rgba(0,0,0,.62);
   --shadow-bar:0 10px 32px rgba(0,0,0,.5);
-  --grad:linear-gradient(150deg,#8282f6,#5c5ce0);
-  --glow:rgba(122,122,246,.07);
 }
+
+/* ---- 主题色候选 ----
+   每个颜色写两条：浅色一条、深色一条（深色下要用更亮的同色相）。
+   同一组规则同时命中 <html data-accent> 和设置页里的色块 ——
+   色块自己带 --accent，所以它的底色和选中圈都不用另外写颜色。
+   必须放在上面两个块之后：选择器权重都是 (0,1,0)，靠顺序取胜。 */
+[data-accent="violet"]{ --accent:#5452e2; }
+[data-accent="blue"]{ --accent:#2563eb; }
+[data-accent="cyan"]{ --accent:#0b7d8f; }
+[data-accent="green"]{ --accent:#0f7a4e; }
+[data-accent="amber"]{ --accent:#c2410c; }
+[data-accent="rose"]{ --accent:#c9345f; }
+[data-theme="dark"][data-accent="violet"],
+[data-theme="dark"] [data-accent="violet"]{ --accent:#8a8af8; }
+[data-theme="dark"][data-accent="blue"],
+[data-theme="dark"] [data-accent="blue"]{ --accent:#78a5fb; }
+[data-theme="dark"][data-accent="cyan"],
+[data-theme="dark"] [data-accent="cyan"]{ --accent:#4fc7d8; }
+[data-theme="dark"][data-accent="green"],
+[data-theme="dark"] [data-accent="green"]{ --accent:#4ecf8b; }
+[data-theme="dark"][data-accent="amber"],
+[data-theme="dark"] [data-accent="amber"]{ --accent:#fb9a4b; }
+[data-theme="dark"][data-accent="rose"],
+[data-theme="dark"] [data-accent="rose"]{ --accent:#fb7fa0; }
 
 /* ============ 基础 ============ */
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -93,7 +159,7 @@ button:focus-visible,select:focus-visible{outline:2px solid var(--accent);outlin
 .brand .mark{
   width:23px;height:23px;border-radius:8px;
   background:var(--grad);
-  box-shadow:0 3px 9px rgba(84,82,226,.35);
+  box-shadow:0 3px 9px var(--shadow-accent);
   display:flex;align-items:center;justify-content:center;flex:0 0 auto;
 }
 [data-theme="dark"] .brand .mark{box-shadow:0 3px 9px rgba(0,0,0,.5)}
@@ -173,16 +239,56 @@ main{flex:1;padding:2px 14px calc(112px + var(--safe-b))}
 /* ============ 主按钮 ============ */
 .btn-add{
   width:100%;height:54px;border-radius:16px;margin:2px 0 12px;
-  background:var(--grad);color:#fff;
+  background:var(--grad);color:var(--accent-on);
   font-size:16px;font-weight:650;letter-spacing:.6px;
   display:flex;align-items:center;justify-content:center;gap:7px;
-  box-shadow:0 8px 22px rgba(84,82,226,.32), inset 0 1px 0 rgba(255,255,255,.18);
+  box-shadow:0 8px 22px var(--shadow-accent), inset 0 1px 0 rgba(255,255,255,.18);
   transition:transform .16s ease,box-shadow .16s ease;
 }
 [data-theme="dark"] .btn-add{box-shadow:0 8px 22px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.14)}
-.btn-add:active{transform:scale(.975);box-shadow:0 3px 10px rgba(84,82,226,.3)}
+.btn-add:active{transform:scale(.975);box-shadow:0 3px 10px var(--shadow-accent)}
 .btn-add svg{width:20px;height:20px}
 .btn-add small{font-size:11.5px;font-weight:500;opacity:.85;margin-left:2px}
+
+/* ============ 首页 · 计时 ============ */
+.timer{display:flex;flex-direction:column;align-items:center;padding:24px 16px 22px}
+.timer-time{
+  font-size:42px;font-weight:750;letter-spacing:-1.4px;line-height:1;
+  font-variant-numeric:tabular-nums;color:var(--text);
+  transition:color .2s ease;
+}
+.timer.run .timer-time{color:var(--accent)}
+[data-theme="dark"] .timer.run .timer-time{color:var(--accent-2)}
+.timer-state{font-size:12.5px;color:var(--text-3);margin-top:10px;text-align:center;line-height:1.5;min-height:19px}
+/* 三列网格：中间那格放主按钮，右侧放「加号」。
+   这样主按钮始终在卡片正中央，不会被右侧的加号顶偏。 */
+.timer-btns{
+  display:grid;grid-template-columns:52px 84px 52px;align-items:center;gap:15px;
+  margin-top:21px;justify-content:center;
+}
+.tbtn{
+  grid-column:2;width:84px;height:84px;border-radius:50%;
+  background:var(--grad);color:var(--accent-on);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 10px 26px var(--shadow-accent), inset 0 1px 0 rgba(255,255,255,.2);
+  transition:transform .16s ease,box-shadow .18s ease,background .22s ease;
+}
+[data-theme="dark"] .tbtn{box-shadow:0 10px 26px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.14)}
+.tbtn svg{width:34px;height:34px}
+.tbtn:active{transform:scale(.93)}
+.tbtn.stop{background:linear-gradient(150deg,#f0717a,#e5484d);color:#fff;animation:pulse 2.1s ease-in-out infinite}
+[data-theme="dark"] .tbtn.stop{background:linear-gradient(150deg,#ff8086,#e5484d);color:#fff}
+@keyframes pulse{
+  0%,100%{box-shadow:0 10px 26px rgba(229,72,77,.34), inset 0 1px 0 rgba(255,255,255,.2), 0 0 0 0 rgba(229,72,77,.22)}
+  55%{box-shadow:0 10px 26px rgba(229,72,77,.34), inset 0 1px 0 rgba(255,255,255,.2), 0 0 0 13px rgba(229,72,77,0)}
+}
+.tplus{
+  grid-column:3;width:52px;height:52px;border-radius:50%;
+  background:var(--card-2);border:1.5px solid var(--line);color:var(--text-2);
+  display:flex;align-items:center;justify-content:center;transition:.16s;
+}
+.tplus svg{width:22px;height:22px}
+.tplus:active{transform:scale(.9);border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
 
 /* ============ 日详情 ============ */
 .day-head{display:flex;align-items:center;justify-content:space-between;padding:15px 15px 11px}
@@ -206,6 +312,8 @@ main{flex:1;padding:2px 14px calc(112px + var(--safe-b))}
 .rec-item .info{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
 .rec-item .row1{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
 .rec-item .vol{font-size:12px;font-weight:650;color:var(--text-2);font-variant-numeric:tabular-nums}
+.rec-item .dur{font-size:12px;font-weight:650;color:var(--accent);font-variant-numeric:tabular-nums}
+[data-theme="dark"] .rec-item .dur{color:var(--accent-2)}
 .rec-item .n{font-size:12px;color:var(--text-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .rec-item .tg{font-size:11.5px;font-weight:600;color:var(--accent);opacity:.9;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 [data-theme="dark"] .rec-item .tg{color:var(--accent-2)}
@@ -308,6 +416,25 @@ select.sel{
 .sw:active::after{width:26px}
 .sw.on:active::after{transform:translateX(16px)}
 .sw[disabled]{opacity:.4;pointer-events:none}
+
+/* ---- 主题色选择 ---- */
+/* 色块自带 --accent（见文件顶部的配色规则），所以底色和选中圈都不用再写颜色 */
+.set-row.accent-row{flex-direction:column;align-items:stretch;gap:12px}
+.accent-picker{display:flex;flex-wrap:wrap;gap:11px}
+.accent-dot{
+  width:32px;height:32px;border-radius:50%;flex:0 0 auto;position:relative;
+  background:var(--accent);
+  box-shadow:inset 0 0 0 1px rgba(20,22,45,.10);
+  transition:transform .16s cubic-bezier(.3,1.2,.5,1);
+}
+[data-theme="dark"] .accent-dot{box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+.accent-dot::after{
+  content:"";position:absolute;inset:-5px;border-radius:50%;
+  border:2px solid transparent;transition:border-color .16s ease;
+}
+.accent-dot.on::after{border-color:var(--accent)}
+.accent-dot.on{transform:scale(1.06)}
+.accent-dot:active{transform:scale(.9)}
 input.tinput{
   appearance:none;-webkit-appearance:none;
   background:var(--card-2);border:1px solid var(--line);border-radius:11px;
@@ -395,12 +522,12 @@ input.tinput[disabled]{opacity:.45;pointer-events:none}
 }
 .chip i{width:7px;height:7px;border-radius:50%;background:currentColor;display:block;flex:0 0 auto}
 .chip:active{transform:scale(.95)}
-.chip.on{color:#fff;border-color:transparent;box-shadow:0 5px 14px rgba(23,26,54,.2)}
+.chip.on{color:var(--accent-on);border-color:transparent;box-shadow:0 5px 14px rgba(23,26,54,.2)}
 .chip.on[data-kind="ej"]{background:var(--k-ej)}
 .chip.on[data-kind="fl"]{background:var(--k-fl)}
 .chip.on[data-kind="other"]{background:var(--k-other)}
-.chip.on i{background:#fff}
-[data-theme="dark"] .chip.on{color:#11131d;box-shadow:0 5px 14px rgba(0,0,0,.45)}
+.chip.on i{background:var(--accent-on)}
+[data-theme="dark"] .chip.on{box-shadow:0 5px 14px rgba(0,0,0,.45)}
 
 /* ---- 精液量 ---- */
 .vol-field{overflow:hidden;transition:max-height .26s ease,opacity .2s ease,margin .26s ease}
@@ -419,6 +546,20 @@ input.tinput[disabled]{opacity:.45;pointer-events:none}
 .vol-hint{font-size:11.5px;color:var(--text-3);margin-top:7px;display:flex;justify-content:space-between;gap:8px}
 .vol-hint b{color:var(--text-2);font-weight:650;cursor:pointer}
 .vol-hint b:active{color:var(--accent)}
+
+/* ---- 用时（分 + 秒）---- */
+.dur-input{display:flex;align-items:center;gap:10px}
+.dur-input .dcell{flex:1;position:relative;display:block}
+.dur-input input{
+  width:100%;background:var(--card-2);border:1.5px solid var(--line);border-radius:13px;
+  padding:12px 42px 12px 14px;font-size:17px;font-weight:650;outline:none;
+  font-variant-numeric:tabular-nums;transition:.16s;
+}
+.dur-input input:focus{border-color:var(--accent);background:var(--card);box-shadow:0 0 0 3.5px var(--accent-soft)}
+.dur-input .unit{
+  position:absolute;right:14px;top:50%;transform:translateY(-50%);
+  font-size:13px;color:var(--text-3);font-weight:600;pointer-events:none;
+}
 
 /* ---- 类型标记 ---- */
 .kbadge{
@@ -499,7 +640,7 @@ input.tinput[disabled]{opacity:.45;pointer-events:none}
 .sheet-actions{display:flex;gap:10px;margin-top:19px}
 .sheet-actions button{flex:1;height:48px;border-radius:14px;font-size:15px;font-weight:650;transition:.16s}
 .sheet-actions button:active{transform:scale(.97)}
-.b-primary{background:var(--grad);color:#fff;box-shadow:0 6px 16px rgba(84,82,226,.28)}
+.b-primary{background:var(--grad);color:var(--accent-on);box-shadow:0 6px 16px var(--shadow-accent)}
 [data-theme="dark"] .b-primary{box-shadow:0 6px 16px rgba(0,0,0,.5)}
 .b-danger{background:var(--danger-soft);color:var(--danger)}
 .b-plain{background:var(--card-2);color:var(--text-2);border:1px solid var(--line)}
@@ -561,7 +702,7 @@ input.tinput[disabled]{opacity:.45;pointer-events:none}
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
 .gdist-row .track{flex:1;height:9px;border-radius:99px;background:var(--card-2);overflow:hidden}
-.gdist-row .track span{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#8f8ef2,#5452e2);transition:width .4s cubic-bezier(.3,1.2,.5,1)}
+.gdist-row .track span{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,color-mix(in srgb,var(--accent) 65%,#fff),var(--accent));transition:width .4s cubic-bezier(.3,1.2,.5,1)}
 .gdist-row .ct{font-size:12.5px;font-weight:650;color:var(--text-2);width:52px;text-align:right;flex:0 0 auto;font-variant-numeric:tabular-nums}
 .gdist-row .ct em{font-style:normal;color:var(--text-3);font-weight:500;font-size:11px}
 
@@ -580,7 +721,7 @@ html[lang="en"] .gdist-row .nm{width:86px}
 .lock .lk-mark{
   width:54px;height:54px;border-radius:18px;background:var(--grad);
   display:flex;align-items:center;justify-content:center;margin-bottom:19px;
-  box-shadow:0 8px 22px rgba(84,82,226,.35);flex:0 0 auto;
+  box-shadow:0 8px 22px var(--shadow-accent);flex:0 0 auto;
 }
 [data-theme="dark"] .lock .lk-mark{box-shadow:0 8px 22px rgba(0,0,0,.55)}
 .lock .lk-mark::after{content:"";width:16px;height:16px;border-radius:50%;background:#fff}
@@ -590,21 +731,37 @@ html[lang="en"] .gdist-row .nm{width:86px}
 .pin-dots i{width:13px;height:13px;border-radius:50%;background:var(--line);transition:.18s;flex:0 0 auto}
 .pin-dots i.on{background:var(--accent);transform:scale(1.15);box-shadow:0 0 0 4px var(--accent-soft)}
 
+/* 指纹解锁按钮：只有原生报告「有指纹硬件且已录入」时才显示（见 bioSupported）。
+   它占的纵向空间通过 --lk-extra 从键盘的可用高度里扣掉，
+   否则矮屏上键盘会被顶出屏幕。 */
+.bio-btn{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  height:42px;padding:0 18px;border-radius:99px;
+  background:var(--card);border:1px solid var(--line-2);box-shadow:var(--shadow);
+  color:var(--accent);font-size:13.5px;font-weight:600;
+  margin-bottom:22px;transition:.16s;
+}
+.bio-btn svg{width:19px;height:19px}
+.bio-btn:active{transform:scale(.95);background:var(--accent-soft)}
+[data-theme="dark"] .bio-btn{color:var(--accent-2)}
+
 /* 键盘按键必须是正圆。
    关键是**边长由同一个变量决定**：宽、高都取 --kp，再配 aspect-ratio 兜底。
    早期写成 height:64px + border-radius:50%，但 3 列网格每列约 81px 宽，
    81×64 配 50% 圆角就渲染成椭圆了。
    --kp 同时受三件事约束：单列不能宽过容器（20vw）、4 行加间距不能高过屏幕
    （(100vh - 230px)/4，230px 是标题/圆点/留白等非键盘部分的实测开销）、
-   以及一个上下限。--kpg 同理随高度收缩，横屏矮屏才不会把键盘顶出去。 */
+   以及一个上下限。--kpg 同理随高度收缩，横屏矮屏才不会把键盘顶出去。
+   --lk-extra 是「指纹按钮」出现时额外占掉的高度，默认 0。 */
 .keypad{
-  --kp: clamp(44px, min(20vw, calc((100vh - 230px) / 4)), 76px);
+  --kp: clamp(44px, min(20vw, calc((100vh - 230px - var(--lk-extra, 0px)) / 4)), 76px);
   --kpg: clamp(6px, min(3.2vw, 1.8vh), 14px);
   display:grid;
   grid-template-columns:repeat(3, var(--kp));
   gap:var(--kpg);
   justify-content:center;
 }
+.lock.has-bio{--lk-extra:64px}
 .keypad button{
   width:var(--kp);height:var(--kp);aspect-ratio:1/1;border-radius:50%;
   background:var(--card);border:1px solid var(--line-2);
@@ -627,6 +784,9 @@ html[lang="en"] .gdist-row .nm{width:86px}
   .lock .lk-s{font-size:12px;margin-bottom:12px;height:16px}
   .pin-dots{gap:12px;margin-bottom:14px}
   .pin-dots i{width:11px;height:11px}
+  .bio-btn{height:36px;padding:0 14px;margin-bottom:12px;font-size:12.5px}
+  .bio-btn svg{width:17px;height:17px}
+  .lock.has-bio{--lk-extra:48px}
 }
 /* 极矮（老手机横屏）：留白已经压无可压，直接让位给键盘 —— 藏掉图标 */
 @media (max-height:420px){
@@ -634,6 +794,10 @@ html[lang="en"] .gdist-row .nm{width:86px}
   .lock .lk-mark{display:none}
   .lock .lk-s{margin-bottom:8px}
   .pin-dots{margin-bottom:10px}
+  /* 横屏时按钮排到键盘右侧也不现实，干脆只留图标、压到最小 */
+  .bio-btn{height:32px;padding:0 12px;margin-bottom:8px}
+  .bio-btn span{display:none}
+  .lock.has-bio{--lk-extra:40px}
 }
 
 /* ============ Toast ============ */
@@ -652,11 +816,10 @@ html[lang="en"] .gdist-row .nm{width:86px}
 .toast.has-act.on{pointer-events:auto}
 .toast .msg{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .toast .act{
-  font-size:13.5px;font-weight:750;color:#a5a4ff;flex:0 0 auto;
+  font-size:13.5px;font-weight:750;color:var(--accent-invert);flex:0 0 auto;
   padding:3px 8px;border-radius:9px;transition:.15s;
 }
 .toast .act:active{background:rgba(255,255,255,.16)}
-[data-theme="dark"] .toast .act{color:#4340cf}
 [data-theme="dark"] .toast .act:active{background:rgba(0,0,0,.08)}
 
 /* ============ 超窄屏（<350px） ============ */
@@ -685,6 +848,19 @@ html[lang="en"] .gdist-row .nm{width:86px}
     <div class="lk-mark"></div>
     <div class="lk-t" id="lockTitle">输入密码</div>
     <div class="lk-s" id="lockSub"></div>
+    <button class="bio-btn" id="bioBtn" type="button" hidden>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 3.6A8.4 8.4 0 0 0 3.6 12"/>
+        <path d="M20.4 12A8.4 8.4 0 0 0 12 3.6"/>
+        <path d="M6.2 8.6A6.3 6.3 0 0 1 12 5.7c2.2 0 4.2 1.1 5.4 2.8"/>
+        <path d="M8.4 12v2.6c0 1.7-.3 3.3-.9 4.8"/>
+        <path d="M12 8.4A3.6 3.6 0 0 0 8.4 12"/>
+        <path d="M15.6 12a3.6 3.6 0 0 0-3.6-3.6"/>
+        <path d="M15.6 12v3.2c0 1.6-.2 3.1-.7 4.5"/>
+        <path d="M18.4 15.2c0 1.5-.2 2.9-.5 4.2"/>
+      </svg>
+      <span data-i18n="lock.bio">指纹解锁</span>
+    </button>
     <div class="pin-dots" id="pinDots"></div>
     <div class="keypad" id="keypad"></div>
   </div>
@@ -697,8 +873,26 @@ html[lang="en"] .gdist-row .nm{width:86px}
   </header>
 
   <main>
+    <!-- ========== 首页（计时） ========== -->
+    <section class="view" id="view-home">
+      <div class="sec-title" style="margin-top:6px" data-i18n="home.title">计时</div>
+
+      <div class="card">
+        <div class="timer" id="timerBox">
+          <div class="timer-time" id="timerTime">00:00</div>
+          <div class="timer-state" id="timerState"></div>
+          <div class="timer-btns">
+            <button class="tbtn" id="timerBtn" type="button"></button>
+            <button class="tplus" id="timerPlus" type="button"></button>
+          </div>
+        </div>
+      </div>
+
+      <div class="mini" id="homeMini"></div>
+    </section>
+
     <!-- ========== 日历 ========== -->
-    <section class="view" id="view-calendar">
+    <section class="view" id="view-calendar" hidden>
       <div id="remindBox"></div>
 
       <div class="card">
@@ -750,6 +944,11 @@ html[lang="en"] .gdist-row .nm{width:86px}
         <div class="trend" id="trendWrap"></div>
       </div>
 
+      <div class="sec-title" data-i18n="stats.durTrend">用时趋势</div>
+      <div class="card">
+        <div class="trend" id="durTrendWrap"></div>
+      </div>
+
       <div class="sec-title" data-i18n="stats.heat">近半年热力图</div>
       <div class="card">
         <div class="heat-wrap"><div class="heat" id="heat"></div></div>
@@ -787,6 +986,13 @@ html[lang="en"] .gdist-row .nm{width:86px}
             <option value="dark" data-i18n="theme.dark">深色</option>
           </select>
         </div>
+        <div class="set-row accent-row">
+          <div class="sl">
+            <span data-i18n="set.accent">主题色</span>
+            <span class="s" id="accentHint"></span>
+          </div>
+          <div class="accent-picker" id="accentPicker" role="radiogroup" data-i18n-aria="set.accent"></div>
+        </div>
         <div class="set-row">
           <div class="sl"><span data-i18n="set.language">语言</span></div>
           <select class="sel" id="setLang">
@@ -812,6 +1018,13 @@ html[lang="en"] .gdist-row .nm{width:86px}
             <span class="s" id="pinHint" data-i18n="set.pinHint">打开应用时需输入 4 位密码</span>
           </div>
           <div class="sw" id="swPin" role="switch" tabindex="0" aria-checked="false" data-i18n-aria="set.pin"></div>
+        </div>
+        <div class="set-row" id="bioRow" hidden>
+          <div class="sl">
+            <span data-i18n="set.bioUnlock">指纹解锁</span>
+            <span class="s" id="bioHint" data-i18n="set.bioHint">用已录入的指纹快速解锁</span>
+          </div>
+          <div class="sw" id="swBio" role="switch" tabindex="0" aria-checked="false" data-i18n-aria="set.bioUnlock"></div>
         </div>
       </div>
 
@@ -885,7 +1098,11 @@ html[lang="en"] .gdist-row .nm{width:86px}
 
   <nav class="tabbar">
     <div class="inner">
-      <button class="tab active" data-view="calendar">
+      <button class="tab active" data-view="home">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.6 10.4 12 3.6l8.4 6.8"/><path d="M5.6 9.4v9.1a1.6 1.6 0 0 0 1.6 1.6h9.6a1.6 1.6 0 0 0 1.6-1.6V9.4"/></svg>
+        <span data-i18n="nav.home">首页</span>
+      </button>
+      <button class="tab" data-view="calendar">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16.5" rx="3.5"/><path d="M3 10h18M8 2.6v3.6M16 2.6v3.6"/></svg>
         <span data-i18n="nav.calendar">日历</span>
       </button>
@@ -921,6 +1138,24 @@ html[lang="en"] .gdist-row .nm{width:86px}
       <div class="vol-hint">
         <span id="volHint" data-i18n="sheet.volHint">按实际测量值填写，不确定就留空</span>
         <b id="volClear" data-i18n="common.clear">清除</b>
+      </div>
+    </div>
+
+    <div class="field" id="durField">
+      <label data-i18n="sheet.dur">用时（可选）</label>
+      <div class="dur-input">
+        <span class="dcell">
+          <input type="number" id="editDurMin" inputmode="numeric" min="0" max="999" data-i18n-ph="sheet.durPh">
+          <span class="unit" data-i18n="unit.min">分</span>
+        </span>
+        <span class="dcell">
+          <input type="number" id="editDurSec" inputmode="numeric" min="0" max="59" data-i18n-ph="sheet.durPh">
+          <span class="unit" data-i18n="unit.sec">秒</span>
+        </span>
+      </div>
+      <div class="vol-hint">
+        <span data-i18n="sheet.durHint">留空表示这次没有计时</span>
+        <b id="durClear" data-i18n="common.clear">清除</b>
       </div>
     </div>
 
@@ -962,6 +1197,9 @@ var DEFAULTS = {
   settings: {
     theme: 'system', weekStart: 1, pin: '', lastKind: 'ej',
     lang: 'system',        // system | zh | en
+    // 主题色 id，见 ACCENTS。只存 id 不存色值 ——
+    // 色值全在 CSS 里，换配色时老用户的数据不用跟着迁移
+    accent: 'violet',
     // 提醒阈值是「自律目标」而不是医学标准，默认取相对温和的起点，可自行调整
     remind: { on: true, week: 3, month: 10 },
     remindDismiss: {},
@@ -970,7 +1208,13 @@ var DEFAULTS = {
     pinSalt: '', pinIter: 0,
     // 连续输错后的锁定状态：{ n: 累计错误次数, until: 解锁时间戳 }
     pinFails: { n: 0, until: 0 },
+    // 指纹解锁：只有原生报告「有指纹硬件 + 已录入 + 系统设了锁屏」时才在设置页露出，
+    // 所以这个开关在浏览器版里永远是隐藏的，默认值给 true 不影响任何东西
+    bioUnlock: true,
     lastTags: [],
+    // 首页计时器。start 为 0 表示没在计时，否则是开始那一刻的时间戳（毫秒）。
+    // 存进设置里是为了让「切后台 / 页面被回收再打开」后还能接着计时
+    timer: { start: 0 },
     daily: { on: false, time: '21:00' }
   }
 };
@@ -999,6 +1243,7 @@ function load(){
     d.settings.remindDismiss = d.settings.remindDismiss || {};
     d.settings.daily = Object.assign({}, DEFAULTS.settings.daily, d.settings.daily || {});
     d.settings.pinFails = Object.assign({}, DEFAULTS.settings.pinFails, d.settings.pinFails || {});
+    d.settings.timer = Object.assign({}, DEFAULTS.settings.timer, d.settings.timer || {});
     if(!(d.settings.lastTags instanceof Array)) d.settings.lastTags = [];
     return d;
   }catch(e){ return clone(DEFAULTS); }
@@ -1021,10 +1266,24 @@ zh: {
   'unit.timesShort': '次',
   'unit.days': '天',
   'unit.mL': 'mL',
+  'unit.min': '分',
+  'unit.sec': '秒',
+  'unit.hour': '小时',
 
+  'nav.home': '首页',
   'nav.calendar': '日历',
   'nav.stats': '统计',
   'nav.settings': '设置',
+
+  'home.title': '计时',
+  'home.start': '开始计时',
+  'home.stop': '结束计时',
+  'home.running': '计时中…',
+  'home.addRecord': '添加记录',
+  'home.todayDur': '今日用时',
+  'home.todayCount': '今日次数',
+  'home.avgDur': '平均用时',
+  'home.timed': '已记录用时 {t}',
 
   'common.cancel': '取消',
   'common.delete': '删除',
@@ -1042,6 +1301,7 @@ zh: {
   'theme.dark': '深色',
   'theme.toggle': '切换主题',
   'theme.toast': '主题：{name}',
+  'toast.accent': '主题色：{name}',
 
   'lang.system': '跟随系统',
   'lang.zh': '中文',
@@ -1110,6 +1370,11 @@ zh: {
   'stats.more': '多',
   'stats.trendTotal': '12 个月合计 {n} 次',
   'stats.trendAvg': '月均 {n} 次',
+  'stats.durTrend': '用时趋势',
+  'stats.durEmpty': '还没有用时记录',
+  'stats.durTotal': '12 个月合计 {t}',
+  'stats.durAvg': '月均 {t}',
+  'stats.durFootN': '{n} 次有计时',
   'stats.empty': '还没有记录',
   'stats.noTags': '还没有打过标签',
   'stats.tagFoot': '共 {total} 个标签打点，分布在 {days} 天。{extra}标签只是你自己的观察记录，不代表因果关系。',
@@ -1127,6 +1392,9 @@ zh: {
   'detail.night': '本月深夜时段',
   'detail.volAvg': '精液量均值',
   'detail.volN': '有测量记录',
+  'detail.durAvg': '平均用时',
+  'detail.durMax': '最长用时',
+  'detail.durN': '有计时记录',
   'detail.first': '首次记录',
   'detail.last': '最近记录',
 
@@ -1150,6 +1418,13 @@ zh: {
 
   'set.appearance': '外观',
   'set.theme': '主题',
+  'set.accent': '主题色',
+  'accent.violet': '紫罗兰',
+  'accent.blue': '海蓝',
+  'accent.cyan': '青碧',
+  'accent.green': '森绿',
+  'accent.amber': '琥珀',
+  'accent.rose': '玫红',
   'set.language': '语言',
   'set.weekStart': '每周起始日',
   'set.monday': '星期一',
@@ -1158,6 +1433,12 @@ zh: {
   'set.pin': '隐私锁',
   'set.pinHint': '打开应用时需输入 4 位密码',
   'set.pinHintLegacy': '旧版密码，建议关掉后重新设置以启用更强的加密',
+  'set.bioUnlock': '指纹解锁',
+  'set.bioHint': '用已录入的指纹快速解锁',
+  'set.bioHintNoPin': '需要先开启隐私锁',
+  'set.bioNoDevice': '未检测到指纹设备，无法开启',
+  'set.bioNoEnroll': '系统里还没录入指纹，先去系统设置里录一个',
+  'set.bioNoLock': '需要先在系统设置里设好锁屏密码',
   'set.remind': '频率提醒',
   'set.remindOn': '开启提醒',
   'set.remindOnHint': '超出上限时在日历页提示',
@@ -1186,6 +1467,9 @@ zh: {
   'sheet.volLabel': '{name}量（可选）',
   'sheet.volPh': '留空表示未测量',
   'sheet.volHint': '按实际测量值填写，不确定就留空',
+  'sheet.dur': '用时（可选）',
+  'sheet.durHint': '留空表示这次没有计时',
+  'sheet.durPh': '0',
   'sheet.time': '时间',
   'sheet.note': '备注（可选）',
   'sheet.notePh': '想写点什么就写，比如当时的状态、心情…',
@@ -1204,6 +1488,9 @@ zh: {
   'lock.saveFail': '保存失败，请重试',
   'lock.verifyFail': '校验失败，请重试',
   'lock.keyDel': '删除',
+  'lock.bio': '指纹解锁',
+  'lock.bioWaiting': '请按压指纹传感器',
+  'lock.bioFail': '指纹未识别，请用密码',
   'notify.dailyBody': '今天过得怎么样？有没有影响到睡眠、工作和情绪？',
 
   'toast.saveFail': '保存失败：存储空间不足',
@@ -1233,6 +1520,10 @@ zh: {
   'toast.pinOn': '隐私锁已开启',
   'toast.pinOff': '隐私锁已关闭',
   'toast.pinCancel': '已取消设置',
+  'toast.bioOn': '指纹解锁已开启',
+  'toast.bioOff': '指纹解锁已关闭',
+  'toast.bioOk': '指纹验证通过',
+  'toast.bioNoPin': '请先开启隐私锁',
 
   'confirm.deleteRecord': '确定删除这条记录吗？',
   'confirm.import': '导入将覆盖当前全部记录，确定继续？',
@@ -1248,10 +1539,24 @@ en: {
   'unit.timesShort': '',
   'unit.days': 'days',
   'unit.mL': 'mL',
+  'unit.min': 'min',
+  'unit.sec': 's',
+  'unit.hour': 'h',
 
+  'nav.home': 'Home',
   'nav.calendar': 'Calendar',
   'nav.stats': 'Stats',
   'nav.settings': 'Settings',
+
+  'home.title': 'Timer',
+  'home.start': 'Start timing',
+  'home.stop': 'Stop timing',
+  'home.running': 'Timing…',
+  'home.addRecord': 'Add entry',
+  'home.todayDur': 'Time today',
+  'home.todayCount': 'Entries today',
+  'home.avgDur': 'Average',
+  'home.timed': 'Duration recorded · {t}',
 
   'common.cancel': 'Cancel',
   'common.delete': 'Delete',
@@ -1269,6 +1574,7 @@ en: {
   'theme.dark': 'Dark',
   'theme.toggle': 'Toggle theme',
   'theme.toast': 'Theme: {name}',
+  'toast.accent': 'Accent: {name}',
 
   'lang.system': 'System',
   'lang.zh': '中文',
@@ -1337,6 +1643,11 @@ en: {
   'stats.more': 'More',
   'stats.trendTotal': '12-month total: {n}',
   'stats.trendAvg': 'avg {n}/month',
+  'stats.durTrend': 'Duration trend',
+  'stats.durEmpty': 'No timed entries yet',
+  'stats.durTotal': '12-month total: {t}',
+  'stats.durAvg': 'avg {t}/month',
+  'stats.durFootN': '{n} timed',
   'stats.empty': 'No entries yet',
   'stats.noTags': 'No triggers tagged yet',
   'stats.tagFoot': '{total} tag hits across {days} days. {extra}Tags are your own observations, not evidence of causation.',
@@ -1354,6 +1665,9 @@ en: {
   'detail.night': 'Late-night this month',
   'detail.volAvg': 'Average volume',
   'detail.volN': 'Measurements',
+  'detail.durAvg': 'Average duration',
+  'detail.durMax': 'Longest duration',
+  'detail.durN': 'Timed entries',
   'detail.first': 'First entry',
   'detail.last': 'Latest entry',
 
@@ -1377,6 +1691,13 @@ en: {
 
   'set.appearance': 'Appearance',
   'set.theme': 'Theme',
+  'set.accent': 'Accent colour',
+  'accent.violet': 'Violet',
+  'accent.blue': 'Blue',
+  'accent.cyan': 'Cyan',
+  'accent.green': 'Green',
+  'accent.amber': 'Amber',
+  'accent.rose': 'Rose',
   'set.language': 'Language',
   'set.weekStart': 'Week starts on',
   'set.monday': 'Monday',
@@ -1385,6 +1706,12 @@ en: {
   'set.pin': 'Passcode lock',
   'set.pinHint': 'Requires a 4-digit passcode to open',
   'set.pinHintLegacy': 'Legacy passcode — turn it off and set it again for stronger hashing',
+  'set.bioUnlock': 'Fingerprint unlock',
+  'set.bioHint': 'Unlock quickly with an enrolled fingerprint',
+  'set.bioHintNoPin': 'Turn on the passcode lock first',
+  'set.bioNoDevice': 'No fingerprint sensor detected — cannot enable',
+  'set.bioNoEnroll': 'No fingerprint enrolled — add one in system settings first',
+  'set.bioNoLock': 'Set up a screen lock in system settings first',
   'set.remind': 'Frequency reminders',
   'set.remindOn': 'Enable reminders',
   'set.remindOnHint': 'Show a banner on the calendar when over the limit',
@@ -1413,6 +1740,9 @@ en: {
   'sheet.volLabel': '{name} amount (optional)',
   'sheet.volPh': 'Leave empty if not measured',
   'sheet.volHint': 'Enter your measured value; leave empty if unsure',
+  'sheet.dur': 'Duration (optional)',
+  'sheet.durHint': 'Leave empty if you did not time it',
+  'sheet.durPh': '0',
   'sheet.time': 'Time',
   'sheet.note': 'Note (optional)',
   'sheet.notePh': 'Anything you want to note — mood, state, what led to it…',
@@ -1431,6 +1761,9 @@ en: {
   'lock.saveFail': 'Could not save, try again',
   'lock.verifyFail': 'Verification failed, try again',
   'lock.keyDel': 'Del',
+  'lock.bio': 'Unlock with fingerprint',
+  'lock.bioWaiting': 'Touch the fingerprint sensor',
+  'lock.bioFail': 'Not recognised — use your passcode',
   'notify.dailyBody': 'How did today go? Is it affecting your sleep, work or mood?',
 
   'toast.saveFail': 'Save failed: out of storage',
@@ -1460,6 +1793,10 @@ en: {
   'toast.pinOn': 'Passcode lock enabled',
   'toast.pinOff': 'Passcode lock disabled',
   'toast.pinCancel': 'Setup cancelled',
+  'toast.bioOn': 'Fingerprint unlock on',
+  'toast.bioOff': 'Fingerprint unlock off',
+  'toast.bioOk': 'Fingerprint verified',
+  'toast.bioNoPin': 'Turn on the passcode lock first',
 
   'confirm.deleteRecord': 'Delete this entry?',
   'confirm.import': 'Importing will overwrite all current entries. Continue?',
@@ -1675,6 +2012,166 @@ function lastKind(){
   return KIND_MAP[k] ? k : 'ej';
 }
 
+/* ================= 用时 =================
+   统一以「秒」为单位存进记录的 d 字段，展示时才换算成时分秒。
+   用秒而不是分钟：首页计时器是按秒走的，存分钟会把 40 秒这种记录抹成 0。 */
+function normDur(rec){
+  if(!rec || rec.d === null || rec.d === undefined || rec.d === '') return null;
+  var n = Math.round(Number(rec.d));
+  return (isFinite(n) && n > 0) ? n : null;
+}
+/* 完整说法：「3 分 45 秒」/「3m 45s」 */
+function durText(sec){
+  if(sec === null || sec === undefined || sec === '') return '';
+  var n = Math.max(0, Math.round(Number(sec)));
+  if(!isFinite(n)) return '';
+  var h = Math.floor(n / 3600), m = Math.floor((n % 3600) / 60), s = n % 60;
+  if(LANG === 'zh'){
+    if(h) return h + ' 小时 ' + m + ' 分';
+    if(m) return s ? (m + ' 分 ' + s + ' 秒') : (m + ' 分');
+    return s + ' 秒';
+  }
+  if(h) return h + 'h ' + m + 'm';
+  if(m) return s ? (m + 'm ' + s + 's') : (m + 'm');
+  return s + 's';
+}
+/* 卡片里用的紧凑说法：值 + 单位分开，好套现有的 .mini / .big 排版 */
+function durParts(sec){
+  var n = Math.max(0, Math.round(Number(sec) || 0));
+  if(n < 60) return { n: String(n), u: t('unit.sec') };
+  var m = n / 60;
+  if(m < 60) return { n: String(m < 10 ? (Math.round(m * 10) / 10) : Math.round(m)), u: t('unit.min') };
+  return { n: String(Math.round(m / 60 * 10) / 10), u: t('unit.hour') };
+}
+function fmtClock(sec){
+  var n = Math.max(0, Math.floor(Number(sec) || 0));
+  var h = Math.floor(n / 3600), m = Math.floor((n % 3600) / 60), s = n % 60;
+  return (h ? (h + ':' + pad(m)) : pad(m)) + ':' + pad(s);
+}
+/* 图表轴上的分钟数：小值留一位小数，大值取整，否则要么糊成 0 要么挤成一串 */
+function fmtMin(sec){
+  var m = Number(sec) / 60;
+  return String(m >= 10 ? Math.round(m) : (Math.round(m * 10) / 10));
+}
+
+/* ================= 计时器 =================
+   开始时间存在 settings.timer.start 里，所以切后台、页面被回收再打开都还能接着走。 */
+var timerTick = null;
+function timerStartMs(){
+  var tm = S.settings.timer || {};
+  return Number(tm.start) > 0 ? Number(tm.start) : 0;
+}
+function timerRunning(){ return timerStartMs() > 0; }
+function timerElapsedSec(){
+  var st = timerStartMs();
+  if(!st) return 0;
+  return Math.max(0, Math.floor((Date.now() - st) / 1000));
+}
+function stopTimerTick(){ if(timerTick){ clearInterval(timerTick); timerTick = null; } }
+function tickTimer(){
+  if(!timerRunning()){ stopTimerTick(); return; }
+  var el = document.getElementById('timerTime');
+  if(el) el.textContent = fmtClock(timerElapsedSec());
+}
+function startTimerTick(){
+  if(timerTick) return;
+  timerTick = setInterval(tickTimer, 1000);
+}
+function timerStart(){
+  if(timerRunning()) return;
+  S.settings.timer = { start: Date.now() };
+  save();
+  renderTimer();
+  if(navigator.vibrate) navigator.vibrate(12);
+}
+/* 结束：先把用时落成一条记录，再自动打开记录页让人补内容。
+   这样即使用户在弹层里点了取消，用时也不会丢。 */
+function timerStop(){
+  if(!timerRunning()) return;
+  var sec = Math.max(1, timerElapsedSec());
+  S.settings.timer = { start: 0 };
+  stopTimerTick();
+  save();
+  renderTimer();
+  var k = todayKey();
+  var rec = addRecord(k, { t: nowHM(), d: sec });
+  selected = k;
+  cursor = new Date();
+  renderAll();
+  openSheet(k, rec.id);
+  if(navigator.vibrate) navigator.vibrate([14, 34, 14]);
+  toast(t('home.timed', { t: durText(sec) }));
+}
+function renderTimer(){
+  var run = timerRunning();
+  var time = document.getElementById('timerTime');
+  time.textContent = run ? fmtClock(timerElapsedSec()) : '00:00';
+  document.getElementById('timerBox').classList.toggle('run', run);
+  // 空闲时不写任何提示：那一行的高度留着（.timer-state 有 min-height），
+  // 否则开始/结束切换时按钮会上下跳
+  document.getElementById('timerState').textContent = run ? t('home.running') : '';
+
+  var b = document.getElementById('timerBtn');
+  b.className = 'tbtn' + (run ? ' stop' : '');
+  b.setAttribute('aria-label', t(run ? 'home.stop' : 'home.start'));
+  b.innerHTML = run
+    ? '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6.5" y="6.5" width="11" height="11" rx="2.4"/></svg>'
+    : '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.2v13.6L19 12z"/></svg>';
+
+  var p = document.getElementById('timerPlus');
+  p.setAttribute('aria-label', t('home.addRecord'));
+  p.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5.5v13M5.5 12h13"/></svg>';
+
+  if(run) startTimerTick(); else stopTimerTick();
+}
+/* 首页迷你统计：今日用时 / 今日次数 / 平均用时 */
+function homeStats(){
+  var list = recsOf(todayKey()), sec = 0;
+  for(var i=0;i<list.length;i++){
+    var d = normDur(list[i]);
+    if(d !== null) sec += d;
+  }
+  return { sec: sec, count: list.length };
+}
+function renderHomeMini(){
+  var hs = homeStats();
+  var ds = durStats();
+  var a = hs.sec ? durParts(hs.sec) : { n: '—', u: '' };
+  var b = ds.avg === null ? { n: '—', u: '' } : durParts(ds.avg);
+  document.getElementById('homeMini').innerHTML =
+    '<div class="m"><div class="v">' + esc(a.n) + (a.u ? '<i>' + esc(a.u) + '</i>' : '') + '</div><div class="k">' + esc(t('home.todayDur')) + '</div></div>' +
+    '<div class="m"><div class="v">' + hs.count + '<i>' + esc(t('unit.timesShort')) + '</i></div><div class="k">' + esc(t('home.todayCount')) + '</div></div>' +
+    '<div class="m"><div class="v">' + esc(b.n) + (b.u ? '<i>' + esc(b.u) + '</i>' : '') + '</div><div class="k">' + esc(t('home.avgDur')) + '</div></div>';
+}
+
+/* ================= 用时统计 ================= */
+function durStats(){
+  var ks = allDays(), sum = 0, n = 0, max = 0, months = {};
+  for(var i=0;i<ks.length;i++){
+    var p = parseKey(ks[i]), mk = p.getFullYear() + '-' + p.getMonth();
+    var list = S.records[ks[i]];
+    for(var j=0;j<list.length;j++){
+      var d = normDur(list[j]);
+      if(d === null) continue;
+      sum += d; n++;
+      if(d > max) max = d;
+      if(!months[mk]) months[mk] = { sum: 0, n: 0 };
+      months[mk].sum += d; months[mk].n++;
+    }
+  }
+  return { sum: sum, n: n, max: max, avg: n ? sum / n : null, months: months };
+}
+/* 近 n 个月的用时合计（秒）。某个月没有计时就是真的 0，不用编数据 */
+function durMonthSeries(n){
+  var now = new Date(), ms = durStats().months, out = [];
+  for(var i=n-1;i>=0;i--){
+    var d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    var hit = ms[d.getFullYear() + '-' + d.getMonth()] || { sum: 0, n: 0 };
+    out.push({ y: d.getFullYear(), m: d.getMonth(), sec: hit.sum, n: hit.n });
+  }
+  return out;
+}
+
 /* ================= 状态 ================= */
 var view = 'calendar';
 var cursor = new Date();
@@ -1696,6 +2193,47 @@ function applyTheme(){
   btn.innerHTML = th === 'dark'
     ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="4.3"/><path d="M12 2.2v2.3M12 19.5v2.3M2.2 12h2.3M19.5 12h2.3M5.1 5.1l1.6 1.6M17.3 17.3l1.6 1.6M18.9 5.1l-1.6 1.6M6.7 17.3l-1.6 1.6"/></svg>'
     : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.6A8.6 8.6 0 1 1 9.4 3.5a6.8 6.8 0 0 0 11.1 11.1z"/></svg>';
+}
+
+/* ================= 主题色 =================
+   只存 id，色值全在 CSS（[data-accent="xxx"] 一行 --accent），
+   深浅两套派生值也由 CSS 的 color-mix 算好。
+   用色板而不是自由取色器：每种颜色的浅色/深色版本都是挑过的，
+   保证按钮上的白字、浅底上的彩色文字都能读清；自由取色很容易选出一个
+   「深色主题下白字糊成一片」的颜色。 */
+var ACCENTS = ['violet', 'blue', 'cyan', 'green', 'amber', 'rose'];
+function accentId(){
+  var a = S.settings.accent;
+  return ACCENTS.indexOf(a) >= 0 ? a : 'violet';
+}
+function accentName(id){ return t('accent.' + id); }
+function applyAccent(){
+  document.documentElement.setAttribute('data-accent', accentId());
+}
+function renderAccentPicker(){
+  var el = document.getElementById('accentPicker');
+  if(!el) return;
+  var cur = accentId(), h = '';
+  for(var i=0;i<ACCENTS.length;i++){
+    var id = ACCENTS[i], on = (id === cur);
+    h += '<button type="button" class="accent-dot' + (on ? ' on' : '') + '"'
+       + ' data-accent="' + id + '" role="radio" aria-checked="' + (on ? 'true' : 'false') + '"'
+       + ' title="' + esc(accentName(id)) + '" aria-label="' + esc(accentName(id)) + '"></button>';
+  }
+  el.innerHTML = h;
+  document.getElementById('accentHint').textContent = accentName(cur);
+}
+function setAccent(id){
+  if(ACCENTS.indexOf(id) < 0) return;
+  // 注意判断条件要带上「存的值本身合法」：备份里被手改成脏值时，
+  // accentId() 会回落到 violet，此时点 violet 必须真的写回去，不能当没变而跳过
+  if(id === accentId() && S.settings.accent === id) return;
+  S.settings.accent = id;
+  save();
+  applyAccent();
+  renderAccentPicker();
+  if(navigator.vibrate) navigator.vibrate(6);
+  toast(t('toast.accent', { name: accentName(id) }));
 }
 
 /* ================= Toast ================= */
@@ -1728,13 +2266,14 @@ function toast(msg, action){
 }
 
 /* ================= 记录操作 ================= */
-/* o = { t:时间, n:备注, k:类型, v:精液量(mL), g:诱因标签数组 } */
+/* o = { t:时间, n:备注, k:类型, v:精液量(mL), d:用时(秒), g:诱因标签数组 } */
 function addRecord(dayKey, o){
   o = o || {};
   if(!S.records[dayKey]) S.records[dayKey] = [];
   var rec = { id: uid(), t: o.t || nowHM(), n: o.n || '' };
   if(o.k) rec.k = o.k;
   if(o.v !== undefined && o.v !== null && o.v !== '') rec.v = Number(o.v);
+  if(o.d !== undefined && o.d !== null && o.d !== '') rec.d = Math.round(Number(o.d));
   if(o.g && o.g.length) rec.g = o.g.slice();
   S.records[dayKey].push(rec);
   S.records[dayKey].sort(function(a,b){ return a.t.localeCompare(b.t); });
@@ -1755,6 +2294,7 @@ function updateRecord(dayKey, id, o){
     r.t = o.t; r.n = o.n;
     if(o.k) r.k = o.k; else delete r.k;
     if(o.v !== undefined && o.v !== null && o.v !== '') r.v = Number(o.v); else delete r.v;
+    if(o.d !== undefined && o.d !== null && o.d !== '') r.d = Math.round(Number(o.d)); else delete r.d;
     if(o.g && o.g.length) r.g = o.g.slice(); else delete r.g;
   }
   list.sort(function(a,b){ return a.t.localeCompare(b.t); });
@@ -2063,6 +2603,72 @@ function renderTrend(){
     + '<span>' + esc(t('stats.trendAvg', { n: (total / data.length).toFixed(1) })) + '</span></div>';
 }
 
+/* ---- 最近 N 个月的用时合计折线 ----
+   和上面的次数折线同一套画法，只是纵轴换成分钟。
+   画「合计」而不是「均值」：没有计时的月份是真的 0，不需要编数据填空档。 */
+function renderDurTrend(){
+  var el = document.getElementById('durTrendWrap');
+  var ds = durStats();
+  if(!ds.n){
+    el.innerHTML = '<div class="empty" style="padding:24px 0"><span class="em">○</span>'
+      + esc(t('stats.durEmpty')) + '</div>';
+    return;
+  }
+  var data = durMonthSeries(12), totalSec = 0, max = 0;
+  for(var i=0;i<data.length;i++){ totalSec += data[i].sec; if(data[i].sec > max) max = data[i].sec; }
+  if(max <= 0) max = 1;
+
+  var W = 320, H = 132, PT = 19, PB = 23, PL = 12, PR = 12;
+  var iw = W - PL - PR, ih = H - PT - PB;
+  var pts = [];
+  for(var i=0;i<data.length;i++){
+    pts.push([PL + iw * i / (data.length - 1), PT + ih * (1 - data[i].sec / max)]);
+  }
+  var dLine = '';
+  for(var i=0;i<pts.length;i++){
+    dLine += (i ? 'L' : 'M') + pts[i][0].toFixed(1) + ' ' + pts[i][1].toFixed(1);
+  }
+  var base = (PT + ih).toFixed(1);
+  var dArea = dLine + 'L' + pts[pts.length-1][0].toFixed(1) + ' ' + base
+                    + 'L' + pts[0][0].toFixed(1) + ' ' + base + 'Z';
+
+  var g = '';
+  for(var k=0;k<=2;k++){
+    var gy = (PT + ih * k / 2).toFixed(1);
+    g += '<line class="gl" x1="' + PL + '" y1="' + gy + '" x2="' + (W-PR) + '" y2="' + gy + '"/>';
+  }
+
+  var labelAt = {};
+  for(var li = data.length - 1; li >= 0; li -= 2) labelAt[li] = 1;
+
+  var marks = '', labels = '', maxShown = false;
+  for(var i=0;i<data.length;i++){
+    var last = (i === data.length - 1);
+    marks += '<circle class="pt' + (last ? ' now' : '') + '" cx="' + pts[i][0].toFixed(1)
+           + '" cy="' + pts[i][1].toFixed(1) + '" r="' + (last ? 4 : 2.6) + '"/>';
+    var isMax = (data[i].sec === max && data[i].sec > 0 && !maxShown);
+    if(last || i === 0 || isMax){
+      if(isMax) maxShown = true;
+      marks += '<text class="vl" x="' + pts[i][0].toFixed(1) + '" y="'
+             + (pts[i][1] - 8).toFixed(1) + '">' + esc(fmtMin(data[i].sec)) + '</text>';
+    }
+    if(labelAt[i]){
+      labels += '<text class="xl" x="' + pts[i][0].toFixed(1) + '" y="' + (H - 6) + '">'
+              + monthLabel(data[i].m) + '</text>';
+    }
+  }
+
+  el.innerHTML =
+    '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="xMidYMid meet">'
+    + g
+    + '<path class="ar" d="' + dArea + '"/>'
+    + '<path class="ln" d="' + dLine + '"/>'
+    + marks + labels
+    + '</svg>'
+    + '<div class="trend-foot"><span>' + esc(t('stats.durTotal', { t: durText(totalSec) })) + '</span>'
+    + '<span>' + esc(t('stats.durFootN', { n: ds.n })) + '</span></div>';
+}
+
 /* ---- 目标达成 ---- */
 /* 从上一周开始往前数，连续「整周不超过周上限」的周数。
    本周还没过完所以不计入；数到第一周有记录之前就停，避免新用户被算成达标一百多周。 */
@@ -2299,14 +2905,15 @@ function renderDay(){
     var html = '';
     for(var i=0;i<recs.length;i++){
       var r = recs[i];
-      var vt = volText(r), tt = tagsText(r);
+      var vt = volText(r), tt = tagsText(r), dt = durText(normDur(r));
       html += '<li class="rec-item" data-id="' + r.id + '" tabindex="0" role="button" '
-        + 'aria-label="' + esc(r.t + ' ' + kindName(r) + (vt ? ' ' + vt : '') + (tt ? ' ' + tt : '')) + '">'
+        + 'aria-label="' + esc(r.t + ' ' + kindName(r) + (vt ? ' ' + vt : '') + (dt ? ' ' + dt : '') + (tt ? ' ' + tt : '')) + '">'
         + '<span class="t">' + esc(r.t) + '</span>'
         + '<span class="info">'
         +   '<span class="row1">'
         +     '<span class="kbadge" data-kind="' + kindOf(r) + '">' + esc(kindName(r)) + '</span>'
         +     (vt ? '<span class="vol">' + esc(vt) + '</span>' : '')
+        +     (dt ? '<span class="dur">' + esc(dt) + '</span>' : '')
         +   '</span>'
         +   (r.n ? '<span class="n">' + esc(r.n) + '</span>' : '')
         +   (tt ? '<span class="tg">' + esc(tt) + '</span>' : '')
@@ -2401,10 +3008,11 @@ function renderStats(){
   }
   heat.innerHTML = hh;
 
-  // 详细数据：按主题分三组，比一口气 11 行好读
+  // 详细数据：按主题分三组，比一口气十几行好读
   var ai = avgInterval();
   var st = typeStats();
   var mx = streakMax();
+  var dstat = durStats();
   var groups = [
     ['detail.groupPace', [
       ['detail.days', nDays(allDays().length)],
@@ -2417,7 +3025,10 @@ function renderStats(){
       ['detail.avg30', nTimes(avg30)],
       ['detail.night', nTimes(nightCount(new Date()))],
       ['detail.volAvg', st.volAvg === null ? '—' : st.volAvg.toFixed(1) + ' ' + t('unit.mL')],
-      ['detail.volN', st.volN ? nTimes(st.volN) : '—']
+      ['detail.volN', st.volN ? nTimes(st.volN) : '—'],
+      ['detail.durAvg', dstat.avg === null ? '—' : durText(Math.round(dstat.avg))],
+      ['detail.durMax', dstat.max ? durText(dstat.max) : '—'],
+      ['detail.durN', dstat.n ? nTimes(dstat.n) : '—']
     ]],
     ['detail.groupTime', [
       ['detail.first', allDays().length ? allDays()[0] : '—'],
@@ -2437,6 +3048,7 @@ function renderStats(){
   renderTypeDist();
   renderTagDist();
   renderTrend();
+  renderDurTrend();
   renderGoal();
 }
 
@@ -2444,11 +3056,31 @@ function renderStats(){
 function renderSettings(){
   document.getElementById('setTheme').value = S.settings.theme;
   document.getElementById('setWeekStart').value = String(S.settings.weekStart);
+  renderAccentPicker();
 
   var swPin = document.getElementById('swPin');
   swPin.classList.toggle('on', !!S.settings.pin);
   swPin.setAttribute('aria-checked', S.settings.pin ? 'true' : 'false');
   document.getElementById('pinHint').textContent = t(isLegacyPin() ? 'set.pinHintLegacy' : 'set.pinHint');
+
+  // 指纹解锁：网页版没有原生桥 → 整块不渲染。
+  // APK 里也要先「检测到可用的指纹设备」才允许打开，检测不过就置灰 + 说明原因。
+  var bioRow = document.getElementById('bioRow');
+  var hasBridge = bioBridge();
+  bioRow.hidden = !hasBridge;
+  if(hasBridge){
+    var bst = bioState();
+    var detected = (bst === 'ok');
+    var pinOn = !!S.settings.pin;
+    var bioOn = detected && pinOn && S.settings.bioUnlock !== false;
+    var swBio = document.getElementById('swBio');
+    swBio.classList.toggle('on', bioOn);
+    swBio.setAttribute('aria-checked', bioOn ? 'true' : 'false');
+    // 检测没过、或隐私锁没开 —— 两种情况都不给点
+    if(detected && pinOn) swBio.removeAttribute('disabled'); else swBio.setAttribute('disabled', 'disabled');
+    document.getElementById('bioHint').textContent = t(
+      detected ? (pinOn ? 'set.bioHint' : 'set.bioHintNoPin') : bioHintKey());
+  }
 
   var rm = S.settings.remind;
   var swR = document.getElementById('swRemind');
@@ -2483,6 +3115,8 @@ function renderAll(){
   renderCalendar();
   renderDay();
   renderMini();
+  renderTimer();
+  renderHomeMini();
   renderStats();
   renderSettings();
 }
@@ -2490,7 +3124,7 @@ function renderAll(){
 /* ================= 视图切换 ================= */
 function switchView(v){
   view = v;
-  var map = { calendar:'view-calendar', stats:'view-stats', settings:'view-settings' };
+  var map = { home:'view-home', calendar:'view-calendar', stats:'view-stats', settings:'view-settings' };
   for(var k in map) document.getElementById(map[k]).hidden = (k !== v);
   var tabs = document.querySelectorAll('.tab');
   for(var i=0;i<tabs.length;i++) tabs[i].classList.toggle('active', tabs[i].getAttribute('data-view') === v);
@@ -2537,6 +3171,27 @@ function setKind(kind, keepVol){
   if(!need) document.getElementById('editVol').value = '';
 }
 
+/* ---- 用时（分 + 秒） ----
+   表单里拆成两个框，是因为「3 分 45 秒」比「3.75 分钟」好填也好读；
+   存的时候仍然合成一个秒数。 */
+function setDur(sec){
+  var n = (sec === null || sec === undefined || sec === '') ? null : Math.round(Number(sec));
+  var mi = document.getElementById('editDurMin');
+  var se = document.getElementById('editDurSec');
+  if(n === null || !isFinite(n) || n <= 0){ mi.value = ''; se.value = ''; return; }
+  mi.value = Math.floor(n / 60) || '';
+  se.value = (n % 60) || '';
+}
+function readDur(){
+  function num(id, max){
+    var v = parseInt(document.getElementById(id).value, 10);
+    if(!isFinite(v) || v < 0) return 0;
+    return Math.min(max, v);
+  }
+  var total = num('editDurMin', 999) * 60 + num('editDurSec', 59);
+  return total > 0 ? total : '';
+}
+
 /* ---- 诱因标签（多选） ---- */
 function renderTagChips(){
   var el = document.getElementById('tagChips');
@@ -2571,12 +3226,14 @@ function openSheet(key, id){
     var v0 = normVol(rec);
     setKind(kindOf(rec), v0 !== null);   // 历史数据没有类型时保持不选中，不擅自改写
     document.getElementById('editVol').value = (v0 === null) ? '' : v0;
+    setDur(normDur(rec));
     document.getElementById('editTime').value = rec.t;
     document.getElementById('editNote').value = rec.n || '';
     editing.tags = tagsOf(rec).slice();
   }else{
     setKind(lastKind());    // 新增时沿用上次的类型，方便一键记录
     document.getElementById('editVol').value = '';
+    setDur(null);           // 手动新增时不预填用时，留空即可
     document.getElementById('editTime').value = (key === todayKey()) ? nowHM() : '21:00';
     document.getElementById('editNote').value = '';
     // 标签也沿用上次，常见的诱因往往反复出现
@@ -2625,6 +3282,75 @@ function startLockTick(){
 }
 function stopLockTick(){ if(lockTick){ clearInterval(lockTick); lockTick = null; } }
 
+/* ---- 指纹解锁 ----
+   只在 APK 里存在。网页碰不到指纹硬件，所以网页端**整块不渲染** ——
+   设置项不出现、锁屏上也没有按钮，不会留下「点了没反应」的死开关。
+
+   检测分两层，缺一层都不允许开启：
+     1. bioBridge() —— 有没有原生桥。浏览器版恒为 false。
+     2. bioState()  —— 设备上有没有可用的指纹：硬件 + 已录入 + 系统设了锁屏，三者缺一不可。
+   设置项只在第 1 层通过时出现；第 2 层没过就置灰并写明原因，开关点不动 ——
+   与其让人开了却永远验证不通过，不如一开始就说清楚。
+
+   密码永远是兜底方案：指纹只是少敲四个数字，不是替代品。 */
+var bioBusy = false;
+
+/* 状态码 → 提示文案。用显式映射而不是拼字符串，key 漏了在两种语言里都能一眼看出来 */
+var BIO_HINT = {
+  none:       'set.bioNoDevice',
+  unenrolled: 'set.bioNoEnroll',
+  nolock:     'set.bioNoLock',
+  error:      'set.bioNoDevice'
+};
+
+function bioBridge(){
+  try{ return !!(window.RijiNative && window.RijiNative.biometricState); }
+  catch(e){ return false; }
+}
+/* 'ok' 可用 | 'none' 无硬件 | 'unenrolled' 未录入 | 'nolock' 系统无锁屏 | 'error' 调用失败 */
+function bioState(){
+  if(!bioBridge()) return 'none';
+  var v;
+  try{ v = window.RijiNative.biometricState(); }catch(e){ return 'error'; }
+  if(v === 0) return 'ok';
+  if(v === 1) return 'none';
+  if(v === 2) return 'unenrolled';
+  if(v === 3) return 'nolock';
+  return 'error';
+}
+function bioSupported(){ return bioState() === 'ok'; }
+function bioEnabled(){ return bioSupported() && S.settings.bioUnlock !== false; }
+function bioHintKey(){ return BIO_HINT[bioState()] || 'set.bioNoDevice'; }
+
+function updateBioButton(){
+  var show = (pinStage === 'unlock') && bioEnabled();
+  document.getElementById('bioBtn').hidden = !show;
+  document.getElementById('lockScreen').classList.toggle('has-bio', show);
+}
+function bioUnlock(){
+  if(!bioEnabled() || bioBusy) return;
+  if(pinStage !== 'unlock' || document.getElementById('lockScreen').hidden) return;
+  bioBusy = true;
+  setLockSub(t('lock.bioWaiting'));
+  try{ window.RijiNative.biometricUnlock(); }
+  catch(e){ bioBusy = false; setLockSub(t('lock.bioFail')); }
+}
+function bioCancel(){
+  bioBusy = false;
+  if(window.RijiNative && window.RijiNative.cancelBiometric){
+    try{ window.RijiNative.cancelBiometric(); }catch(e){ /* 原生没实现就无所谓 */ }
+  }
+}
+/* 原生验证结果。ok === null 表示用户主动取消（按了返回键之类），此时什么都不做 */
+function onBioResult(ok){
+  bioBusy = false;
+  if(pinStage !== 'unlock' || document.getElementById('lockScreen').hidden) return;
+  if(ok === null || ok === undefined) return;
+  if(ok){ pinReset(); hideLock(); toast(t('toast.bioOk')); return; }
+  shakeLock();
+  setLockSub(t('lock.bioFail'));
+}
+
 function showLock(stage){
   pinStage = stage; pinBuf = '';
   if(stage !== 'set2') pinFirst = '';   // 进入确认阶段时要保留第一次输入的密码
@@ -2641,10 +3367,16 @@ function showLock(stage){
     else { el.textContent = t('lock.confirm'); setLockSub(t('lock.subConfirm')); }
   }
   document.querySelectorAll('.keypad button.plain')[0].style.visibility = (stage === 'unlock') ? 'hidden' : 'visible';
+  updateBioButton();
+  // 锁屏一出现就把指纹唤起（锁定期内不弹，免得用户以为是密码错了）
+  if(pinStage === 'unlock' && bioEnabled() && pinLockLeft() <= 0){
+    setTimeout(function(){ if(pinStage === 'unlock') bioUnlock(); }, 300);
+  }
   renderPinDots();
 }
 function hideLock(){
   stopLockTick();
+  bioCancel();
   document.getElementById('lockScreen').hidden = true;
   unlocked = true;
 }
@@ -2786,6 +3518,18 @@ function bind(){
     openSheet(k, null);
   };
 
+  // 首页：三角形按钮开始/结束计时，右侧加号直接开记录页
+  document.getElementById('timerBtn').onclick = function(){
+    if(timerRunning()) timerStop(); else timerStart();
+  };
+  document.getElementById('timerPlus').onclick = function(){
+    var k = todayKey();
+    selected = k;
+    cursor = new Date();
+    renderCalendar(); renderDay();
+    openSheet(k, null);
+  };
+
   // 类型选择
   document.getElementById('kindChips').addEventListener('click', function(e){
     var b = e.target.closest ? e.target.closest('.chip') : null;
@@ -2803,6 +3547,10 @@ function bind(){
   document.getElementById('volClear').onclick = function(){
     document.getElementById('editVol').value = '';
     document.getElementById('editVol').focus();
+  };
+  document.getElementById('durClear').onclick = function(){
+    setDur(null);
+    document.getElementById('editDurMin').focus();
   };
 
   // 为选中日补记
@@ -2838,8 +3586,9 @@ function bind(){
       var num = Number(raw);
       if(isFinite(num) && num >= 0) v = num;
     }
+    var d = readDur();
 
-    var payload = { t:tm, n:note, k:k, v:v, g:editing.tags.slice() };
+    var payload = { t:tm, n:note, k:k, v:v, d:d, g:editing.tags.slice() };
     if(editing.id) updateRecord(editing.key, editing.id, payload);
     else addRecord(editing.key, payload);
 
@@ -2852,7 +3601,8 @@ function bind(){
     if(navigator.vibrate) navigator.vibrate(12);
     var label = k ? kindLabel(k) : t('kind.none');
     toast(t(editing.id ? 'toast.saved' : 'toast.logged', { label: label })
-          + (v !== '' ? ' ' + fmtVol(v) : ''));
+          + (v !== '' ? ' ' + fmtVol(v) : '')
+          + (d !== '' ? ' · ' + durText(d) : ''));
   };
   document.getElementById('editDelete').onclick = function(){
     if(!editing.id) return;
@@ -2888,6 +3638,11 @@ function bind(){
   document.getElementById('setTheme').onchange = function(e){
     S.settings.theme = e.target.value; save(); applyTheme();
   };
+  // 主题色：点色块即换，立即生效（颜色全靠 html[data-accent]，不用重渲染整页）
+  document.getElementById('accentPicker').addEventListener('click', function(e){
+    var b = e.target.closest ? e.target.closest('.accent-dot') : null;
+    if(b) setAccent(b.getAttribute('data-accent'));
+  });
   // 语言切换：换完要整体重渲染，因为文案散在静态属性和 JS 里两处
   document.getElementById('setLang').onchange = function(e){
     S.settings.lang = e.target.value; save();
@@ -2908,6 +3663,16 @@ function bind(){
       showLock('set1');
     }
   });
+
+  // 指纹解锁开关：每次点都重新检测一遍设备，检测不过就直接拒绝开启
+  bindSwitch(document.getElementById('swBio'), function(){
+    if(!S.settings.pin){ toast(t('toast.bioNoPin')); return; }
+    if(!bioSupported()){ toast(t(bioHintKey())); return; }
+    S.settings.bioUnlock = !(S.settings.bioUnlock !== false);
+    save(); renderSettings();
+    toast(t(S.settings.bioUnlock ? 'toast.bioOn' : 'toast.bioOff'));
+  });
+  document.getElementById('bioBtn').onclick = bioUnlock;
 
   // 频率提醒
   bindSwitch(document.getElementById('swRemind'), function(){
@@ -2996,8 +3761,9 @@ function bind(){
         S.settings.daily = Object.assign({}, DEFAULTS.settings.daily, (p.settings && p.settings.daily) || {});
         S.settings.remindDismiss = {};   // 换了数据源，之前的关闭记录就不适用了
         S.settings.pinFails = { n:0, until:0 };
+        S.settings.timer = { start: 0 };  // 备份里可能带着一个「正在计时」，别把它当成本机的
         S.settings.lastTags = [];
-        save(); applyLang(); applyTheme(); applyDailyReminder();
+        save(); applyLang(); applyTheme(); applyAccent(); applyDailyReminder();
         toast(t('toast.imported', { n: allDays().length }));
       }catch(err){ toast(t('toast.importBad')); }
     };
@@ -3053,8 +3819,14 @@ function applyLang(){
 bind();
 applyLang();          // 内部会调 renderAll，所以放在 bind 之后
 applyTheme();
-switchView('calendar');
+applyAccent();        // 主题色只改 html 上的属性，不用重渲染
+switchView('home');   // 首页（计时）是默认落地页
 applyDailyReminder();
+
+// 计时器：页面被回收再打开时接着走。
+// 超过 24 小时的一律当成忘了关，直接丢掉 —— 否则会记出一条荒唐的用时。
+if(timerRunning() && timerElapsedSec() > 86400){ S.settings.timer = { start: 0 }; save(); }
+renderTimer();
 
 // 隐私锁
 if(S.settings.pin){
@@ -3075,7 +3847,16 @@ window.__dyf = {
   S:S, render:renderAll, save:save, applyLang:applyLang, t:t,
   get lang(){ return LANG; },
   STRINGS: STRINGS,
+  accent:{ list:ACCENTS, id:accentId, set:setAccent, apply:applyAccent, name:accentName },
   lock:{ show:showLock, hide:hideLock, input:pinInput },
+  timer:{ start:timerStart, stop:timerStop, running:timerRunning, elapsed:timerElapsedSec, render:renderTimer },
+  dur:{ stats:durStats, text:durText, parts:durParts, clock:fmtClock, series:durMonthSeries },
+  bio:{
+    bridge:bioBridge, state:bioState, supported:bioSupported, enabled:bioEnabled,
+    unlock:bioUnlock,
+    // 浏览器里没有原生桥，测试靠这个桩模拟「指纹验证通过 / 失败」
+    result:onBioResult
+  },
   stats:{ monthTotal:monthTotal, weekTotal:weekTotal, goalStreak:goalStreakWeeks, tagStats:tagStats },
   rules:remindRules,
   // 原生申请通知权限是异步的，结果回来后由这里显示提示语（保证跟界面语言一致）

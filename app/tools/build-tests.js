@@ -62,6 +62,11 @@ function pickTags(rnd) {
   }
   return out;
 }
+/* 用时（秒）。现实里不会每次都掐表，所以大约六成有值；40 秒 ~ 15 分，取 5 秒整 */
+function pickDur(rnd) {
+  if (rnd() < 0.4) return null;
+  return Math.round((40 + rnd() * 860) / 5) * 5;
+}
 
 function buildDemoRecords() {
   const rnd = mulberry32(20260926);
@@ -90,6 +95,9 @@ function buildDemoRecords() {
       if (v !== null) rec.v = v;
       const g = pickTags(rnd);
       if (g.length) rec.g = g;
+      // 用时放在最后抽：前面几项随机序列不变，历史截图不会因为加了这个字段而整体漂移
+      const dur = pickDur(rnd);
+      if (dur !== null) rec.d = dur;
       items.push(rec);
     }
     items.sort((a, b) => a.t.localeCompare(b.t));
@@ -109,6 +117,7 @@ function seedScript(records, theme, lang) {
       remind: { on: true, week: 3, month: 10 },
       remindDismiss: {}, pinSalt: '', pinIter: 0,
       pinFails: { n: 0, until: 0 },
+      bioUnlock: true, timer: { start: 0 },
       daily: { on: false, time: '21:00' }
     }
   };
@@ -139,10 +148,13 @@ function build() {
 
   /* ---------- 2) 演示数据页 ---------- */
   const records = buildDemoRecords();
-  const SWITCH_STATS = 'setTimeout(function(){document.querySelectorAll(".tab")[1].click();},80);';
+  // 底部导航现在是「首页 / 日历 / 统计 / 设置」四个 tab，索引跟着挪了一位。
+  // 默认落地页是首页，所以凡是要拍日历的页面都得先点回日历。
+  const GO_CALENDAR = 'setTimeout(function(){document.querySelectorAll(".tab")[1].click();},60);';
+  const SWITCH_STATS = 'setTimeout(function(){document.querySelectorAll(".tab")[2].click();},80);';
   const SHOW_REMIND_SETTINGS = [
     'setTimeout(function(){',
-    '  document.querySelectorAll(".tab")[2].click();',
+    '  document.querySelectorAll(".tab")[3].click();',
     '  var rows=document.querySelectorAll(".set-row");',
     '  for(var i=0;i<rows.length;i++){',
     '    if(rows[i].textContent.indexOf("每日自查提醒")>=0){ rows[i].scrollIntoView({block:"center"}); break; }',
@@ -151,20 +163,29 @@ function build() {
   ].join('\n');
   // 干净日历页（关掉提醒卡片后再截图；每点一次会重渲染，所以要反复取新的第一个按钮）
   const DISMISS_REMIND = 'setTimeout(function(){for(var n=0;n<8;n++){var b=document.querySelector(".rm-x");if(!b)break;b.click();}},90);';
+  // 计时进行中的首页，用来展示「结束按钮」那一态
+  const HOME_RUNNING = 'setTimeout(function(){window.__dyf.S.settings.timer={start:Date.now()-225000};window.__dyf.timer.render();},120);';
+  // 设置页顶部的「外观」区（含主题色色板）
+  const SHOW_APPEARANCE = 'setTimeout(function(){document.querySelectorAll(".tab")[3].click();},110);';
 
   const variants = [
-    ['_demo.html', 'light', '', 'zh'],
+    ['_demo.html', 'light', GO_CALENDAR, 'zh'],
     ['_demo-stats.html', 'light', SWITCH_STATS, 'zh'],
-    ['_demo-dark.html', 'dark', '', 'zh'],
+    ['_demo-dark.html', 'dark', GO_CALENDAR, 'zh'],
     // 弹层页也先关掉提醒，否则截图里遮罩后面飘着几张提醒卡，很乱
-    ['_demo-sheet.html', 'light', DISMISS_REMIND + '\nsetTimeout(function(){document.getElementById("quickAdd").click();},200);', 'zh'],
+    ['_demo-sheet.html', 'light', GO_CALENDAR + '\n' + DISMISS_REMIND + '\nsetTimeout(function(){document.getElementById("quickAdd").click();},200);', 'zh'],
     ['_demo-remind.html', 'light', SHOW_REMIND_SETTINGS, 'zh'],
-    ['_demo-plain.html', 'light', DISMISS_REMIND, 'zh'],
+    ['_demo-plain.html', 'light', GO_CALENDAR + '\n' + DISMISS_REMIND, 'zh'],
+    ['_demo-home.html', 'light', '', 'zh'],
+    ['_demo-home-run.html', 'light', HOME_RUNNING, 'zh'],
+    ['_demo-settings.html', 'light', SHOW_APPEARANCE, 'zh'],
     // 英文版：README-en.md 要用英文界面的截图
-    ['_demo-en.html', 'light', '', 'en'],
+    ['_demo-en.html', 'light', GO_CALENDAR, 'en'],
     ['_demo-en-stats.html', 'light', SWITCH_STATS, 'en'],
-    ['_demo-en-sheet.html', 'light', DISMISS_REMIND + '\nsetTimeout(function(){document.getElementById("quickAdd").click();},200);', 'en'],
-    ['_demo-en-remind.html', 'light', SHOW_REMIND_SETTINGS, 'en']
+    ['_demo-en-sheet.html', 'light', GO_CALENDAR + '\n' + DISMISS_REMIND + '\nsetTimeout(function(){document.getElementById("quickAdd").click();},200);', 'en'],
+    ['_demo-en-remind.html', 'light', SHOW_REMIND_SETTINGS, 'en'],
+    ['_demo-en-home.html', 'light', '', 'en'],
+    ['_demo-en-settings.html', 'light', SHOW_APPEARANCE, 'en']
   ];
   for (const [name, theme, extra, lang] of variants) {
     const idx = html.lastIndexOf('<script>');

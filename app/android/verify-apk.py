@@ -69,6 +69,8 @@ def main():
     checks.append(('不申请存储权限', not any('STORAGE' in p or 'MEDIA' in p for p in perms)))
     checks.append(('声明通知权限', any('POST_NOTIFICATIONS' in p for p in perms)))
     checks.append(('声明开机自启权限', any('RECEIVE_BOOT_COMPLETED' in p for p in perms)))
+    # 指纹解锁：USE_FINGERPRINT 是普通权限，不弹窗、不涉及数据访问
+    checks.append(('声明指纹权限', any('USE_FINGERPRINT' in p for p in perms)))
 
     # 2) 清单里的广播接收器（badging 不列 receiver，得看 xmltree）
     if aapt2:
@@ -98,6 +100,11 @@ def main():
     # 4) 打进包里的网页确实带着本轮新功能（防止忘了同步 assets）
     for key, label in [('--kp:', '键盘正圆样式'), ('tagChips', '诱因标签'),
                        ('goalCard', '目标达成'), ('trendWrap', '月度趋势'),
+                       ('durTrendWrap', '用时趋势'), ('editDurMin', '用时输入'),
+                       ('timerBtn', '首页计时'), ('homeMini', '首页统计'),
+                       ('accentPicker', '主题色色板'), ('--accent-on', '主题色派生'),
+                       ('bioBtn', '指纹解锁按钮'), ('bioUnlock', '指纹解锁开关'),
+                       ('biometricState', '原生指纹检测'), ('biometricUnlock', '原生指纹桥'),
                        ('exportBackup', '原生导出桥'), ('setDailyReminder', '原生提醒桥'),
                        ('p2:', 'PBKDF2 密码'),
                        ('Private Diary', '英文界面'), ('setLang', '语言切换'),

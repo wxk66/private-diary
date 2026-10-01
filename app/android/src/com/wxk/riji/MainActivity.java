@@ -4,14 +4,17 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.KeyguardManager;
 import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.hardware.fingerprint.FingerprintManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.CancellationSignal;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.JavascriptInterface;
@@ -30,16 +33,18 @@ import java.io.OutputStream;
  * 私密日志 · 安卓外壳
  *
  * 把 assets 里的单页应用用 WebView 全屏跑起来。业务逻辑与数据都在网页里，原生层只补
- * 网页做不到的三件事：
+ * 网页做不到的四件事：
  *
  *   1. 导出备份 —— WebView 不会自己处理 blob: 下载链接，网页点「导出」在这里会毫无反应。
  *      改成网页把 JSON 交给原生，走 SAF（ACTION_CREATE_DOCUMENT）让用户选保存位置。
  *   2. 导入备份 —— <input type="file"> 需要宿主实现 onShowFileChooser，否则同样点了没反应。
  *   3. 每日提醒 —— 网页没有后台能力，用 AlarmManager 定时 + 通知栏提醒，关掉应用也会响。
+ *   4. 指纹解锁 —— 网页碰不到指纹硬件，由原生调 FingerprintManager，
+ *      验证结果再回传给网页的锁屏。密码始终是兜底方案，指纹只是少敲四个数字。
  *
- * 权限：只申请 POST_NOTIFICATIONS（且只在用户真的开启每日提醒时才弹窗请求）
- * 和 RECEIVE_BOOT_COMPLETED（开机后恢复定时）。依旧不联网、不读写外部存储
- * —— SAF 由用户自己选位置，不需要存储权限。
+ * 权限：只申请 POST_NOTIFICATIONS（且只在用户真的开启每日提醒时才弹窗请求）、
+ * RECEIVE_BOOT_COMPLETED（开机后恢复定时）和 USE_FINGERPRINT（普通权限，不弹窗）。
+ * 依旧不联网、不读写外部存储 —— SAF 由用户自己选位置，不需要存储权限。
  */
 public class MainActivity extends Activity {
 
@@ -61,6 +66,11 @@ public class MainActivity extends Activity {
     private String pendingNotifTime = "21:00";
     private String pendingNotifTitle;
     private String pendingNotifBody;
+
+    /* 指纹验证的取消信号：用户改用密码、或页面销毁时要把它掐掉，
+       否则回调还会打回一个已经不需要的结果 */
+    private CancellationSignal bioCancel;
+    private boolean bioRunning;
 
     @SuppressLint({"SetJavaScriptEnabled", "AddJavascriptInterface"})
     @Override
@@ -228,6 +238,40 @@ public class MainActivity extends Activity {
                 }
             });
         }
+
+        /**
+         * 指纹是否可用。网页拿这个决定设置项露不露、开不开 ——
+         * 不可用时开关点不动，不会留下「开了却永远验证不通过」的坑。
+         * 返回状态码而不是布尔：网页要按不同原因给出不同提示。
+         *   0 可用 / 1 没有指纹硬件 / 2 有硬件但没录入指纹 / 3 系统没设锁屏 / -1 不支持
+         * 这是同步调用（@JavascriptInterface 默认同步返回），网页侧可以当普通函数用。
+         */
+        @JavascriptInterface
+        public int biometricState() {
+            return bioState();
+        }
+
+        /** 唤起指纹验证，结果通过 window.__dyf.onBioResult(ok) 回传 */
+        @JavascriptInterface
+        public void biometricUnlock() {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    startBiometric();
+                }
+            });
+        }
+
+        /** 用户改用密码解锁 / 页面销毁时收尾，别让回调再打回来 */
+        @JavascriptInterface
+        public void cancelBiometric() {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    stopBiometric();
+                }
+            });
+        }
     }
 
     private void applyDailyReminder(boolean on, String hhmm, String title, String body) {
@@ -246,6 +290,98 @@ public class MainActivity extends Activity {
             return;
         }
         ReminderScheduler.schedule(this, pendingNotifTime, pendingNotifTitle, pendingNotifBody);
+    }
+
+    /* ================= 指纹解锁 =================
+       用 FingerprintManager 而不是 BiometricPrompt：后者的平台版构造函数要
+       androidx.fragment 的 FragmentActivity，而本项目是手工打包、不带任何 AndroidX 依赖。
+       FingerprintManager 从 API 23 起就在，minSdk 24 覆盖得住，虽然被标记为 deprecated
+       但在 android-34 的 android.jar 里仍然完整可用。
+
+       只用指纹、不做人脸：这个功能的名字就叫「指纹解锁」，人脸走系统锁屏即可。 */
+
+    /** 指纹状态码。0 可用 / 1 没有硬件 / 2 没录入 / 3 系统没设锁屏 / -1 不支持 */
+    @SuppressWarnings("deprecation")
+    private int bioState() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return -1;
+        try {
+            FingerprintManager fm = (FingerprintManager) getSystemService(FINGERPRINT_SERVICE);
+            if (fm == null || !fm.isHardwareDetected()) return 1;
+            if (!fm.hasEnrolledFingerprints()) return 2;
+            // 系统没设锁屏时指纹根本无从校验，这种情况也当成不可用
+            KeyguardManager km = (KeyguardManager) getSystemService(KEYGUARD_SERVICE);
+            if (km == null || !km.isKeyguardSecure()) return 3;
+            return 0;
+        } catch (Throwable t) {
+            // 个别 ROM 的 FingerprintManager 会直接抛，不能让它把应用带崩
+            return -1;
+        }
+    }
+
+    @SuppressWarnings("deprecation")
+    private void startBiometric() {
+        if (bioRunning) return;
+        if (bioState() != 0) {   // 唤起之前再检测一次：指纹可能刚被系统删掉
+            bioResult(false);
+            return;
+        }
+        FingerprintManager fm = (FingerprintManager) getSystemService(FINGERPRINT_SERVICE);
+        if (fm == null) {
+            bioResult(false);
+            return;
+        }
+        bioCancel = new CancellationSignal();
+        bioRunning = true;
+        try {
+            fm.authenticate(null, bioCancel, 0, new FingerprintManager.AuthenticationCallback() {
+                @Override
+                public void onAuthenticationSucceeded(FingerprintManager.AuthenticationResult result) {
+                    bioRunning = false;
+                    bioCancel = null;
+                    bioResult(true);
+                }
+
+                @Override
+                public void onAuthenticationError(int errorCode, CharSequence errString) {
+                    bioRunning = false;
+                    bioCancel = null;
+                    // 用户自己取消（按返回键、点了别处）不算失败，
+                    // 别在锁屏上甩一句「指纹未识别」让人以为手指放错了
+                    if (errorCode == FingerprintManager.FINGERPRINT_ERROR_CANCELED
+                            || errorCode == FingerprintManager.FINGERPRINT_ERROR_USER_CANCELED) {
+                        callJs("window.__dyf&&window.__dyf.onBioResult&&window.__dyf.onBioResult(null)");
+                        return;
+                    }
+                    bioResult(false);
+                }
+
+                @Override
+                public void onAuthenticationFailed() {
+                    // 单次不匹配：系统会继续等着，不在这里收场，
+                    // 否则手指稍微偏一下就弹一次错误提示，很吵
+                }
+            }, null);
+        } catch (Throwable t) {
+            bioRunning = false;
+            bioCancel = null;
+            bioResult(false);
+        }
+    }
+
+    private void stopBiometric() {
+        if (bioCancel != null) {
+            try {
+                bioCancel.cancel();
+            } catch (Throwable ignored) {
+            }
+            bioCancel = null;
+        }
+        bioRunning = false;
+    }
+
+    private void bioResult(boolean ok) {
+        callJs("window.__dyf&&window.__dyf.onBioResult&&window.__dyf.onBioResult("
+               + (ok ? "true" : "false") + ")");
     }
 
     @Override
@@ -412,6 +548,7 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onDestroy() {
+        stopBiometric();   // 页面没了，指纹回调也不能再打回来
         if (web != null) {
             web.removeJavascriptInterface("RijiNative");
             web.loadUrl("about:blank");

@@ -9,6 +9,12 @@
     <!-- 依旧不申请联网、不申请存储权限：导出走 SAF，由用户自己选保存位置 -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <!--
+        指纹解锁。USE_FINGERPRINT 是普通权限（normal），安装即授予、不会弹窗，
+        也不涉及任何数据访问 —— 只是让应用能调用指纹传感器做一次本地校验，
+        指纹模板本身留在系统里，应用拿不到。
+    -->
+    <uses-permission android:name="android.permission.USE_FINGERPRINT" />
 
     <application
         android:label="@string/app_name"

@@ -11,8 +11,10 @@
 
 「私密日志」用日历的形态记录每天的次数与类型，把长期趋势、诱因分布、频率提醒和自律目标放在统计页。
 提供两种使用方式：**手机浏览器安装的 PWA**，以及**可安装的 Android APK**（带真正的每日提醒通知）。
+首页放了一个计时器：点三角形开始、再点结束，用时会自动填进记录页。
 
 <p align="center">
+  <img src="app/preview/home.png" width="220" alt="首页计时">
   <img src="app/preview/calendar.png" width="220" alt="日历页">
   <img src="app/preview/stats.png" width="220" alt="统计页">
   <img src="app/preview/add-record.png" width="220" alt="记录表单">
@@ -41,6 +43,18 @@
 
 ## 功能特性
 
+### ⏱️ 首页计时
+
+底部导航最左边是首页，中间一个大三角形按钮：
+
+- **点三角形开始计时**，按钮立刻变成红色的方形「结束」，顶部读数按秒走
+- **点结束**就把本次用时落成一条记录，并**自动弹出记录页**，你只需要补上类型和备注
+- 三角形**右边的小加号**是「添加记录」，不用计时也能直接记一笔
+- 计时状态存在设置里，所以切后台、页面被回收再打开，回来还是接着走
+- 下方三格是今日用时 / 今日次数 / 平均用时
+
+计时只是省事，不是必须——不想掐表就跳过，用时在记录页里也可以手填。
+
 ### 📅 日历页
 
 - 月视图，42 格，支持「每周起始日」为周一或周日
@@ -58,6 +72,7 @@
 |---|---|
 | **类型** | 射精 / 流精 / 其他，各带配色圆点 |
 | **精液量** | 选「射精」或「流精」时才展开，单位 mL，可留空表示未测量，带「清除」按钮 |
+| **用时** | 可留空。分 / 秒两个框，计时结束后会自动填好；超过 59 秒会被夹到 59 |
 | **时间** | 默认当前时间，可改 |
 | **备注** | 自由文本 |
 | **诱因 / 状态** | 多选：压力大、无聊、睡不着、独处、刷到内容、习惯性、疲惫、焦虑 |
@@ -71,9 +86,10 @@
 - **目标达成**：本周/本月进度条、是否在目标内、**连续达标周数**
 - **最近 30 天**：柱状图，一眼看出节奏
 - **最近 12 个月**：折线图 + 面积填充，标出最高点与当前月
+- **用时趋势**：折线图，最近 12 个月每月的用时合计（分钟），脚注给合计与计时次数
 - **近半年热力图**：26 周 × 7 天
 - **类型分布** / **诱因分布**：各类占比与次数
-- **详细数据**：按「节奏 / 频率与测量 / 时间线」分三组的 11 项指标
+- **详细数据**：按「节奏 / 频率与测量 / 时间线」分三组的 14 项指标
 
 ### 🔔 频率提醒
 
@@ -105,6 +121,25 @@
 - **连续输错 5 次开始锁定**，从 30 秒起逐次翻倍（最多约 32 分钟），期间有倒计时
 - 键盘按键在任何屏幕尺寸与宽高比下都保持正圆
 
+**指纹解锁（仅 APK）**：在隐私锁的基础上可以再开一个指纹快捷解锁。开启前会先检测设备——
+**没有指纹硬件、没录入指纹、或系统没设锁屏，都不允许开启**，设置项会置灰并写明原因。
+锁屏出现时自动唤起指纹，验证不过随时可以退回输密码。
+网页版碰不到指纹硬件，所以**网页端根本没有这个功能**，设置项和锁屏按钮都不会出现。
+
+### 🎨 主题色
+
+设置 → 外观 → 主题色，六种配色可选：**紫罗兰（默认）/ 海蓝 / 青碧 / 森绿 / 琥珀 / 玫红**。
+选中即刻生效，整个界面跟着换——主按钮、日历深浅、热力图、进度条、选中态、导航高亮全都是同一套色。
+
+- 深浅两套主题各自有专门挑过的色值：浅色下偏深（压得住白字），深色下偏亮（暗底上看得清）
+- 所有派生色都由一个 `--accent` 用 `color-mix` 算出来，加新配色只要补一行
+- **记录类型色（射精 / 流精 / 其他）刻意不跟着变**：它们是数据本身的颜色，
+  换主题色时保持稳定，日历圆点和类型分布才对得上历史
+
+用色板而不是自由取色器，是因为每种颜色的浅色/深色版本都是挑过的，
+能保证按钮上的文字、浅底上的彩色文字都读得清；自由取色很容易选出一个
+「深色主题下白字糊成一片」的颜色。
+
 ### 🌐 界面语言
 
 完整支持**中文 / English**，设置里可切换，也可以跟随系统语言。
@@ -116,19 +151,31 @@
 
 **中文界面**
 
-| 日历 | 统计 | 记录表单 | 深色主题 |
+| 首页计时 | 计时中 | 日历 | 统计 |
 |:---:|:---:|:---:|:---:|
-| <img src="app/preview/calendar.png" width="180"> | <img src="app/preview/stats.png" width="180"> | <img src="app/preview/add-record.png" width="180"> | <img src="app/preview/dark.png" width="180"> |
+| <img src="app/preview/home.png" width="180"> | <img src="app/preview/home-running.png" width="180"> | <img src="app/preview/calendar.png" width="180"> | <img src="app/preview/stats.png" width="180"> |
 
-| 频率提醒 | 设置页 | 隐私锁 | 隐私锁（深色） |
+| 记录表单 | 深色主题 | 主题色 | 频率提醒 |
 |:---:|:---:|:---:|:---:|
-| <img src="app/preview/reminder.png" width="180"> | <img src="app/preview/remind-settings.png" width="180"> | <img src="app/preview/lock-light.png" width="180"> | <img src="app/preview/lock-dark.png" width="180"> |
+| <img src="app/preview/add-record.png" width="180"> | <img src="app/preview/dark.png" width="180"> | <img src="app/preview/accent.png" width="180"> | <img src="app/preview/reminder.png" width="180"> |
+
+| 设置页 | 用时趋势 | 隐私锁 | 隐私锁（深色） |
+|:---:|:---:|:---:|:---:|
+| <img src="app/preview/remind-settings.png" width="180"> | <img src="app/preview/stats-more.png" width="180"> | <img src="app/preview/lock-light.png" width="180"> | <img src="app/preview/lock-dark.png" width="180"> |
+
+| 指纹锁屏（仅 APK） | 隐私锁（小屏 360×640） | 隐私锁（横屏 820×400） | |
+|:---:|:---:|:---:|:---:|
+| <img src="app/preview/lock-bio.png" width="180"> | <img src="app/preview/lock-short.png" width="180"> | <img src="app/preview/lock-landscape.png" width="180"> | |
 
 **English UI**
 
-| Calendar | Stats | Entry form |
-|:---:|:---:|:---:|
-| <img src="app/preview/en-calendar.png" width="180"> | <img src="app/preview/en-stats.png" width="180"> | <img src="app/preview/en-add-record.png" width="180"> |
+| Home | Calendar | Stats | Entry form |
+|:---:|:---:|:---:|:---:|
+| <img src="app/preview/en-home.png" width="180"> | <img src="app/preview/en-calendar.png" width="180"> | <img src="app/preview/en-stats.png" width="180"> | <img src="app/preview/en-add-record.png" width="180"> |
+
+| Accent colour | Settings | Reminders | Passcode |
+|:---:|:---:|:---:|:---:|
+| <img src="app/preview/en-accent.png" width="180"> | <img src="app/preview/en-settings.png" width="180"> | <img src="app/preview/en-reminder.png" width="180"> | <img src="app/preview/en-lock.png" width="180"> |
 
 ---
 
@@ -150,21 +197,22 @@
 
 ### 方式二：安装 APK
 
-从 [Releases](../../releases) 下载 `private-diary-v1.2.0.apk`（约 80 KB），
-或直接用仓库里的 `app/android/dist/private-diary-v1.2.0.apk`。
+从 [Releases](../../releases) 下载 `private-diary-v1.3.0.apk`（约 93 KB），
+或直接用仓库里的 `app/android/dist/private-diary-v1.3.0.apk`。
 
 1. 把 APK 传到手机（数据线 / 微信文件传输助手都行）
 2. 手机上点击安装，首次会提示「允许安装未知来源应用」，同意即可
 3. 桌面出现「私密日志」图标，点开即用，无需联网
 
 ```bash
-adb install -r "app/android/dist/private-diary-v1.2.0.apk"
+adb install -r "app/android/dist/private-diary-v1.3.0.apk"
 ```
 
 > APK 是一个最小 WebView 外壳，业务逻辑全在网页里。
-> **不申请联网、不申请存储权限**；只声明两个权限：
-> `POST_NOTIFICATIONS`（且只在你真的开启每日提醒时才弹窗请求）和
-> `RECEIVE_BOOT_COMPLETED`（重启后恢复定时）。
+> **不申请联网、不申请存储权限**；只声明三个权限：
+> `POST_NOTIFICATIONS`（且只在你真的开启每日提醒时才弹窗请求）、
+> `RECEIVE_BOOT_COMPLETED`（重启后恢复定时）和
+> `USE_FINGERPRINT`（普通权限，安装即授予、不弹窗，只为指纹解锁）。
 
 ### 方式三：在电脑上打开
 
@@ -178,12 +226,23 @@ python -m http.server 8777 --bind 127.0.0.1
 
 ## 使用示例
 
+### 掐表记一次
+
+```
+首页 → 点三角形开始计时
+     → 结束（按钮变成红色方块）→ 用时自动填进记录页
+     → 选类型、写备注 → 保存
+```
+
+不想掐表也行：首页右侧的加号直接开记录页，用时那一栏留空即可。
+
 ### 记录一次
 
 ```
 日历页 →「+ 添加记录」
       → 选类型「射精」
       → 填精液量 2.5（可留空）
+      → 用时留空，或手填 3 分 45 秒
       → 时间默认当前，备注可写可不写
       → 选两个诱因标签「压力大」「睡不着」
       → 保存
@@ -204,6 +263,7 @@ python -m http.server 8777 --bind 127.0.0.1
 ```
 统计页 → 目标达成：本周 8 次 / 上限 3 次，已经超出，连续达标 0 周
       → 最近 12 个月：折线能看出哪几个月明显偏高
+      → 用时趋势：12 个月合计 18 小时 30 分，144 次有计时
       → 诱因分布：压力大 21 次最多
       → 详细数据 → 节奏：最长连续记录 5 天
 ```
@@ -228,9 +288,11 @@ python -m http.server 8777 --bind 127.0.0.1
 | 分类 | 设置项 | 默认值 |
 |---|---|---|
 | 外观 | 主题 | 跟随系统 |
+| 外观 | 主题色 | 紫罗兰 |
 | 外观 | 语言 | 跟随系统 |
 | 外观 | 每周起始日 | 星期一 |
 | 隐私 | 隐私锁（4 位数字） | 关闭 |
+| 隐私 | 指纹解锁（仅 APK，检测到指纹设备才可开） | 开启 |
 | 频率提醒 | 开启提醒 | 开启 |
 | 频率提醒 | 每周上限 | 3 次 |
 | 频率提醒 | 每月上限 | 10 次 |
@@ -251,6 +313,7 @@ python -m http.server 8777 --bind 127.0.0.1
         "t": "13:41",           // 时间 HH:MM
         "k": "ej",              // 类型 ej|fl|other，缺失表示「未分类」
         "v": 1.6,               // 精液量 mL（可选，缺失表示未测量）
+        "d": 225,               // 用时，单位秒（可选，缺失表示没计时）
         "n": "备注",             // 备注（可选）
         "g": ["stress","bored"] // 诱因标签 id 数组（可选）
       }
@@ -259,11 +322,14 @@ python -m http.server 8777 --bind 127.0.0.1
   "settings": {
     "theme": "system",          // system | light | dark
     "lang": "system",           // system | zh | en
+    "accent": "violet",         // violet|blue|cyan|green|amber|rose，只存 id
     "weekStart": 1,             // 0 周日 / 1 周一
     "pin": "p2:120000:9f3c…",   // PBKDF2-SHA256 派生结果，空串表示未开启
     "pinSalt": "a1b2c3…",       // 16 字节随机盐（十六进制）
     "pinIter": 120000,          // 迭代次数
     "pinFails": { "n": 0, "until": 0 },  // 连续输错次数与解锁时间
+    "bioUnlock": true,          // 指纹解锁开关（只在检测到指纹设备时可用）
+    "timer": { "start": 0 },    // 首页计时器：开始时刻的时间戳，0 表示没在计时
     "lastKind": "ej",
     "lastTags": ["stress"],     // 下次新增时默认带上的标签
     "remind": { "on": true, "week": 3, "month": 10 },
@@ -274,9 +340,12 @@ python -m http.server 8777 --bind 127.0.0.1
 ```
 
 **兼容性**：没有 `k` 字段的历史记录一律显示为「未分类」，不会被自动改写；
-没有 `v` 表示未测量；没有 `g` 表示没打标签。
+没有 `v` 表示未测量；没有 `d` 表示没计时；没有 `g` 表示没打标签。
 更早版本的密码是 DJB2 哈希，仍能解锁，设置页会提示你重设以启用 PBKDF2。
 旧版本的存储键 `dyf.tracker.v1` 会被自动读取并迁移到新键。
+「从备份恢复」时会清掉备份里的 `timer`，避免把一个「正在计时」当成本机的。
+`accent` 存的是配色 id 而不是色值，所以以后调整色值不需要迁移老数据；
+认不出的 id 会回落到默认的紫罗兰。
 
 ---
 
@@ -310,6 +379,15 @@ python -m http.server 8777 --bind 127.0.0.1
 **Q：网页版的每日提醒为什么不响？**
 网页没有后台能力，只有页面开着的时候才有效。想要关掉应用也能提醒，请用 APK 版。
 
+**Q：网页版为什么没有指纹解锁？**
+网页拿不到指纹硬件。所以网页版**整块不渲染**这个功能——设置项和锁屏按钮都不会出现，
+不会留一个点了没反应的死开关。指纹解锁是 APK 独有的。
+
+**Q：APK 里开了指纹解锁，但验证一直不通过？**
+开启前会先检测设备：没有指纹硬件、系统里没录入指纹、或系统没设锁屏，
+这三种情况都不允许开启，设置项会置灰并写明原因。如果检测通过了却验证不通过，
+通常是手指太湿或传感器脏了，直接输密码即可——**密码永远是兜底方案**。
+
 ---
 
 ## 已知限制
@@ -317,6 +395,9 @@ python -m http.server 8777 --bind 127.0.0.1
 - **隐私锁是客户端的**：能挡住随手拿到手机的人，但挡不住能清除应用数据的对手。
   4 位数字密码本身也只有 1 万种组合，PBKDF2 加盐拉伸能提高离线爆破成本，但改变不了这个量级。
   真正的威胁模型是「手机被别人拿到」，所以别把密码设成生日。
+- **指纹解锁只在 APK 里**：网页版没有访问指纹硬件的途径，所以设置项和锁屏按钮都不出现。
+  APK 侧用的是系统的 `FingerprintManager`，**只认指纹**——如果你的设备只有人脸没有指纹，
+  这个功能不会出现（人脸交给系统锁屏即可）。
 - **APK 的通知提醒用的是非精确闹钟**（`setInexactRepeating`），
   实际触发时间可能有几分钟偏差——换来的是不需要 `SCHEDULE_EXACT_ALARM` 这个敏感权限。
 
@@ -331,7 +412,7 @@ private-diary/
 ├─ index.html                    GitHub Pages 入口（跳转到 app/index.html）
 ├─ .nojekyll                     让 Pages 跳过 Jekyll 处理
 ├─ app/
-│  ├─ index.html                 全部功能（单文件，零依赖，约 2500 行）
+│  ├─ index.html                 全部功能（单文件，零依赖，约 3900 行）
 │  ├─ manifest.webmanifest       PWA 安装配置
 │  ├─ sw.js                      离线缓存 Service Worker
 │  ├─ icon-192.png / icon-512.png / apple-touch-icon.png / favicon.png
@@ -341,10 +422,15 @@ private-diary/
 │  │  ├─ verify.js               一键验证：端到端测试 + 布局适配检查
 │  │  ├─ check-circle.js         隐私锁按键形状与溢出专项检查
 │  │  ├─ build-tests.js          生成测试页与演示数据页
-│  │  ├─ _e2e.js                 端到端测试用例（约 220 项断言）
+│  │  ├─ _e2e.js                 端到端测试用例（约 360 项断言）
 │  │  ├─ shots.js                生成 preview/ 下的截图（中英双语）
 │  │  └─ gen-icons.js            生成应用图标与通知栏单色图标
-│  └─ android/                   APK 打包工程（详见 app/android/README.md）
+│  └─ android/                   APK 打包工程
+│     ├─ src/ res/               Java 源码 / 图标与样式资源
+│     ├─ dist/*.apk              预编译好的安装包，README 里给用户下载的就是这个
+│     ├─ build.py                构建脚本（aapt2 → javac → d8 → zipalign → apksigner）
+│     ├─ verify-apk.py           产物自检（39 项）
+│     └─ keystore/               签名密钥（不入库，丢了就无法覆盖升级）
 ├─ .gitattributes                统一换行符
 └─ .gitignore
 ```
@@ -377,18 +463,20 @@ node tools/shots.js             # 重新生成 preview/ 截图
 
 `tools/verify.js` 会做两类检查：
 
-1. **端到端交互测试**（约 220 项断言）——把 `tools/_e2e.js` 注入 `index.html` 的副本，
-   在真实浏览器里点按钮、填表单、切页面、开关隐私锁、切换语言、
-   验证数据落盘与重载，并统计页面 JS 报错数。
-2. **布局适配检查**（12 种屏幕尺寸）——横向溢出、日历第 7 列越界、
-   底部导航遮挡内容、记录弹层按钮可达性、触控目标高度、
-   以及隐私锁键盘是否正圆且放得下。
+1. **端到端交互测试**（约 360 项断言）——把 `tools/_e2e.js` 注入 `index.html` 的副本，
+   在真实浏览器里点按钮、填表单、切页面、开关隐私锁、跑一遍首页计时与用时统计、
+   换主题色、切换语言、验证数据落盘与重载，并统计页面 JS 报错数。
+   指纹解锁也在这里测：先确认「没有原生桥时整块不渲染」，再用一个桩模拟原生桥，
+   把设备检测（无硬件 / 未录入 / 无锁屏 / 可用）和验证成功/失败/取消都跑一遍。
+2. **布局适配检查**（12 种屏幕尺寸）——横向溢出（首页 / 日历 / 设置页各查一遍）、
+   日历第 7 列越界、底部导航遮挡内容、记录弹层按钮可达性、触控目标高度、
+   主题色色板是否放得下，以及隐私锁键盘是否正圆且放得下（**含指纹按钮出现时的键盘高度**）。
 
 ### 重新打包 APK
 
 ```bash
 python app/android/build.py       # 产物在 app/android/dist/
-python app/android/verify-apk.py  # 28 项自检
+python app/android/verify-apk.py  # 39 项自检
 ```
 
 打包链是 `aapt2 → javac → d8 → zipalign → apksigner`，不走 Gradle。

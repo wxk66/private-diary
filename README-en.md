@@ -13,8 +13,11 @@ Private Diary records the frequency and type of each day in a calendar, and puts
 trigger distribution, frequency reminders and self-set goals on a stats page.
 It ships in two forms: a **PWA you install from your phone browser**, and an
 **installable Android APK** (with real daily reminder notifications).
+The home page carries a timer: tap the triangle to start, tap again to stop, and the
+duration is filled into the entry form for you.
 
 <p align="center">
+  <img src="app/preview/en-home.png" width="220" alt="Home / timer">
   <img src="app/preview/en-calendar.png" width="220" alt="Calendar">
   <img src="app/preview/en-stats.png" width="220" alt="Stats">
   <img src="app/preview/en-add-record.png" width="220" alt="Entry form">
@@ -46,6 +49,19 @@ counsellor — not an app.
 
 ## Features
 
+### ⏱️ Home / timer
+
+The leftmost tab is Home, built around one big triangle:
+
+- **Tap the triangle to start timing** — it turns into a red square "stop" and the readout ticks up
+- **Tap stop** and the duration is saved as an entry, and the **entry form opens automatically** —
+  you only need to add the type and a note
+- The **small plus on its right** is "Add entry", for logging without timing
+- The running timer is stored in settings, so it keeps going if the app is backgrounded or reloaded
+- The three cards below show time today / entries today / average duration
+
+Timing is a convenience, not a requirement — skip it and type a duration by hand instead.
+
 ### 📅 Calendar
 
 - Month view, 42 cells, week can start on Monday or Sunday
@@ -63,6 +79,7 @@ Tap "Add entry" to open the form:
 |---|---|
 | **Type** | Ejaculation / Leakage / Other, each with its own colour |
 | **Amount** | Only shown for Ejaculation or Leakage, in mL. Leave empty if not measured; there's a Clear button |
+| **Duration** | Optional. Separate minutes / seconds boxes, pre-filled after timing; seconds above 59 are clamped |
 | **Time** | Defaults to now, editable |
 | **Note** | Free text |
 | **Triggers** | Multi-select: Stressed, Bored, Can't sleep, Alone, Saw content, Habitual, Tired, Anxious |
@@ -77,9 +94,11 @@ bottom toast for 6 seconds**.
 - **Goals**: weekly/monthly progress bars, whether you're within your goals, and **consecutive weeks on target**
 - **Last 30 days**: bar chart
 - **Last 12 months**: line chart with area fill, marking the peak and the current month
+- **Duration trend**: a 12-month line chart of total time per month (minutes), with the total and
+  the number of timed entries in the footer
 - **Last 6 months**: 26-week × 7-day heatmap
 - **By type** / **By trigger**: distribution with counts
-- **Details**: 11 metrics grouped into Rhythm / Frequency & measurement / Timeline
+- **Details**: 14 metrics grouped into Rhythm / Frequency & measurement / Timeline
 
 ### 🔔 Frequency reminders
 
@@ -114,6 +133,30 @@ rather than "time to log" — the point of this app is not to encourage you to d
   (up to ~32 minutes), with a live countdown
 - Keypad buttons stay perfectly circular at any screen size or aspect ratio
 
+**Fingerprint unlock (APK only)**: on top of the passcode lock you can enable a fingerprint
+shortcut. It runs a device check first — **no fingerprint hardware, no enrolled fingerprint, or no
+screen lock means it cannot be enabled**, and the setting is greyed out with the reason shown.
+The lock screen prompts for a fingerprint automatically, and you can always fall back to the
+passcode. The web version has no access to fingerprint hardware, so it **does not have this
+feature at all** — neither the setting nor the lock-screen button is rendered.
+
+### 🎨 Accent colour
+
+Settings → Appearance → Accent colour gives you six palettes: **Violet (default) / Blue / Cyan /
+Green / Amber / Rose**. It applies instantly and recolours the whole UI — buttons, calendar
+shading, heatmap, progress bars, selected states and the nav highlight all use one colour.
+
+- Light and dark themes each get their own hand-picked value: darker in light mode (so white
+  text holds up), lighter in dark mode (so it stays legible on a dark background)
+- Every derived tint comes from a single `--accent` via `color-mix`, so adding a palette is one line
+- **Type colours (Ejaculation / Leakage / Other) deliberately do not follow the accent.** They
+  belong to the data itself — keeping them stable means calendar dots and the type breakdown
+  still line up with your history after you change the theme colour
+
+A fixed palette rather than a free colour picker: each colour's light and dark variants are
+chosen so text on buttons and coloured text on tinted backgrounds stay readable. A free picker
+easily produces a colour where white text dissolves in dark mode.
+
 ### 🌐 Interface language
 
 Full **English / 中文** support, switchable in Settings or left on "follow system".
@@ -125,19 +168,17 @@ The switch takes effect immediately — no reinstall, no reload.
 
 **English UI**
 
-| Calendar | Stats | Entry form | Dark theme |
+| Home | Calendar | Stats | Entry form |
 |:---:|:---:|:---:|:---:|
-| <img src="app/preview/en-calendar.png" width="180"> | <img src="app/preview/en-stats.png" width="180"> | <img src="app/preview/en-add-record.png" width="180"> | <img src="app/preview/dark.png" width="180"> |
+| <img src="app/preview/en-home.png" width="180"> | <img src="app/preview/en-calendar.png" width="180"> | <img src="app/preview/en-stats.png" width="180"> | <img src="app/preview/en-add-record.png" width="180"> |
 
-| Reminders | Settings | Passcode | Passcode (dark) |
+| Accent colour | Reminders | Settings | Passcode |
 |:---:|:---:|:---:|:---:|
-| <img src="app/preview/en-reminder.png" width="180"> | <img src="app/preview/en-settings.png" width="180"> | <img src="app/preview/en-lock.png" width="180"> | <img src="app/preview/lock-dark.png" width="180"> |
+| <img src="app/preview/en-accent.png" width="180"> | <img src="app/preview/en-reminder.png" width="180"> | <img src="app/preview/en-settings.png" width="180"> | <img src="app/preview/en-lock.png" width="180"> |
 
-**中文界面**
-
-| 日历 | 统计 | 记录表单 |
-|:---:|:---:|:---:|
-| <img src="app/preview/calendar.png" width="180"> | <img src="app/preview/stats.png" width="180"> | <img src="app/preview/add-record.png" width="180"> |
+> The app is fully bilingual — screenshots of the Chinese UI (dark theme, duration trend,
+> fingerprint lock screen, small-screen and landscape layouts, …) are in the
+> [Chinese README](README.md#界面预览).
 
 ---
 
@@ -160,21 +201,23 @@ It runs as a standalone full-screen window with no address bar, and **works offl
 
 ### Option 2: Install the APK
 
-Download `private-diary-v1.2.0.apk` (~80 KB) from [Releases](../../releases),
-or use `app/android/dist/private-diary-v1.2.0.apk` from the repo.
+Download `private-diary-v1.3.0.apk` (~93 KB) from [Releases](../../releases),
+or use `app/android/dist/private-diary-v1.3.0.apk` from the repo.
 
 1. Transfer the APK to your phone (USB cable, or any file-transfer app)
 2. Tap to install; Android will ask you to allow installs from unknown sources
 3. A "Private Diary" icon appears — tap to launch, no network needed
 
 ```bash
-adb install -r "app/android/dist/private-diary-v1.2.0.apk"
+adb install -r "app/android/dist/private-diary-v1.3.0.apk"
 ```
 
 > The APK is a minimal WebView shell; all business logic lives in the web page.
-> It requests **no network and no storage permission**. Only two permissions are declared:
-> `POST_NOTIFICATIONS` (and only prompted when you actually enable the daily reminder) and
-> `RECEIVE_BOOT_COMPLETED` (to restore the schedule after a reboot).
+> It requests **no network and no storage permission**. Only three permissions are declared:
+> `POST_NOTIFICATIONS` (and only prompted when you actually enable the daily reminder),
+> `RECEIVE_BOOT_COMPLETED` (to restore the schedule after a reboot), and
+> `USE_FINGERPRINT` (a normal permission, granted at install with no prompt, used only for
+> fingerprint unlock).
 
 ### Option 3: Run on desktop
 
@@ -188,12 +231,24 @@ python -m http.server 8777 --bind 127.0.0.1
 
 ## Usage examples
 
+### Time a session
+
+```
+Home → tap the triangle to start
+     → tap stop (the button turns into a red square) — the duration is filled in for you
+     → pick a type, write a note → Save
+```
+
+Prefer not to time it? The plus next to the triangle opens the form directly — just leave the
+duration empty.
+
 ### Log an entry
 
 ```
 Calendar → "+ Add entry"
         → pick type "Ejaculation"
         → enter amount 2.5 (optional)
+        → duration empty, or type 3 min 45 s by hand
         → time defaults to now; note is optional
         → select triggers "Stressed" and "Can't sleep"
         → Save
@@ -214,6 +269,7 @@ Calendar → tap yesterday's cell
 ```
 Stats → Goals: 8 this week vs a limit of 3 — over, 0 weeks on target
       → Last 12 months: the line shows which months ran high
+      → Duration trend: 18 h 30 m over 12 months, 144 timed entries
       → By trigger: Stressed appears most, 21 times
       → Details → Rhythm: longest streak 5 days
 ```
@@ -240,9 +296,11 @@ Everything is configured in the in-app Settings page — no config files, no cod
 | Group | Setting | Default |
 |---|---|---|
 | Appearance | Theme | Follow system |
+| Appearance | Accent colour | Violet |
 | Appearance | Language | Follow system |
 | Appearance | Week starts on | Monday |
 | Privacy | Passcode lock (4 digits) | Off |
+| Privacy | Fingerprint unlock (APK only; needs a detected sensor) | On |
 | Frequency reminders | Enable reminders | On |
 | Frequency reminders | Weekly limit | 3 |
 | Frequency reminders | Monthly limit | 10 |
@@ -263,6 +321,7 @@ Data lives in the browser/WebView **localStorage** under the key `private-diary.
         "t": "13:41",           // time HH:MM
         "k": "ej",              // type ej|fl|other; missing = "Unclassified"
         "v": 1.6,               // amount in mL (optional; missing = not measured)
+        "d": 225,               // duration in seconds (optional; missing = not timed)
         "n": "note",            // free-text note (optional)
         "g": ["stress","bored"] // trigger tag ids (optional)
       }
@@ -271,11 +330,14 @@ Data lives in the browser/WebView **localStorage** under the key `private-diary.
   "settings": {
     "theme": "system",          // system | light | dark
     "lang": "system",           // system | zh | en
+    "accent": "violet",         // violet|blue|cyan|green|amber|rose — id only
     "weekStart": 1,             // 0 Sunday / 1 Monday
     "pin": "p2:120000:9f3c…",   // PBKDF2-SHA256 derivation; empty = no passcode
     "pinSalt": "a1b2c3…",       // 16-byte random salt (hex)
     "pinIter": 120000,          // iteration count
     "pinFails": { "n": 0, "until": 0 },  // failure count and unlock timestamp
+    "bioUnlock": true,          // fingerprint unlock (usable only when a sensor is detected)
+    "timer": { "start": 0 },    // home timer: start timestamp, 0 = not running
     "lastKind": "ej",
     "lastTags": ["stress"],     // tags pre-selected on the next new entry
     "remind": { "on": true, "week": 3, "month": 10 },
@@ -286,10 +348,13 @@ Data lives in the browser/WebView **localStorage** under the key `private-diary.
 ```
 
 **Compatibility**: records without a `k` field always display as "Unclassified" and are never
-rewritten. A missing `v` means not measured; a missing `g` means no tags.
-Passcodes from older versions used a DJB2 hash — they still unlock, and Settings will prompt
-you to reset for PBKDF2. The legacy storage key `dyf.tracker.v1` is read once and migrated
-to the new key automatically.
+rewritten. A missing `v` means not measured; a missing `d` means not timed; a missing `g` means
+no tags. Passcodes from older versions used a DJB2 hash — they still unlock, and Settings will
+prompt you to reset for PBKDF2. The legacy storage key `dyf.tracker.v1` is read once and migrated
+to the new key automatically. "Restore from backup" clears the `timer` from the backup so a
+"currently running" timer is never imported as yours. `accent` stores a palette id rather than a
+colour value, so tuning the colours later never requires migrating your data; an unrecognised id
+falls back to Violet.
 
 ---
 
@@ -327,6 +392,17 @@ feature on**. Leave it off and the app never asks.
 Web pages have no background execution. It only works while the page is open.
 Install the APK if you want it to fire with the app closed.
 
+**Why is there no fingerprint unlock in the web version?**
+Web pages have no access to fingerprint hardware. So the web version **renders none of it** —
+neither the setting nor the lock-screen button appears, rather than leaving a switch that does
+nothing. Fingerprint unlock is APK-only.
+
+**I enabled fingerprint unlock in the APK but it never verifies.**
+Enabling runs a device check first: no fingerprint hardware, no enrolled fingerprint, or no
+screen lock — all three block it, and the setting is greyed out with the reason. If the check
+passed but verification fails, it's usually a wet finger or a dirty sensor; just type the
+passcode — **the passcode is always the fallback**.
+
 ---
 
 ## Known limitations
@@ -335,6 +411,10 @@ Install the APK if you want it to fire with the app closed.
   not someone who can clear the app's data. A 4-digit passcode is only 10,000 combinations;
   PBKDF2 with a salt raises the cost of offline brute force but doesn't change the order of
   magnitude. The threat model is "someone else has my phone" — so don't use your birthday.
+- **Fingerprint unlock exists only in the APK.** The web version has no way to reach fingerprint
+  hardware, so neither the setting nor the lock-screen button is rendered. The APK uses the
+  system `FingerprintManager` and is **fingerprint-only** — if your device has face unlock but
+  no fingerprint sensor, the feature simply won't appear (face unlock is the system lock screen's job).
 - **The APK uses an inexact alarm** (`setInexactRepeating`) for the daily reminder, so it can
   fire a few minutes off. In exchange, it needs no `SCHEDULE_EXACT_ALARM` permission.
 
@@ -349,7 +429,7 @@ private-diary/
 ├─ index.html                    GitHub Pages entry (redirects to app/index.html)
 ├─ .nojekyll                     tells Pages to skip Jekyll processing
 ├─ app/
-│  ├─ index.html                 everything (single file, zero dependencies, ~2500 lines)
+│  ├─ index.html                 everything (single file, zero dependencies, ~3900 lines)
 │  ├─ manifest.webmanifest       PWA install config
 │  ├─ sw.js                      offline caching service worker
 │  ├─ icon-192.png / icon-512.png / apple-touch-icon.png / favicon.png
@@ -359,10 +439,15 @@ private-diary/
 │  │  ├─ verify.js               one-shot verification: e2e tests + layout checks
 │  │  ├─ check-circle.js         passcode keypad shape/overflow check
 │  │  ├─ build-tests.js          generates test pages and demo-data pages
-│  │  ├─ _e2e.js                 end-to-end test suite (~220 assertions)
+│  │  ├─ _e2e.js                 end-to-end test suite (~360 assertions)
 │  │  ├─ shots.js                regenerates preview/ screenshots (both languages)
 │  │  └─ gen-icons.js            generates app icons and the monochrome notification icon
-│  └─ android/                   APK build project (see app/android/README.md)
+│  └─ android/                   APK build project
+│     ├─ src/ res/               Java sources / icons and styles
+│     ├─ dist/*.apk              the prebuilt APK the README links to
+│     ├─ build.py                build script (aapt2 → javac → d8 → zipalign → apksigner)
+│     ├─ verify-apk.py           artifact self-check (39 checks)
+│     └─ keystore/               signing key (not in the repo; lose it and you can't upgrade)
 ├─ .gitattributes                normalizes line endings
 └─ .gitignore
 ```
@@ -397,19 +482,23 @@ not static analysis.
 
 `tools/verify.js` runs two kinds of checks:
 
-1. **End-to-end interaction tests** (~220 assertions) — injects `tools/_e2e.js` into a copy of
-   `index.html` and clicks buttons, fills forms, switches views, toggles the passcode lock,
-   switches languages, and verifies data persistence and reloads in a real browser,
-   while counting page JS errors.
-2. **Layout checks** (12 viewport sizes) — horizontal overflow, calendar column 7 overflow,
-   bottom nav occlusion, entry-sheet button reachability, touch target heights,
-   and whether the passcode keypad is circular and fits.
+1. **End-to-end interaction tests** (~360 assertions) — injects `tools/_e2e.js` into a copy of
+   `index.html` and clicks buttons, fills forms, switches views, toggles the passcode lock, walks
+   the home timer and the duration stats, changes the accent colour, switches languages, and
+   verifies data persistence and reloads in a real browser, while counting page JS errors.
+   Fingerprint unlock is covered too: first that it renders nothing without the native bridge,
+   then a stubbed bridge exercises the device checks (no hardware / not enrolled / no screen lock /
+   available) and success, failure and cancellation.
+2. **Layout checks** (12 viewport sizes) — horizontal overflow (checked separately on Home, the
+   calendar and Settings), calendar column 7 overflow, bottom nav occlusion, entry-sheet button
+   reachability, touch target heights, whether the accent swatches fit, and whether the passcode
+   keypad is circular and fits (**including with the fingerprint button present**).
 
 ### Rebuilding the APK
 
 ```bash
 python app/android/build.py       # output in app/android/dist/
-python app/android/verify-apk.py  # 28 self-checks
+python app/android/verify-apk.py  # 39 self-checks
 ```
 
 The build chain is `aapt2 → javac → d8 → zipalign → apksigner`, with no Gradle.
